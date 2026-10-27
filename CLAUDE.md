@@ -93,7 +93,7 @@ https://claude.ai/artifact/XZmFFGCfP1hxr81NsLbHyY
 
 ## 남은 일 (우선순위 순)
 
-1. **GitHub Pages에 올려서 폰에서 실시간 카메라·겹쳐 보기 테스트** (지금 미리보기 링크에서는 카메라 앱 대체 방식만 돼요)
+1. **폰에서 실시간 카메라·겹쳐 보기 테스트** — https://sokumbi.github.io/lunchbox-animation/ 에 올려 둠(2026-10-28)
 2. 원작 애니 영상이 오면 `p3c_screens.js`의 `INTRO_VIDEO`에 파일 경로를 넣기 (없으면 컷아웃 애니메이션)
 3. 스토리보드: 시나리오의 장면마다 스케치를 사진으로 붙이기 (글자 입력 줄이기)
 4. 영상 파일이 webm이라 아이폰·윈도우에서 안 열릴 수 있음 → mp4 경로 마련
@@ -103,11 +103,13 @@ https://claude.ai/artifact/XZmFFGCfP1hxr81NsLbHyY
 
 ## 배포 (GitHub Pages)
 
-이 폴더를 git 저장소로 만들고 GitHub에 올린 뒤, 저장소 Settings → Pages → Branch `main` / root 로 켜면
-`https://<아이디>.github.io/<저장소>/` 주소가 생겨요. `index.html`이 루트에 있어서 그대로 열려요.
-같은 폴더에 사용자의 다른 파일(mp3, 시안 이미지 등)이 있으니 **올리기 전에 어떤 파일을 넣을지 사용자에게 확인**하세요.
+- 저장소: https://github.com/sokumbi/lunchbox-animation (공개, `main` / root)
+- 주소: **https://sokumbi.github.io/lunchbox-animation/**
+- 고친 뒤 `./build.sh` → `git add -A && git commit` → `git push` 하면 1~2분 뒤 반영돼요.
+- 올리지 않는 파일(mp3, *.bin, 시안 png/jpeg, `design/`)은 `.gitignore`에 있어요. 새 파일을 넣을 땐 사용자에게 확인하세요.
 
 ## 참고 링크 (claude.ai)
 
-- 앱 미리보기: https://claude.ai/artifact/QFcQGWpKUReEyJ3bQabRr3
+- 앱(배포): https://sokumbi.github.io/lunchbox-animation/
+- 앱 미리보기(claude.ai): https://claude.ai/artifact/QFcQGWpKUReEyJ3bQabRr3
 - 화면 흐름표 문서: https://claude.ai/artifact/XZmFFGCfP1hxr81NsLbHyY
