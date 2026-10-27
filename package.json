@@ -1,0 +1,16 @@
+{
+  "name": "lunchbox-animation",
+  "version": "1.0.0",
+  "private": true,
+  "description": "런치박스애니메이션 — 아르떼노바 애니메이션 교구용 스톱모션 제작 앱 (가로형 폰 웹앱)",
+  "scripts": {
+    "build": "bash build.sh",
+    "serve": "python3 -m http.server 8765",
+    "test": "node tests/ui-test.js",
+    "design:vector": "python3 design/vector/screens.py && node design/vector/render.js",
+    "design:textures": "python3 design/textures/build_tex.py && bash build.sh"
+  },
+  "devDependencies": {
+    "playwright": "^1.48.0"
+  }
+}

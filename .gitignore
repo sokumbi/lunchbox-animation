@@ -1,0 +1,15 @@
+node_modules/
+tests/shots/
+__pycache__/
+*.pyc
+.DS_Store
+app.html
+
+# 사용자 작업 파일 (올리지 않음)
+*.mp3
+*.bin
+*.png
+*.jpeg
+*.jpg
+design/
+!brand/**
