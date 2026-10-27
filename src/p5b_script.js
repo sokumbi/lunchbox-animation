@@ -16,8 +16,12 @@ STEP_MOD.script = (() => {
       key('촬영하러 가기', { ic: 'next', cls: 'orange row', onclick: () => nextStep('script') }));
     // 왼쪽: 줄거리 + 장면
     const scenes = h('div', { class: 'scroll' });
-    P.scenes.forEach((s, i) => scenes.append(h('div', { class: 'sc-card', style: { padding: '6px' } },
+    P.scenes.forEach((s, i) => scenes.append(h('div', { class: 'sc-card', style: { padding: '6px', gridTemplateColumns: '24px auto minmax(0,1fr) auto' } },
       h('span', { class: 'n', style: { paddingTop: '4px' } }, i + 1),
+      h('button', { class: 'sk-slot' + (s.sketch ? ' has' : ''), type: 'button', style: s.sketch ? { backgroundImage: `url(${s.sketch.url})` } : {},
+        'aria-label': s.sketch ? `${i + 1}번 장면 스케치 보기` : `${i + 1}번 장면 스케치 사진 찍기`,
+        onclick: async () => { if (s.sketch) sketchModal(s, render); else if (await takeSketch(s)) render(); },
+        html: s.sketch ? '' : icon('cam') + '<span>스케치</span>' }),
       h('div', { class: 'f' },
         h('input', { class: 'input', value: s.name, maxlength: 30, 'aria-label': `${i + 1}번 장면 이름`, oninput: e => { s.name = e.target.value; changed(); } }),
         h('input', { class: 'input', value: s.desc || '', placeholder: '이 장면에서 무슨 일이 일어나나요?', 'aria-label': `${i + 1}번 장면 설명`, style: { fontSize: '13px' }, oninput: e => { s.desc = e.target.value; changed(); } })),

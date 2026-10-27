@@ -45,9 +45,38 @@ async function fileToFrameBlob(file) {
   return new Promise(r => off.toBlob(r, 'image/jpeg', .88));
 }
 
+/* 스토리보드 스케치 — 장면마다 종이에 그린 그림을 사진으로 한 장 붙여요 ({ blob, url, img }) */
+async function fileToSketch(file) {
+  const img = await new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = URL.createObjectURL(file); });
+  if (!img) return null;
+  const k = Math.min(1, 900 / Math.max(img.naturalWidth, img.naturalHeight));
+  const off = h('canvas', { width: Math.round(img.naturalWidth * k), height: Math.round(img.naturalHeight * k) });
+  off.getContext('2d').drawImage(img, 0, 0, off.width, off.height); URL.revokeObjectURL(img.src);
+  const blob = await new Promise(r => off.toBlob(r, 'image/jpeg', .82));
+  return blob ? { blob, ...loadImg(blob) } : null;
+}
+async function takeSketch(s, { album = false } = {}) {
+  const f = (await pickImages({ capture: !album }))[0]; if (!f) return false;
+  const sk = await fileToSketch(f); if (!sk) { toast('사진을 읽지 못했어요'); return false; }
+  s.sketch = sk; changed(); toast(`“${s.name}” 스케치를 붙였어요`, 1400); return true;
+}
+/* 스케치 크게 보기 — 다시 찍기 · 앨범에서 고르기 · 떼기. 바뀌면 onChange() */
+function sketchModal(s, onChange) {
+  modal((b, m) => {
+    const redo = async album => { if (await takeSketch(s, { album })) { m.close(); onChange && onChange(); } };
+    b.append(h('h2', {}, `${s.name} · 스케치`),
+      s.sketch ? h('img', { class: 'sketch-big', src: s.sketch.url, alt: `${s.name} 스케치` }) : h('p', { class: 'hint' }, '아직 붙인 스케치가 없어요'),
+      h('div', { class: 'acts' },
+        s.sketch ? ib('trash', '떼기', 'btn ghost', { onclick: () => { s.sketch = null; changed(); m.close(); onChange && onChange(); } }) : '',
+        ib('image', '앨범에서', 'btn', { onclick: () => redo(true) }),
+        ib('cam', s.sketch ? '다시 찍기' : '찍기', 'btn', { onclick: () => redo(false) }),
+        h('button', { class: 'btn primary', type: 'button', onclick: m.close }, '닫기')));
+  }, { wide: true });
+}
+
 STEP_MOD.shoot = (() => {
   let raf = 0, onion = true, grid = false, sel = null, insertAt = null, previewing = false, pvStart = 0;
-  let root, cv, ctx, flashEl, badge, list, headEl, popEl, nocamEl, pvBtn, onionBtn, gridBtn, holdBtn, counterEl;
+  let root, cv, ctx, flashEl, badge, sketchEl, list, headEl, popEl, nocamEl, pvBtn, onionBtn, gridBtn, holdBtn, counterEl;
   const scene = () => { let s = P.scenes.find(s => s.id === S.curScene); if (!s) { s = P.scenes[P.scenes.length - 1]; S.curScene = s.id; } return s; };
 
   function mount({ main }) {
@@ -59,9 +88,10 @@ STEP_MOD.shoot = (() => {
     // 가운데: 모니터
     flashEl = h('div', { class: 'flash' }); badge = h('div', { class: 'stage-badge' }); popEl = h('div', { class: 'frame-pop', hidden: true });
     nocamEl = h('div', { class: 'nocam', hidden: true });
+    sketchEl = h('button', { class: 'mon-sketch', type: 'button', hidden: true, 'aria-label': '장면 스케치 크게 보기', onclick: () => sketchModal(scene(), buildStrip) });
     gridBtn = h('button', { type: 'button', 'aria-label': '격자', html: icon('grid'), onclick: () => { grid = !grid; gridBtn.classList.toggle('on', grid); } });
     const tools = h('div', { class: 'mon-tools' }, gridBtn, h('button', { type: 'button', 'aria-label': '앞·뒤 카메라 바꾸기', html: icon('switchCam'), onclick: switchCam }));
-    const mon = monitorEl([flashEl, badge, nocamEl, popEl, tools]); cv = mon.cv; ctx = cv.getContext('2d');
+    const mon = monitorEl([flashEl, badge, sketchEl, nocamEl, popEl, tools]); cv = mon.cv; ctx = cv.getContext('2d');
     const area = h('div', { class: 'cam-area' }, mon.mon);
     // 오른쪽: 조작판
     counterEl = h('div', { class: 'counter' });
@@ -178,6 +208,7 @@ STEP_MOD.shoot = (() => {
         h('img', { src: f.url, alt: '' }), h('b', {}, String(i + 1).padStart(3, '0')), h('em', {}, '×' + f.hold)));
     });
     if (scrollEnd) requestAnimationFrame(() => list.scrollTop = list.scrollHeight);
+    sketchEl.hidden = !sc.sketch; if (sc.sketch) sketchEl.style.backgroundImage = `url(${sc.sketch.url})`;
     paintCounter(); buildPop();
   }
   function buildPop() {

@@ -253,7 +253,7 @@ async function saveProject() {
     id: P.id, title: P.title, storyId: P.storyId, created: P.created, updated: P.updated, fps: P.fps, hold: P.hold,
     synopsis: P.synopsis || '', lastStep: P.lastStep || 'shoot', scriptMode: P.scriptMode, script: P.script, narrText: P.narrText, mix: P.mix, duck: P.duck, fade: P.fade, subs: P.subs, done: P.done,
     fx: P.fx, sfx: P.sfx,
-    scenes: P.scenes.map(s => ({ id: s.id, name: s.name, desc: s.desc || '', trimIn: s.trimIn, trimOut: s.trimOut, bgm: s.bgm, stage: s.stage, frames: s.frames.map(f => ({ id: f.id, hold: f.hold, blob: f.blob })) })),
+    scenes: P.scenes.map(s => ({ id: s.id, name: s.name, desc: s.desc || '', trimIn: s.trimIn, trimOut: s.trimOut, bgm: s.bgm, stage: s.stage, sketch: s.sketch ? s.sketch.blob : null, frames: s.frames.map(f => ({ id: f.id, hold: f.hold, blob: f.blob })) })),
     voices: P.voices.map(v => ({ ...v, buf: undefined })), narrs: P.narrs.map(v => ({ ...v, buf: undefined })),
     thumb: (P.scenes.find(s => s.frames.length) || { frames: [] }).frames[0]?.blob || null
   };
@@ -264,7 +264,7 @@ function loadImg(blob) { const url = URL.createObjectURL(blob); const img = new 
 async function decodeBlob(blob) { AE.init(); const ab = await blob.arrayBuffer(); return await new Promise((res, rej) => AE.ctx.decodeAudioData(ab, res, rej)); }
 async function openProject(d) {
   const p = { ...d };
-  p.scenes = d.scenes.map(s => ({ ...s, frames: s.frames.map(f => ({ ...f, ...loadImg(f.blob) })) }));
+  p.scenes = d.scenes.map(s => ({ ...s, sketch: s.sketch ? { blob: s.sketch, ...loadImg(s.sketch) } : null, frames: s.frames.map(f => ({ ...f, ...loadImg(f.blob) })) }));
   p.voices = []; p.narrs = [];
   for (const k of ['voices', 'narrs']) for (const v of d[k] || []) { try { p[k].push({ ...v, buf: await decodeBlob(v.blob) }); } catch (e) { } }
   delete p.thumb; P = p; TLc = null; return p;
