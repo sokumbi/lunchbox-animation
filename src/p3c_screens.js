@@ -216,7 +216,22 @@ let curMod = null;
 function openStudio(step) { show('studio'); stopIntro(); goStep(step); }
 function renderRail() { }
 function undoKey() { return key('', { ic: 'undo', cls: 'navkey dim undo', aria: '되돌리기', title: '되돌리기', onclick: undo }); }
-function navKey(extraCls = '') { return key('단계', { ic: 'menu', cls: 'navkey row dim ' + extraCls, aria: '제작 단계 보기', onclick: () => { leaveStep(); showProcess('nav'); } }); }
+function navKey(extraCls = '') { return key('단계', { ic: 'menu', cls: 'navkey row dim ' + extraCls, aria: '다른 단계로 가기', onclick: stepMenu }); }
+/* 단계 키 — 어느 화면에서든 한 번 눌러 단계 6개 중 하나로 바로 가요 */
+const STEP_IC = { script: 'book', shoot: 'cam', voice: 'mic', sound: 'music', edit: 'scissors', final: 'sparkle' };
+function stepMenu() {
+  modal((b, m) => {
+    const grid = h('div', { class: 'step-menu' });
+    STEPS.forEach((s, i) => grid.append(h('button', { class: 'key step-go' + (s.id === S.step ? ' cur' : '') + (P && P.done[s.id] ? ' done' : ''), type: 'button',
+      onclick: () => { m.close(); if (s.id !== S.step) goStep(s.id); } },
+      h('span', { class: 'no' }, String(i + 1).padStart(2, '0')), h('span', { html: icon(STEP_IC[s.id], 'ki') }), h('b', {}, s.name), s.id === S.step ? h('small', {}, '지금') : '')));
+    b.append(h('h2', {}, '어느 단계로 갈까요?'), grid,
+      h('div', { class: 'acts' },
+        ib('home', '이야기 목록', 'btn ghost', { onclick: async () => { m.close(); if (await confirmBox('이야기 목록으로 갈까요?', '작품은 자동으로 저장돼요. 내 작품함에서 다시 열 수 있어요.', '목록으로')) { leaveStep(); await saveProject(); P = null; openLibrary(); } } }),
+        h('div', { class: 'spacer' }),
+        h('button', { class: 'btn primary', type: 'button', onclick: m.close }, '닫기')));
+  }, { wide: true });
+}
 function leaveStep() { Player.pause(); AE.stopPreview(); if (curMod && curMod.unmount) curMod.unmount(); curMod = null; }
 function goStep(id) {
   leaveStep(); S.step = id; S.sel = null;

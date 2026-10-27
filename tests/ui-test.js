@@ -21,6 +21,19 @@ fs.mkdirSync(path.join(__dirname, 'shots'), { recursive: true });
         const cs = getComputedStyle(el);
         if (/(auto|scroll)/.test(cs.overflowY) && el.scrollHeight > el.clientHeight + 2 && !/scroll|list|modal/.test(el.className)) bad.push('SCROLL ' + el.className);
       }
+      // 버튼끼리 겹침 (4px 넘게 겹치면 표시, 스크롤 목록 안에서 가려진 것은 빼요)
+      const top = document.querySelector('#modals .modal-bg:last-child') || app;
+      const inView = el => { const sp = el.parentElement.closest('.list,.scroll,.film'); if (!sp) return true; const a = el.getBoundingClientRect(), r = sp.getBoundingClientRect(); return a.bottom > r.top + 2 && a.top < r.bottom - 2; };
+      // 선택 막대(.sel-bar)는 일부러 키 위에 띄우는 창이라 빼요
+      const btns = [...top.querySelectorAll('button,.key,.btn')].filter(el => el.offsetWidth && !el.closest('[hidden]') && !el.parentElement.closest('button,.key,.btn') && inView(el));
+      const bar = top.querySelector('.sel-bar:not([hidden])'), barR = bar && bar.getBoundingClientRect();
+      const under = el => { if (!barR || bar.contains(el)) return false; const a = el.getBoundingClientRect(); return a.left < barR.right && a.right > barR.left && a.top < barR.bottom && a.bottom > barR.top; };
+      const nm = el => (el.getAttribute('aria-label') || el.textContent.trim().slice(0, 10) || el.className.split(' ')[0]);
+      for (let i = 0; i < btns.length; i++) for (let j = i + 1; j < btns.length; j++) {
+        const a = btns[i].getBoundingClientRect(), c = btns[j].getBoundingClientRect();
+        const ox = Math.min(a.right, c.right) - Math.max(a.left, c.left), oy = Math.min(a.bottom, c.bottom) - Math.max(a.top, c.top);
+        if (ox > 4 && oy > 4 && !under(btns[i]) && !under(btns[j])) bad.push('OVERLAP ' + nm(btns[i]) + ' × ' + nm(btns[j]));
+      }
       return [...new Set(bad)].slice(0, 12);
     });
     out.push(tag + ': ' + (r.length ? r.join(' | ') : 'ok'));
@@ -57,7 +70,9 @@ fs.mkdirSync(path.join(__dirname, 'shots'), { recursive: true });
     const before = await p.evaluate(() => P.fx.length); await p.locator('.navrow .undo').click(); await p.waitForTimeout(500); out.push(name + ' undo fx ' + before + '->' + await p.evaluate(() => P.fx.length));
     await p.locator('.tl-scene').first().click(); await p.waitForTimeout(400); await sh('06b_scenemenu'); await p.locator('.modal >> text=닫기').click(); await p.waitForTimeout(300);
     await p.locator('.B .key', { hasText: '자르기' }).click(); await p.waitForTimeout(400); await sh('06_trim'); await p.locator('.modal >> text=다 했어요').click();
-    await p.locator('.navkey').first().click(); await p.waitForTimeout(900); await sh('07_nav'); await clipCheck(p, name + ' nav');
+    await p.locator('.navkey').first().click(); await p.waitForTimeout(500); await sh('07_nav'); await clipCheck(p, name + ' nav');
+    await p.locator('.step-go', { hasText: '촬영' }).click(); await p.waitForTimeout(800); out.push(name + ' nav -> ' + await p.evaluate(() => S.step));
+    await p.locator('.navkey').first().click(); await p.waitForTimeout(400); await p.locator('.step-go', { hasText: '완성' }).click(); await p.waitForTimeout(800); out.push(name + ' nav -> ' + await p.evaluate(() => S.step));
     await ctx.close();
   }
   await b.close(); server.close();
