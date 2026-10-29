@@ -50,10 +50,10 @@ function openEditor(first) {
       h('button', { type: 'button', 'aria-label': '앞 컷', html: icon('prevf'), onclick: () => edStep(-1) }),
       h('button', { type: 'button', 'aria-label': '뒤 컷', html: icon('nextf'), onclick: () => edStep(1) })),
     h('button', { class: 'ed-full', type: 'button', 'aria-label': '크게 보기', html: icon('expand'), onclick: () => { if (TL().total) playAll(); } }));
-  const ib2 = (ic, label, onclick, cls = '') => h('button', { class: 'ei ' + cls, type: 'button', 'aria-label': label, title: label, onclick, html: icon(ic) });
+  const ib2 = (ic, label, onclick, cls = '') => h('button', { class: 'ei ' + cls, type: 'button', 'aria-label': label, title: label, onclick, html: icon(ic) + `<span>${label}</span>` });
   const playB = ib2('play', '재생', edTogglePlay);
   const left = h('div', { class: 'ed-rl' },
-    ib2('back', '내 작품', edToGallery), ib2('mic', '소리', () => edSheet('sound')), ib2('plus', '더하기', e => edAddMenu(e.currentTarget)),
+    ib2('back', '내 영화', edToGallery), ib2('mic', '소리', () => edSheet('sound')), ib2('plus', '더하기', e => edAddMenu(e.currentTarget)),
     ib2('help', '도움말', edHelp), ib2('gear', '설정', edSettings));
   const right = h('div', { class: 'ed-rr' },
     ib2('cam', '촬영', edCapOpen, 'cam'), ib2('undo', '되돌리기', undo), ib2('share', '완성', edFinish), playB);
@@ -66,7 +66,7 @@ function openEditor(first) {
   EDel = { root, cv, ctx: cv.getContext('2d'), sub, empty, mon, playB, stage, label, film, strip, pop };
   Player.attach(cv, { onTick: edTick, loop: true });
   strip.addEventListener('scroll', edStripScroll, { passive: true });
-  Player.onState = on => { EDel.playB.innerHTML = icon(on ? 'pause' : 'play'); EDel.playB.classList.toggle('on', on); if (!on) edAfterPlay(); };
+  Player.onState = on => { EDel.playB.innerHTML = icon(on ? 'pause' : 'play') + `<span>${on ? '멈춤' : '재생'}</span>`; EDel.playB.classList.toggle('on', on); if (!on) edAfterPlay(); };
   edFixSel(); if (ED.sel) edSetSel(ED.sel.sid, ED.sel.i);
   edStrip(true);
   addEventListener('keydown', edKey);
@@ -104,7 +104,7 @@ function edLoop() {
   const ctx = EDel.ctx; ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.shadowColor = 'transparent';
   const sf = selFrame();
   EDel.empty.hidden = !!sf;
-  if (!sf) { ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H); if (!EDel.empty.innerHTML) EDel.empty.innerHTML = icon('cam') + '<b>오른쪽 카메라 버튼을 눌러 첫 컷을 찍어요</b>'; return; }
+  if (!sf) { ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H); if (!EDel.empty.innerHTML) EDel.empty.innerHTML = icon('cam') + '<b>카메라(촬영) 버튼을 눌러 첫 컷을 찍어요</b>'; return; }
   const trimmed = sf.i < sf.s.trimIn || sf.i >= sf.s.frames.length - sf.s.trimOut;
   if (trimmed) { ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H); drawCover(ctx, sf.f.img); ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fillRect(0, 0, W, H); ctx.fillStyle = '#fff'; ctx.font = '30px Jua, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('잘라 낸 컷이에요', W / 2, H / 2); return; }
   renderAt(ctx, Player.t, {});
@@ -215,8 +215,8 @@ function edNewScene() {
 }
 /* 더하기(+) 메뉴: 이미지 · 비디오 · 오디오 · 제목 카드 · 제작진 · 효과 · 새 장면 · 스케치 */
 function edAddMenu(anchor) {
-  const old = $('.ed-menu'); if (old) { old.remove(); return; }
-  const it = (ic, label, fn) => h('button', { type: 'button', onclick: () => { menu.remove(); fn(); }, html: icon(ic) + `<span>${label}</span>` });
+  const old = $('.ed-menu:not(.out)'); if (old) { fadeRemove(old); return; }
+  const it = (ic, label, fn) => h('button', { type: 'button', onclick: () => { fadeRemove(menu); fn(); }, html: icon(ic) + `<span>${label}</span>` });
   const menu = h('div', { class: 'ed-menu' },
     it('image', '이미지 추가', edImport),
     it('video', '비디오', edImportVideo),
@@ -227,9 +227,10 @@ function edAddMenu(anchor) {
     it('plus', '새 장면', edNewScene),
     it('book', '장면 스케치', () => sketchModal(edScene(), edStrip)));
   EDel.root.append(menu);
-  const r = appRect(anchor), br = appRect(EDel.root);
-  menu.style.left = (r.right - br.left + 6) + 'px'; menu.style.top = clamp(r.top - br.top - 10, 6, br.height - menu.offsetHeight - 6) + 'px';
-  setTimeout(() => { const away = e => { if (!menu.contains(e.target)) { menu.remove(); removeEventListener('pointerdown', away, true); } }; addEventListener('pointerdown', away, true); }, 0);
+  const r = appRect(anchor), br = appRect(EDel.root), mw = menu.offsetWidth, mh = menu.offsetHeight;
+  if (r.right - br.left + 6 + mw <= br.width - 6) { menu.style.left = (r.right - br.left + 6) + 'px'; menu.style.top = clamp(r.top - br.top - 10, 6, br.height - mh - 6) + 'px'; menu.style.transformOrigin = '0 20%'; }
+  else { menu.style.left = clamp(r.left - br.left, 6, br.width - mw - 6) + 'px'; menu.style.top = clamp(r.bottom - br.top + 6, 6, br.height - mh - 6) + 'px'; menu.style.transformOrigin = '20% 0'; }   // 세로 화면: + 아래로
+  setTimeout(() => { const away = e => { if (!menu.contains(e.target)) { fadeRemove(menu); removeEventListener('pointerdown', away, true); } }; addEventListener('pointerdown', away, true); }, 0);
 }
 async function edImport() { const f = await pickImages({ multiple: true }); for (const x of f) { const b = await fileToFrameBlob(x); b && await edAddFrame(b); } if (f.length) { toast(`사진 ${f.length}장을 넣었어요`); if (!ED.cap) edStrip(); } }
 
@@ -265,16 +266,16 @@ function edCapOpen() {
   const flash = h('div', { class: 'flash' }), cd = h('div', { class: 'countdown', hidden: true }), nocam = h('div', { class: 'nocam', hidden: true });
   const sketch = h('button', { class: 'mon-sketch', type: 'button', hidden: true, 'aria-label': '장면 스케치 크게 보기', onclick: () => sketchModal(edScene(), edCapPaint) });
   const counter = h('div', { class: 'cp-cnt' });
-  const tb = (ic, label, onclick, cls = '') => h('button', { class: 'ci ' + cls, type: 'button', 'aria-label': label, title: label, onclick, html: icon(ic) });
+  const tb = (ic, label, onclick, cls = '', short = label) => h('button', { class: 'ci ' + cls, type: 'button', 'aria-label': label, title: label, onclick, html: `<i>${icon(ic)}</i><span>${short}</span>` });
   const onionB = tb('onion', '겹쳐보기', () => { ED.onion = !ED.onion; onionB.classList.toggle('on', ED.onion); }, ED.onion ? 'on' : '');
   const gridB = tb('grid', '격자', () => { ED.grid = !ED.grid; gridB.classList.toggle('on', ED.grid); }, ED.grid ? 'on' : '');
-  const lockB = tb('camlock', '밝기·초점 고정', async () => { await edLock(!ED.locked); lockB.classList.toggle('on', ED.locked); }, ED.locked ? 'on' : '');
+  const lockB = tb('camlock', '밝기·초점 고정', async () => { await edLock(!ED.locked); lockB.classList.toggle('on', ED.locked); }, ED.locked ? 'on' : '', '고정');
   const slider = h('input', { class: 'cp-sl', type: 'range', min: .15, max: .8, step: .05, value: S.onionA || .42, 'aria-label': '겹쳐 보기 진하기', oninput: e => { S.onionA = +e.target.value; } });
   const leftBar = h('div', { class: 'cp-bar' }, onionB, slider, gridB, lockB);
   const mode = h('button', { class: 'cp-mode', type: 'button', 'aria-label': '찍는 방식', onclick: () => edCamSet() });
   const shutter = h('button', { class: 'cp-shut', type: 'button', 'aria-label': '촬영', onclick: edShutter }, h('span', { class: 'in' }));
-  const pvB = tb('play', '찍은 것 보기', edCapPreview, 'dark');
-  const right = h('div', { class: 'cp-r' }, tb('back', '편집으로', () => edCapClose(), 'dark'), mode, shutter, pvB, tb('sliders', '카메라 설정', edCamSet, 'dark'));
+  const pvB = tb('play', '찍은 것 보기', edCapPreview, 'dark', '보기');
+  const right = h('div', { class: 'cp-r' }, tb('back', '편집으로', () => edCapClose(), 'dark'), mode, shutter, pvB, tb('sliders', '카메라 설정', edCamSet, 'dark', '설정'));
   const wrap = h('div', { class: 'cp-mon' }, cv, flash, cd, nocam, sketch);
   const cap = h('div', { class: 'cp' }, wrap, leftBar, right, counter);
   EDel.root.append(cap); EDel.root.classList.add('capturing');
@@ -285,7 +286,7 @@ function edCapOpen() {
 function edCapClose(silent) {
   if (!ED.cap) return;
   edStopTimer(); ED.cap = false; ED.pv = false; Cam.stop(); ED.locked = false;
-  if (EDel.cap) EDel.cap.remove(); if (EDel.root) EDel.root.classList.remove('capturing');
+  if (EDel.cap) { if (silent) EDel.cap.remove(); else fadeRemove(EDel.cap, 300); } if (EDel.root) EDel.root.classList.remove('capturing');
   if (!silent && ED.open) { edFixSel(); if (ED.sel) edSetSel(ED.sel.sid, ED.sel.i); edStrip(); }
 }
 /* 찍으면 들어갈 자리: 고른 컷 바로 뒤 (없으면 지금 장면 끝) */
@@ -334,7 +335,7 @@ function edCapDraw() {
   }
   if (ED.grid) { ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 1.5; ctx.beginPath(); for (const x of [W / 3, W * 2 / 3]) { ctx.moveTo(x, 0); ctx.lineTo(x, H); } for (const y of [H / 3, H * 2 / 3]) { ctx.moveTo(0, y); ctx.lineTo(W, y); } ctx.stroke(); }
 }
-function edCapPreview() { if (!capSpot().s.frames.length) { toast('먼저 몇 컷을 찍어 보세요'); return; } ED.pv = !ED.pv; ED.pvT = performance.now(); EDel.pvB.innerHTML = icon(ED.pv ? 'stop' : 'play'); }
+function edCapPreview() { if (!capSpot().s.frames.length) { toast('먼저 몇 컷을 찍어 보세요'); return; } ED.pv = !ED.pv; ED.pvT = performance.now(); EDel.pvB.innerHTML = `<i>${icon(ED.pv ? 'stop' : 'play')}</i><span>${ED.pv ? '멈춤' : '보기'}</span>`; }
 function edShutterPaint() { const sh = EDel.shutter; if (!sh || !ED.cap) return; const run = ED.autoOn || !!ED.cdT; sh.classList.toggle('run', run); sh.setAttribute('aria-label', ED.autoOn ? '자동 촬영 멈추기' : ED.cdT ? '타이머 취소' : '촬영'); }
 function edShutter() {
   if (!ED.cap) { edCapOpen(); return; }
@@ -428,7 +429,7 @@ function edSheetClose(quiet) {
   ED.paint = null; EDel.sheetRender = null;
   if (ED.rec && ED.rec.active) ED.rec.stop();
   AE.stopPreview(); ED.pv = false;
-  if (EDel.sheetEl) EDel.sheetEl.remove(); EDel.sheetEl = null;
+  if (EDel.sheetEl) { if (quiet) EDel.sheetEl.remove(); else fadeRemove(EDel.sheetEl, 260); } EDel.sheetEl = null;
   if (EDel.root) EDel.root.classList.remove('has-sheet');
   if (EDel.label) EDel.label.hidden = true;
   if (EDel.sub) EDel.sub.hidden = true;
@@ -443,7 +444,7 @@ function edSheetRefresh() {
   EDel.label.hidden = false; EDel.label.textContent = cur[2];
   const head = h('div', { class: 'bs-head' },
     h('button', { class: 'bs-x', type: 'button', 'aria-label': '취소', html: icon('x'), onclick: () => edSheetClose() }),
-    h('div', { class: 'bs-tabs' }, ...tabs.map(([k, ic, l]) => h('button', { type: 'button', class: k === ED.tab ? 'on' : '', 'aria-label': l, title: l, html: icon(ic), onclick: () => { if (ED.rec && ED.rec.active) ED.rec.stop(); AE.stopPreview(); ED.tab = k; ED.pend = null; S.sel = null; edSheetRefresh(); } }))),
+    h('div', { class: 'bs-tabs' }, ...tabs.map(([k, ic, l]) => h('button', { type: 'button', class: k === ED.tab ? 'on' : '', 'aria-label': l, title: l, html: icon(ic) + `<span>${l}</span>`, onclick: () => { if (ED.rec && ED.rec.active) ED.rec.stop(); AE.stopPreview(); ED.tab = k; ED.pend = null; S.sel = null; edSheetRefresh(); } }))),
     h('button', { class: 'bs-ok', type: 'button', 'aria-label': '넣기', html: icon('check2'), onclick: edSheetOk }));
   const row = h('div', { class: 'bs-row list' }), foot = h('div', { class: 'bs-foot' });
   el.append(head, row, foot);

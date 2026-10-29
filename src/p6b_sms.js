@@ -100,7 +100,7 @@ function smsSheet({ title, tabs = null, tab, render, ok, cancel }) {
       h('button', { class: 'bs-x', type: 'button', 'aria-label': '취소', html: icon('x'), onclick: () => edSheetClose() }),
       h('b', { class: 'bs-title' }, cur ? cur[2] : title),
       h('button', { class: 'bs-ok', type: 'button', 'aria-label': '확인', html: icon('check2'), onclick: async () => { ED.sheetCancel = null; ED.paint = null; if (ok) await ok(st); edSheetClose(); } })));
-    if (tabs && tabs.length > 1) el.append(h('div', { class: 'bs-tabs' }, ...tabs.map(([k, ic, l]) => h('button', { type: 'button', class: k === st.tab ? 'on' : '', 'aria-label': l, title: l, html: icon(ic), onclick: () => { AE.stopPreview(); st.tab = k; paint(); } }))));
+    if (tabs && tabs.length > 1) el.append(h('div', { class: 'bs-tabs' }, ...tabs.map(([k, ic, l]) => h('button', { type: 'button', class: k === st.tab ? 'on' : '', 'aria-label': l, title: l, html: icon(ic) + `<span>${l}</span>`, onclick: () => { AE.stopPreview(); st.tab = k; paint(); } }))));
     const body = h('div', { class: 'bs-body' }), foot = h('div', { class: 'bs-foot' });
     el.append(body, foot);
     render(st.tab, body, foot, st, paint);

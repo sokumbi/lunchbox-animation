@@ -7,19 +7,15 @@ const BRAND = { app: '런치박스애니메이션' };
 /* 무대 해상도 — 작품 포맷(P.fmt)에 따라 바뀌어요. 긴 변 960 (setFormat, p3a_core) */
 let W = 960, H = 540;
 const $ = (s, r = document) => r.querySelector(s);
-/* 세로로 들고 있어도 가로로 보이게 화면 전체를 90° 돌려요. 돌렸을 때 손가락 좌표도 같이 바꿔요. */
+/* 세로 화면도 그대로 써요 (예전엔 90° 돌렸어요). 손가락 좌표 함수는 그대로 둬요. */
 const ROT = { on: false };
-function appPt(e) { return ROT.on ? { x: e.clientY, y: innerWidth - e.clientX } : { x: e.clientX, y: e.clientY }; }
-function appRect(el) {
-  const r = el.getBoundingClientRect(); if (!ROT.on) return r;
-  return { left: r.top, top: innerWidth - r.right, width: r.height, height: r.width, right: r.bottom, bottom: innerWidth - r.left };
-}
+function appPt(e) { return { x: e.clientX, y: e.clientY }; }
+function appRect(el) { return el.getBoundingClientRect(); }
 function layoutApp() {
   const app = document.getElementById('app'); if (!app) return;
-  const coarse = matchMedia('(pointer:coarse)').matches;
-  ROT.on = innerHeight > innerWidth && (coarse || innerWidth < 900);
-  if (ROT.on) Object.assign(app.style, { width: innerHeight + 'px', height: innerWidth + 'px', left: innerWidth + 'px', top: '0px', transform: 'rotate(90deg)', transformOrigin: '0 0' });
-  else Object.assign(app.style, { width: '', height: '', left: '0px', top: '0px', transform: '', transformOrigin: '' });
+  ROT.on = false;
+  Object.assign(app.style, { width: '', height: '', left: '0px', top: '0px', transform: '', transformOrigin: '' });
+  app.classList.toggle('por', innerHeight > innerWidth);
 }
 addEventListener('resize', layoutApp);
 addEventListener('orientationchange', () => setTimeout(layoutApp, 250));
@@ -91,17 +87,19 @@ const icon = (n, cls = '') => `<svg class="${cls}" viewBox="0 0 24 24" fill="non
 const ib = (n, label, cls = 'btn sm', attrs = {}) => h('button', { class: cls, type: 'button', ...attrs, html: icon(n) + (label ? `<span>${label}</span>` : '') , 'aria-label': attrs['aria-label'] || label || n });
 
 /* ---------- 토스트 & 모달 ---------- */
+/* 창·메뉴를 닫을 때 툭 사라지지 않고 .out 애니메이션 뒤에 빼요 */
+function fadeRemove(el, ms = 220) { if (!el || el._gone) return; el._gone = true; el.classList.add('out'); el.style.pointerEvents = 'none'; setTimeout(() => el.remove(), ms); }
 let toastT;
 function toast(msg, ms = 2400, top = false) {
-  $$('.toast').forEach(t => t.remove());
+  $$('.toast').forEach(t => fadeRemove(t));
   const t = h('div', { class: 'toast' + (top ? ' top' : ''), role: 'status' }, msg);
-  ($('#app') || document.body).append(t); clearTimeout(toastT); toastT = setTimeout(() => t.remove(), ms);
+  ($('#app') || document.body).append(t); clearTimeout(toastT); toastT = setTimeout(() => fadeRemove(t), ms);
 }
 function modal(build, { wide = false, close = true } = {}) {
   const bg = h('div', { class: 'modal-bg' });
   const box = h('div', { class: 'modal' + (wide ? ' wide' : ''), role: 'dialog', 'aria-modal': 'true' });
   bg.append(box); $('#modals').append(bg);
-  const api = { close() { bg.remove(); api.onclose && api.onclose(); }, box };
+  const api = { close() { if (bg._gone) return; fadeRemove(bg); api.onclose && api.onclose(); }, box };
   if (close) bg.addEventListener('pointerdown', e => { if (e.target === bg) api.close(); });
   build(box, api);
   setTimeout(() => { const f = box.querySelector('input,textarea,select'); f && f.focus(); }, 60);

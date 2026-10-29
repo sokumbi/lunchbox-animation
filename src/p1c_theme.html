@@ -639,4 +639,111 @@ body,#app,.screen{background:#000;color:#fff}
 .ns-num{flex:none;min-width:34px;height:30px;border-radius:7px;background:#3a3a3c;display:grid;place-items:center;font-weight:700}
 .ns-rng{flex:1;accent-color:var(--orange)}
 .bs-in.who{width:80px;flex:none}
+
+/* =========================================================
+   2026-10-30 — 아르떼노바 로고 · 이름 붙은 큰 아이콘 · 부드러운 움직임 · 세로 화면
+   ========================================================= */
+:root{--spring:cubic-bezier(.32,.72,0,1);--pop:cubic-bezier(.2,.9,.25,1.12)}
+/* 시작 로고: 천천히 나타났다 사라져요 (누르면 바로 넘어가요) */
+.intro{position:absolute;inset:0;z-index:900;background:#000;display:grid;place-items:center;cursor:pointer}
+.intro svg{width:min(56cqw,130cqh,460px);height:auto;opacity:0;animation:logoIn 1.1s cubic-bezier(.25,.8,.3,1) .15s forwards}
+.intro.out{animation:fadeOut .6s ease forwards}
+.intro.out svg{opacity:1;animation:logoOut .6s ease forwards}
+@keyframes logoIn{from{opacity:0;transform:scale(.94);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+@keyframes logoOut{from{opacity:1}to{opacity:0;transform:scale(1.04)}}
+
+/* 화면 바뀔 때 · 카드 차례로 */
+.screen.enter{animation:screenIn .42s ease backwards}
+@keyframes screenIn{from{opacity:0}}
+.gal-screen.enter .g-card{animation:cardIn .5s var(--spring) backwards;animation-delay:calc(var(--i,0) * 28ms + 60ms)}
+@keyframes cardIn{from{opacity:0;transform:translateY(14px) scale(.96)}}
+
+/* 창 · 알림 · 메뉴: 스프링처럼 들어오고 부드럽게 나가요 */
+.modal-bg{animation:fadeIn .26s ease both}
+.modal{animation:popIn .4s var(--spring) both}
+.modal-bg.out{animation:fadeOut .22s ease both}
+.modal-bg.out .modal{animation:popOut .22s ease both}
+@keyframes popIn{from{opacity:0;transform:translateY(16px) scale(.95)}}
+@keyframes popOut{to{opacity:0;transform:scale(.96)}}
+.al{animation:popIn .4s var(--spring) both}
+.al-bg.out .al{animation:popOut .16s ease both}
+.cm{animation:menuIn .34s var(--pop) both}
+.cm-bg.out .cm{animation:popOut .16s ease both}
+@keyframes menuIn{from{opacity:0;transform:scale(.7)}}
+.toast{animation:toastIn .38s var(--spring) both}
+.toast.out{animation:toastOut .22s ease both}
+@keyframes toastIn{from{opacity:0;transform:translateY(14px) scale(.96)}}
+@keyframes toastOut{to{opacity:0;transform:translateY(8px)}}
+.ed-menu{animation:menuIn .32s var(--pop) both;transform-origin:0 20%}
+.ed-menu.out{animation:popOut .18s ease both}
+.ed-pop:not([hidden]){animation:gridIn .34s var(--spring) both}
+@keyframes gridIn{from{opacity:0;translate:0 14px;scale:.96}}
+.bs{animation:sheetUp .42s var(--spring) both}
+.bs.out{animation:sheetDown .26s ease-in both}
+@keyframes sheetUp{from{translate:0 110%;opacity:.4}}
+@keyframes sheetDown{to{translate:0 110%;opacity:0}}
+.cp{animation:capIn .36s var(--spring) both}
+.cp.out{animation:capOut .28s ease both}
+@keyframes capIn{from{opacity:0;scale:1.04}}
+@keyframes capOut{to{opacity:0;scale:1.03}}
+.ef-fr{transition:transform .25s var(--spring),box-shadow .2s,outline-color .2s}
+/* 누를 때 살짝 들어가요 */
+.ei,.ci,.g-rb,.bs-tabs button,.bs-x,.bs-ok,.ed-step button,.ed-full,.ed-pop button,.ed-menu button,.cm-i,.btn,.bt,.pk,.ns-pill,.ns-tile,.al-acts button{transition:transform .2s var(--spring),background-color .2s,color .2s,opacity .2s}
+.ei:active,.ci:active,.g-rb:active,.bs-tabs button:active,.bs-x:active,.bs-ok:active,.ed-step button:active,.ed-full:active,.ed-pop button:active,.ed-menu button:active,.bt:active,.pk:active,.ns-pill:active,.al-acts button:active{transform:scale(.9)}
+
+/* ---------- 이름 붙은 큰 아이콘 ---------- */
+.ed{--rail:clamp(62px,10cqw,92px)}
+.ei{width:100%;max-width:var(--rail);height:auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px 0;border-radius:14px}
+.ei svg,.ei.cam svg{width:clamp(26px,8.4cqh,36px);height:clamp(26px,8.4cqh,36px);stroke-width:1.7}
+.ei span,.ci span,.g-rb span,.bs-tabs button span{font-size:clamp(10px,3.1cqh,12.5px);font-weight:700;line-height:1.1;color:#d1d1d6;white-space:nowrap;letter-spacing:-.02em}
+.ei.on span{color:var(--acc)}
+.ed-rl,.ed-rr{justify-content:space-evenly;padding:4px 2px}
+.ci{width:auto;height:auto;background:none !important;border-radius:0;display:flex;flex-direction:column;align-items:center;gap:3px;padding:0}
+.ci i{width:clamp(40px,13cqh,52px);height:clamp(40px,13cqh,52px);border-radius:50%;display:grid;place-items:center}
+.ci.dark i{background:#2c2c2ecc}
+.ci i svg{width:56%;height:56%;stroke-width:1.8}
+.ci span{color:#fff;text-shadow:0 1px 3px #000}
+.ci.on i,.ci.on span{color:var(--acc)}
+.cp-bar{width:clamp(58px,17cqh,70px);padding:8px 0;gap:4px}
+.cp-r{width:clamp(70px,24cqh,96px)}
+.g-rail{width:clamp(66px,10cqw,84px);gap:8px}
+.g-rb{width:calc(100% - 8px);height:auto;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 0}
+.g-rb svg{width:clamp(26px,8.4cqh,32px);height:clamp(26px,8.4cqh,32px)}
+.g-rb.on span{color:#fff}
+.bs-tabs button{width:auto;min-width:clamp(46px,14cqh,60px);height:auto;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 6px;border-radius:10px}
+.bs-tabs button svg{width:clamp(20px,6.4cqh,26px);height:clamp(20px,6.4cqh,26px)}
+.bs-tabs button span{font-size:clamp(9.5px,2.9cqh,11.5px)}
+.bs-tabs button.on span{color:#fff}
+
+/* ---------- 세로 화면 ---------- */
+@media (orientation:portrait){
+  .ed{--bh:clamp(62px,9cqh,76px);--fh:clamp(48px,8cqh,70px);grid-template-columns:minmax(0,1fr);grid-template-rows:var(--bh) minmax(0,1fr) var(--sh) var(--bh)}
+  .ed-rl,.ed-rr{flex-direction:row;justify-content:space-around;padding:0 6px}
+  .ed-rl{grid-row:1;grid-column:1}
+  .ed-stage{grid-row:2;grid-column:1}
+  .ed-strip{grid-row:3}
+  .ed-rr{grid-row:4;grid-column:1;border-top:1px solid #1c1c1e}
+  .ei{width:auto;min-width:56px;max-width:none;padding:4px 6px}
+  .ei svg,.ei.cam svg{width:clamp(26px,7.6cqw,32px);height:clamp(26px,7.6cqw,32px)}
+  .ei span{font-size:11.5px}
+  .ed-pop{bottom:calc(var(--sh) + var(--bh) + 8px);grid-template-columns:repeat(4,minmax(0,1fr))}
+  .bs{left:6px;right:6px;width:auto;transform:none;bottom:6px;max-height:calc(100% - var(--bh) - 12px)}
+  .ed.has-sheet .ed-rr{visibility:hidden}
+  .bs-tabs button{min-width:0;flex:1;padding:4px 2px}
+  /* 촬영 화면: 위 줄(겹쳐보기·진하기·격자·고정) · 가운데 카메라 · 아래 줄(편집으로·방식·찰칵·보기·설정) */
+  .cp-bar{left:10px;right:10px;top:10px;bottom:auto;width:auto;height:auto;flex-direction:row;justify-content:space-around;padding:6px 10px}
+  .cp-sl{writing-mode:horizontal-tb;direction:ltr;flex:1;min-height:0;height:24px;width:auto;min-width:60px;margin:0 6px}
+  .cp-r{left:0;right:0;top:auto;bottom:calc(14px + env(safe-area-inset-bottom));width:auto;flex-direction:row;justify-content:space-around;align-items:center;padding:0 8px}
+  .cp-cnt{top:calc(clamp(64px,10cqh,84px) + 34px)}
+  .modal .menu-grid{grid-template-columns:minmax(0,1fr)}
+  .cp-shut{width:clamp(66px,18cqw,80px);height:clamp(66px,18cqw,80px)}
+  .ed-cpop{left:50%;right:auto;transform:translateX(-50%);bottom:calc(clamp(110px,16cqh,140px) + env(safe-area-inset-bottom));width:min(340px,calc(100% - 20px))}
+  .cp-mon .mon-sketch{left:10px;bottom:10px;width:24%}
+  /* 갤러리: 아래 탭 막대 */
+  .gal-screen{flex-direction:column-reverse}
+  .g-rail{width:auto;flex-direction:row;justify-content:space-around;padding:6px 6px calc(6px + env(safe-area-inset-bottom));border-top:1px solid #2c2c2e}
+  .g-rail .g-sp{display:none}
+  .g-rb{width:auto;min-width:72px;padding:6px 8px}
+  .g-main{padding-right:0;padding-top:env(safe-area-inset-top)}
+}
 </style>

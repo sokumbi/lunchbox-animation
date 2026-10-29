@@ -31,8 +31,8 @@ async function openGallery(o = {}) {
   show('library');
   const root = $('#library'); root.className = 'screen gal-screen'; root.innerHTML = '';
   const up = h('input', { type: 'file', accept: '.json,application/json', hidden: true, onchange: async e => { const f = e.target.files[0]; if (!f) return; const d = await importProjectFile(f); if (d) { toast(`“${d.title}”을(를) 불러왔어요`); openGallery(); } } });
-  const rb = (ic, label, tab, onclick) => h('button', { class: 'g-rb' + (tab && GV.tab === tab ? ' on' : ''), type: 'button', 'aria-label': label, title: label, html: icon(ic), onclick: onclick || (() => { GV.tab = tab; openGallery(); }) });
-  const rail = h('nav', { class: 'g-rail' }, rb('folder', '내 영화', 'movies'), rb('trash', '최근 삭제한 항목', 'trash'), h('span', { class: 'g-sp' }), rb('upload', '작품 파일 불러오기', null, () => up.click()), up);
+  const rb = (ic, label, tab, onclick, short = label) => h('button', { class: 'g-rb' + (tab && GV.tab === tab ? ' on' : ''), type: 'button', 'aria-label': label, title: label, html: icon(ic) + `<span>${short}</span>`, onclick: onclick || (() => { GV.tab = tab; openGallery(); }) });
+  const rail = h('nav', { class: 'g-rail' }, rb('folder', '내 영화', 'movies'), rb('trash', '최근 삭제한 항목', 'trash', null, '휴지통'), h('span', { class: 'g-sp' }), rb('upload', '작품 파일 불러오기', null, () => up.click(), '불러오기'), up);
   const { list, trash } = await loadWorks();
   const sortLabel = SORTS.find(x => x[0] === GV.sort)[1];
   const sortB = h('button', { class: 'g-sort', type: 'button', html: icon('chev') + `<span>${sortLabel}</span>`, onclick: e => ctxMenu(e.currentTarget, SORTS.map(([k, l]) => ({ label: l, ic: GV.sort === k ? 'check' : null, fn: () => { GV.sort = k; gvSave(); openGallery(); } })), { below: true }) });
@@ -57,6 +57,7 @@ async function openGallery(o = {}) {
     card.onkeydown = e => { if (e.key === 'Enter') card.onclick(); };
     card.oncontextmenu = e => { e.preventDefault(); menu(); };
     longPress(card, menu);
+    card.style.setProperty('--i', Math.min(grid.children.length, 14));
     grid.append(card);
   }
   root.append(rail, h('div', { class: 'g-main' }, top, grid));

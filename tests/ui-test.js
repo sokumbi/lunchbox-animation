@@ -99,7 +99,7 @@ fs.mkdirSync(path.join(__dirname, 'shots'), { recursive: true });
     out.push(name + ' look ' + await ev(() => JSON.stringify(P.look)));
     await T('.ed-rr [aria-label="완성"]', 500); await sh('07_finish'); await clipCheck(p, name + ' finish');
     await T('.modal .pn-x', 300);
-    await T('.ed-rl [aria-label="내 작품"]', 900); out.push(name + ' gallery cards ' + await p.locator('.g-card:not(.new)').count()); await sh('08_gallery2'); await clipCheck(p, name + ' gallery2');
+    await T('.ed-rl [aria-label="내 영화"]', 900); out.push(name + ' gallery cards ' + await p.locator('.g-card:not(.new)').count()); await sh('08_gallery2'); await clipCheck(p, name + ' gallery2');
     // 길게 누르기 메뉴 → 이름 바꾸기 · 삭제(최근 삭제한 항목)
     await p.locator('.g-card:not(.new)').first().click({ button: 'right' }); await p.waitForTimeout(400); await sh('08c_ctx'); await clipCheck(p, name + ' ctx menu');
     await T('.cm-i:has-text("이름 바꾸기")', 400); await p.locator('.al-in').fill('바뀐 이름'); await T('.al-acts .ok', 600);
@@ -113,7 +113,7 @@ fs.mkdirSync(path.join(__dirname, 'shots'), { recursive: true });
     out.push(name + ' story fmt -> ' + await ev(() => P.fmt + ' ' + W + 'x' + H + ' cap=' + ED.cap));
     for (let i = 0; i < 2; i++) await T('.cp-shut', 350);
     await sh('08h_story_cap'); await T('.cp-r [aria-label="편집으로"]', 500); await sh('08i_story_edit'); await clipCheck(p, name + ' story edit');
-    await T('.ed-rl [aria-label="내 작품"]', 900); await sh('08j_back');
+    await T('.ed-rl [aria-label="내 영화"]', 900); await sh('08j_back');
     await ctx.close();
   }
   await b.close(); server.close();
