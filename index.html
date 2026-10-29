@@ -771,6 +771,157 @@ input[type=range]{accent-color:var(--orange);width:100%}
 
 /* ---------- 대사 녹음: 대사는 화면 위 자막 ---------- */
 .guide{bottom:6%}
+
+/* =========================================================
+   한 화면 편집기 (Stop Motion Studio 방식) · 갤러리
+   ========================================================= */
+#studio .tray{padding:0}
+.ed{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--bg);--fh:clamp(34px,11.5cqh,62px);--sh:calc(var(--fh) + 34px);--shut:clamp(58px,20cqh,84px);--btn:clamp(34px,10.5cqh,48px)}
+.ed-main{flex:1;min-height:0;display:flex}
+.ed-stage{position:relative;flex:1;min-width:0;container-type:size;overflow:hidden}
+.ed-mon{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(100cqw,100cqh*16/9);aspect-ratio:16/9;border-radius:0;box-shadow:none}
+.efb{border:0;background:none;padding:0;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--ink);cursor:pointer;font:inherit}
+.efb .c{width:var(--btn);height:var(--btn);border-radius:50%;background:#fff;display:grid;place-items:center;box-shadow:0 2px 8px #5E463033}
+.efb .c svg{width:46%;height:46%}
+.efb small{font-size:clamp(9px,2.8cqh,11px);font-weight:800;line-height:1.1;background:#F4EFE5cc;border-radius:6px;padding:0 4px;white-space:nowrap}
+.efb.on .c{background:var(--orange);color:#fff}
+.efb.play .c{background:var(--ink);color:#fff}
+.efb.play.on .c{background:var(--orange)}
+.efb:active .c{transform:scale(.93)}
+.ed-l{position:absolute;left:max(8px,env(safe-area-inset-left));top:8px;bottom:8px;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;z-index:3}
+.ed-l>.efb{margin-left:4px}
+.ed-top{display:flex;gap:6px}
+.ed-r{position:absolute;right:max(10px,env(safe-area-inset-right));top:calc(var(--btn) + 4px);bottom:8px;display:flex;flex-direction:column;justify-content:space-evenly;align-items:center;z-index:3;width:var(--shut)}
+.ed-shut{width:var(--shut);height:var(--shut);border-radius:50%;border:0;background:#fff;padding:0;display:grid;place-items:center;box-shadow:0 3px 14px #0005;cursor:pointer;position:relative}
+.ed-shut .in{width:80%;height:80%;border-radius:50%;background:var(--rec);transition:all .15s}
+.ed-shut:active .in{transform:scale(.9)}
+.ed-shut.run .in{width:44%;height:44%;border-radius:8px}
+.ed-pill{position:absolute;top:8px;left:50%;transform:translateX(-50%);background:#1E1C1Ad0;color:#fff;border-radius:999px;padding:4px 12px;font-size:clamp(10px,3.2cqh,13px);font-weight:800;display:flex;gap:8px;align-items:center;white-space:nowrap;max-width:46%;overflow:hidden;z-index:3;pointer-events:none}
+.ed-pill span{overflow:hidden;text-overflow:ellipsis}
+.ed-pill i{font-style:normal;color:#F6B38A}
+.ed-done{position:absolute;top:8px;right:max(10px,env(safe-area-inset-right));z-index:4;border:0;border-radius:999px;background:var(--orange);color:#fff;font:inherit;font-weight:900;font-size:clamp(12px,3.8cqh,15px);height:var(--btn);padding:0 clamp(10px,2cqw,16px);display:flex;align-items:center;gap:6px;box-shadow:0 2px 10px #CF5D2A66;cursor:pointer}
+.ed-done svg{width:18px;height:18px}
+.ed .mon-sketch{right:8px;bottom:8px;width:18%}
+/* 필름 */
+.ed-strip{flex:none;height:var(--sh);overflow-x:auto;overflow-y:hidden;background:#EDE5D6;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.ed-strip::-webkit-scrollbar{display:none}
+.ef{position:relative;display:inline-flex;align-items:flex-start;gap:3px;padding:6px max(10px,env(safe-area-inset-left)) 0;height:100%;min-width:100%}
+.ef>button{flex:none;height:var(--fh);border-radius:7px;padding:0;cursor:pointer;font:inherit}
+.ef-scn{min-width:calc(var(--fh) * .9);max-width:calc(var(--fh) * 1.6);border:1px solid var(--line);background:#fff;color:#A8441A;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:0 4px!important;margin-left:6px}
+.ef-scn:first-child{margin-left:0}
+.ef-scn b{font-family:var(--display);font-weight:900;font-size:clamp(12px,4cqh,17px);line-height:1}
+.ef-scn span{font-size:clamp(8px,2.4cqh,10px);font-weight:700;color:var(--ink2);max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.ef-scn.cur{border:2px solid var(--orange)}
+.ef-fr{width:calc(var(--fh) * 16 / 9);border:2px solid transparent;background:#1E1C1A;position:relative;overflow:hidden}
+.ef-fr img{width:100%;height:100%;object-fit:cover;display:block}
+.ef-fr i{position:absolute;left:3px;bottom:1px;font-style:normal;font-size:9px;font-weight:800;color:#fff;text-shadow:0 1px 2px #000}
+.ef-fr em{position:absolute;right:2px;top:1px;font-style:normal;font-size:9px;font-weight:900;color:#fff;background:#CF5D2Acc;border-radius:4px;padding:0 3px}
+.ef-fr.sel{border-color:var(--orange);box-shadow:0 0 0 2px #CF5D2A55}
+.ef-fr.play{border-color:#fff;box-shadow:0 0 0 2px var(--ink)}
+.ef-fr.cut{opacity:.35}
+.ef-live{width:calc(var(--fh) * 16 / 9);border:2px solid var(--rec);background:#1E1C1A;color:#fff;display:grid;place-items:center;opacity:.75}
+.ef-live svg{width:34%;height:auto}
+.ef-live.on{opacity:1;box-shadow:0 0 0 3px #E2412E44}
+.ef-add{width:calc(var(--fh) * 1.2);border:1.5px dashed #BFAF96;background:transparent;color:var(--ink2);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px!important;font-weight:800!important;margin-left:6px}
+.ef-add svg{width:16px;height:16px}
+.ef-trk{position:absolute;left:0;right:0;top:calc(6px + var(--fh) + 4px);height:26px;pointer-events:none}
+.ef-trk .tb{position:absolute;height:5px;border:0;border-radius:3px;padding:0;pointer-events:auto;cursor:pointer;opacity:.85}
+.ef-trk .tb::before{content:"";position:absolute;inset:-2px 0}
+.ef-trk .tb.on{opacity:1;box-shadow:0 0 0 2px #fff,0 0 0 3.5px var(--ink)}
+/* 컷 말풍선 메뉴 */
+.ed-pop{position:absolute;bottom:calc(var(--sh) + 8px);background:#fff;border-radius:14px;box-shadow:0 8px 24px #0005;display:flex;padding:3px;z-index:20;--ax:50%}
+.ed-pop::after{content:"";position:absolute;bottom:-7px;left:var(--ax);margin-left:-7px;border:7px solid transparent;border-bottom:0;border-top-color:#fff}
+.ed-pop button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:1px;font:inherit;font-size:clamp(9.5px,3cqh,11.5px);font-weight:800;padding:5px clamp(5px,1.2cqw,10px);border-radius:10px;color:var(--ink);cursor:pointer;white-space:nowrap}
+.ed-pop button svg{width:clamp(16px,5.4cqh,22px);height:clamp(16px,5.4cqh,22px)}
+.ed-pop button:active{background:var(--panel2)}
+.ed-pop button.red{color:var(--rec)}
+/* 카메라 설정 */
+.ed-cpop{position:absolute;right:calc(var(--shut) + 22px);top:calc(var(--btn) + 6px);width:min(300px,62cqw);max-height:calc(100% - var(--btn) - 14px);overflow:auto;background:#fff;border-radius:16px;box-shadow:0 8px 24px #0005;padding:8px 12px;display:flex;flex-direction:column;gap:2px;z-index:20}
+.cp-row{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12.5px;font-weight:800;min-height:clamp(28px,9cqh,36px)}
+.cp-row .seg button{min-height:26px;padding:0 8px;font-size:11.5px}
+.cp-row input[type=range]{width:110px}
+.cp-row .btn.sm{min-height:28px}
+/* 오른쪽 판 */
+.ed-panel{flex:none;width:clamp(250px,38cqw,380px);background:#fff;border-radius:18px 0 0 18px;box-shadow:-6px 0 20px #5E463026;display:flex;flex-direction:column;padding:clamp(6px,2cqh,12px) max(10px,env(safe-area-inset-right)) clamp(6px,2cqh,12px) 12px;gap:6px;container-type:size;position:relative;z-index:5}
+.ed-panel.p-story{width:min(66cqw,680px)}
+.pn-head{display:flex;align-items:center;justify-content:space-between;flex:none}
+.pn-head h3{margin:0;font-family:var(--display);font-weight:900;font-size:clamp(15px,5cqh,20px)}
+.pn-x{width:32px;height:32px;border-radius:50%;border:0;background:var(--panel2);display:grid;place-items:center;cursor:pointer}
+.pn-x svg{width:16px;height:16px}
+.pn-body{flex:1;min-height:0;display:flex;flex-direction:column;gap:6px;position:relative}
+.pn-body.scroll{overflow-y:auto}
+.pn-tabs{flex:none;display:flex}
+.pn-tabs button{flex:1;padding:0 4px;font-size:clamp(10.5px,3.4cqh,12.5px)}
+.pn-tab{flex:1;min-height:0;display:flex;flex-direction:column;gap:6px}
+.pn-tab .kgrid{grid-template-columns:repeat(auto-fill,minmax(78px,1fr));grid-auto-rows:minmax(36px,1fr);overflow:auto}
+.pn-body>.kgrid{grid-template-columns:repeat(auto-fill,minmax(78px,1fr));grid-auto-rows:minmax(36px,1fr);overflow:auto}
+.ed-panel .fxk{flex-direction:row;gap:5px;justify-content:flex-start;padding:2px 6px;min-height:36px}
+.ed-panel .fxk .dot{width:24px;height:24px}
+.ed-panel .kgrid.c2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.ed-panel .sbtn{min-height:40px}
+.pn-tip{font-size:11px;flex:none}
+.pn-list{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:4px}
+.pn-sub{display:flex;align-items:center;gap:6px;flex:none}
+.pn-sub h4,.pn-body h4{margin:0;font-size:13px;font-weight:900;flex:1}
+.pn-empty{margin:auto;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px}
+.pn-empty p{margin:0}
+.pn-syn{font-size:12.5px;line-height:1.55;padding:8px 10px}
+.pn-cols{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start}
+.pn-col{display:flex;flex-direction:column;gap:6px;min-width:0}
+.pn-items{display:flex;flex-direction:column;gap:4px}
+.ed.has-panel .ed-pill,.ed.has-panel .ed-done{display:none}
+@container (max-width:560px){.pn-cols{grid-template-columns:1fr}}
+.ed-panel .sc-card{grid-template-columns:22px auto minmax(0,1fr) auto;padding:5px;align-items:center}
+.ed-panel .sk-slot{width:62px;min-height:44px;font-size:10px}
+.ed-panel .script-row{grid-template-columns:58px minmax(0,1fr) 70px auto}
+.vl{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:#FBF8F2;border-radius:10px;padding:5px 8px;text-align:left;font:inherit;cursor:pointer;flex:none}
+.vl .d{width:24px;height:24px;border-radius:50%;background:#D9CFC0;color:#fff;display:grid;place-items:center;font-size:11px;font-weight:900;flex:none}
+.vl .d svg{width:14px;height:14px}
+.vl.ok .d{background:var(--c-voice)}
+.vl.on{border:2px solid var(--rec);background:#fff}
+.vl .t{flex:1;min-width:0;display:flex;flex-direction:column}
+.vl .t b{font-size:12px}
+.vl .t small{font-size:11px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vl em{font-style:normal;font-size:10.5px;color:var(--mute)}
+.pn-rec{display:flex;align-items:center;justify-content:center;gap:14px;flex:none}
+.pn-rec .mic{width:clamp(48px,17cqh,64px);height:clamp(48px,17cqh,64px);border-radius:50%;border:0;background:var(--rec);color:#fff;display:grid;place-items:center;box-shadow:0 3px 12px #E2412E66;cursor:pointer}
+.pn-rec .mic svg{width:44%;height:44%}
+.pn-rec .mic.run{animation:micPulse 1s infinite}
+@keyframes micPulse{50%{box-shadow:0 0 0 10px #E2412E33}}
+.ed-panel .sel-bar{position:static;flex:none;flex-wrap:wrap;border-radius:14px;padding:6px 8px;row-gap:4px}
+.ed-panel .sel-bar b{flex:1 1 100%;font-size:13px}
+.ed-panel textarea.input{flex:none;font-size:13px;resize:none}
+.ed-panel .mix{grid-template-columns:1fr 1fr}
+/* 완성 창 */
+.fin-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.fin-b{border:1px solid var(--line);background:#fff;border-radius:14px;padding:10px 6px;display:flex;flex-direction:column;align-items:center;gap:3px;font:inherit;cursor:pointer;text-align:center}
+.fin-b svg{width:26px;height:26px;color:var(--orange)}
+.fin-b b{font-size:13px}
+.fin-b small{font-size:10.5px;color:var(--mute)}
+.fin-b.or{background:var(--orange);border-color:var(--orange);color:#fff}
+.fin-b.or svg,.fin-b.or small{color:#fff}
+@media (max-width:560px){.fin-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* 갤러리 */
+.tale-grid.v-gallery{display:block;padding:0;background:transparent}
+.gal{height:100%;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(140px,21cqw,230px),1fr));align-content:start;gap:clamp(8px,1.6cqw,14px);padding:2px}
+.gcard{position:relative;border-radius:14px;background:#fff;box-shadow:0 2px 8px #5E463026;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;border:0;padding:0;font:inherit;text-align:left;color:var(--ink)}
+.gcard:active{transform:scale(.98)}
+.gcard .th{aspect-ratio:16/9;background:#3B3631 center/cover;position:relative;display:block}
+.gcard .th em{position:absolute;right:6px;bottom:5px;background:#000a;color:#fff;font-size:10.5px;font-style:normal;font-weight:800;padding:1px 6px;border-radius:6px}
+.gcard .tt{padding:6px 9px 8px;display:flex;flex-direction:column;min-width:0}
+.gcard .tt b{font-size:clamp(12px,3.8cqh,15px);font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gcard .tt small{font-size:10.5px;color:var(--mute);font-weight:600}
+.gmore{position:absolute;top:5px;right:5px;width:30px;height:30px;border-radius:50%;border:0;background:#fffe;display:grid;place-items:center;box-shadow:0 1px 4px #0003;cursor:pointer}
+.gmore svg{width:18px;height:18px}
+.gcard.new{background:var(--orange);color:#fff;align-items:center;justify-content:center;gap:6px;min-height:clamp(110px,34cqh,190px);box-shadow:0 4px 14px #CF5D2A55}
+.gcard.new .pl{width:clamp(40px,14cqh,58px);height:clamp(40px,14cqh,58px);border-radius:50%;background:#ffffff33;display:grid;place-items:center}
+.gcard.new .pl svg{width:56%;height:56%;stroke-width:2.6}
+.gcard.new b{font-size:clamp(14px,4.6cqh,18px);font-weight:900}
+.fin-head{display:flex;align-items:center;gap:10px}
+.fin-head h2{margin:0;white-space:nowrap}
+.fin-head .input{flex:1;min-width:0}
+.fin-set{gap:8px 12px;align-items:center}
+.fin-set .toggle{font-size:13px;gap:6px}
 </style>
 <script>
 'use strict';
@@ -1775,79 +1926,6 @@ for (const [k, cache] of [['getSfx', 'sfx'], ['getBgm', 'bgm']]) { const orig = 
 function applyMix() { if (!AE.ctx || !P) return; for (const k of ['bgm', 'sfx', 'voice', 'narr']) AE.buses[k].gain.value = P.mix[k]; }
 
 /* =========================================================
-   타임라인 UI — 트랙마다 색이 있어요 (효과 보라 · 대사 파랑 · 효과음 주황 · 배경음악 초록 · 나레이션 청록)
-   ========================================================= */
-class Timeline {
-  constructor(host, o) {
-    this.host = host; this.o = o; this.build();
-    if (window.ResizeObserver) { this.ro = new ResizeObserver(() => { const w = this.scroll.clientWidth; if (w && w !== this.lastW) this.render(); }); this.ro.observe(host); }
-  }
-  build() {
-    this.host.innerHTML = '';
-    this.scroll = h('div', { class: 'tl' }); this.inner = h('div', { class: 'tl-inner' }); this.scroll.append(this.inner);
-    this.host.append(this.scroll); this.render();
-  }
-  render() {
-    const tl = TL(), total = Math.max(tl.total, 1), cw = this.scroll.clientWidth || 600; this.lastW = cw;
-    const X0 = this.X0 = Math.round(clamp(cw * .11, 68, 100));
-    const pps = this.pps = Math.max(18, (cw - X0 - 10) / total);
-    const width = Math.max(X0 + total * pps + 10, cw);
-    this.inner.innerHTML = ''; this.inner.style.width = width + 'px'; this.inner.style.setProperty('--x0', X0 + 'px');
-    const ruler = h('div', { class: 'tl-ruler' });
-    const stepS = pps > 120 ? .5 : pps > 50 ? 1 : pps > 22 ? 2 : 5;
-    const every = Math.max(1, Math.ceil(34 / (pps * stepS)));
-    for (let k = 0, s = 0; s <= total + 1e-6; k++, s = k * stepS) { ruler.append(h('i', { style: { left: X0 + s * pps + 'px' } })); if (k % every === 0) ruler.append(h('span', { style: { left: X0 + s * pps + 'px' } }, fmt(s).replace(/\.0$/, ''))); }
-    const seekFrom = e => { const r = appRect(this.inner); Player.seek((appPt(e).x - r.left - X0) / pps); };
-    ruler.addEventListener('pointerdown', e => { seekFrom(e); const mv = ev => seekFrom(ev); const up = () => { removeEventListener('pointermove', mv); removeEventListener('pointerup', up); }; addEventListener('pointermove', mv); addEventListener('pointerup', up); });
-    this.inner.append(ruler);
-    const row = (label, color, dim) => { const r = h('div', { class: 'tl-track' + (dim ? ' dim' : ''), style: { '--tc': color } }, h('span', { class: 'tl-lab' }, label)); r.style.setProperty('--tc', color); return r; };
-    // 영상(장면) 줄
-    const st = row('영상', '#3A3734', this.o.sceneDim);
-    for (const r of tl.ranges) {
-      if (r.t1 <= r.t0) continue;
-      const f = r.sc.frames[r.sc.trimIn];
-      st.append(h('div', { class: 'tl-scene', style: { left: X0 + r.t0 * pps + 'px', width: Math.max(4, (r.t1 - r.t0) * pps - 2) + 'px', backgroundImage: f ? `url(${f.url})` : '' }, title: r.sc.name, onclick: e => { const rr = appRect(this.inner); const t = clamp((appPt(e).x - rr.left - X0) / pps, r.t0, r.t1 - .001); Player.seek(t); this.o.onScene && this.o.onScene(r.sc, t); } }, h('span', {}, r.sc.name)));
-    }
-    this.inner.append(st);
-    for (const tr of this.o.tracks || []) {
-      const rw = row(tr.label, tr.color, tr.dim);
-      rw.addEventListener('pointerdown', e => { if (e.target === rw || e.target.classList.contains('tl-lab')) seekFrom(e); });
-      if (tr.key === 'bgm') {
-        for (const r of tl.ranges) {
-          if (r.t1 <= r.t0 || !r.sc.bgm) continue; const b = BGM.find(x => x.id === r.sc.bgm);
-          rw.append(h('div', { class: 'tl-item', style: { left: X0 + r.t0 * pps + 'px', width: Math.max(10, (r.t1 - r.t0) * pps - 2) + 'px', background: tr.color, cursor: 'pointer' }, onclick: () => { Player.seek(r.t0 + .001); tr.onSelect && tr.onSelect(r.sc); }, html: icon('music') + `<span>${b ? b.name : ''}</span>` }));
-        }
-      } else for (const it of tr.items()) {
-        const t = absT(it); if (t == null) continue;
-        const len = tr.len(it);
-        const el = h('div', { class: 'tl-item' + (S.sel && S.sel.id === it.id ? ' sel' : ''), style: { left: X0 + t * pps + 'px', width: Math.max(18, len * pps) + 'px', background: tr.color }, html: (tr.icon ? icon(tr.icon) : '') + `<span>${tr.text(it)}</span>` });
-        this.dragItem(el, it, tr);
-        rw.append(el);
-      }
-      this.inner.append(rw);
-    }
-    this.head = h('div', { class: 'tl-head' }); this.inner.append(this.head);
-    this.update(Player.t);
-  }
-  dragItem(el, it, tr) {
-    el.addEventListener('pointerdown', e => {
-      e.stopPropagation(); el.setPointerCapture(e.pointerId);
-      const x0 = appPt(e).x, t0 = absT(it); let moved = false;
-      S.sel = { kind: tr.key, id: it.id }; $$('.tl-item.sel', this.inner).forEach(x => x.classList.remove('sel')); el.classList.add('sel');
-      tr.onSelect && tr.onSelect(it);
-      const mv = ev => { const dx = appPt(ev).x - x0; if (Math.abs(dx) > 3) moved = true; if (!moved) return; const nt = Math.max(0, t0 + dx / this.pps); el.style.left = this.X0 + nt * this.pps + 'px'; it.__nt = nt; };
-      const up = () => { el.removeEventListener('pointermove', mv); el.removeEventListener('pointerup', up); el.removeEventListener('pointercancel', up);
-        if (moved && it.__nt != null) { setAbs(it, it.__nt); delete it.__nt; changed(); tr.onMove && tr.onMove(it); this.render(); } else { Player.seek(t0); } };
-      el.addEventListener('pointermove', mv); el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
-    });
-  }
-  update(t) {
-    if (!this.head) return; const x = this.X0 + t * this.pps; this.head.style.left = x + 'px';
-    const sc = this.scroll; if (Player.playing && (x < sc.scrollLeft + this.X0 || x > sc.scrollLeft + sc.clientWidth - 30)) sc.scrollLeft = x - this.X0 - 40;
-  }
-}
-
-/* =========================================================
    저장 (자동 저장 + 작품함)
    ========================================================= */
 let saveT = null;
@@ -2007,7 +2085,7 @@ function initSplash() {
   const go = () => {
     if (gone) return; gone = true; AE.init(); goFullscreen(); AE.click(.2);
     $('#splash').classList.add('open');
-    setTimeout(() => { showProcess('home'); $('#splash').classList.remove('open'); }, 560);
+    setTimeout(() => { openGallery(); $('#splash').classList.remove('open'); }, 560);
   };
   $('#splash').addEventListener('click', go);
   // 버튼을 누를 때마다 짧은 클릭음
@@ -2017,76 +2095,13 @@ function initSplash() {
   }, true);
 }
 
-/* ---------- 2. 제작 과정 ---------- */
-const PROC = [
-  { id: 'script', name: '시나리오', ic: 'book' },
-  { id: 'shoot', name: '촬영', ic: 'cam' },
-  { id: 'voice', name: '대사 녹음', ic: 'mic' },
-  { id: 'sound', name: '사운드', ic: 'music' },
-  { id: 'edit', name: '편집', ic: 'scissors' }
-];
-function showProcess(mode) {
-  show('process');
-  const box = $('#process'); box.innerHTML = '';
-  const tray = h('div', { class: 'tray' }); box.append(tray);
-  const nav = mode === 'nav';
-  const next = nav ? S.step : mode === 'byeoljubu' ? 'shoot' : 'script';
-  const done = nav ? P.done : mode === 'byeoljubu' ? { script: true } : {};
-  const title = mode === 'home' ? '애니메이션은 이렇게 만들어요' : mode === 'byeoljubu' ? '이제 직접 찍어 볼까요?' : mode === 'new' ? '먼저 시나리오를 써요' : (P.title || '나의 애니메이션');
-  const top = h('div', { class: 'proc-top' });
-  if (nav) top.append(key('목록', { ic: 'home', cls: 'dim', onclick: async e => { e.stopPropagation(); if (await confirmBox('이야기 목록으로 갈까요?', '작품은 자동으로 저장돼요. 내 작품함에서 다시 열 수 있어요.', '목록으로')) { leaveStep(); await saveProject(); P = null; openLibrary(); } } }));
-  top.append(LCD.make(title));
-  if (nav) top.append(key('돌아가기', { ic: 'back', onclick: e => { e.stopPropagation(); goStep(S.step); show('studio'); } }));
-  const row = h('div', { class: 'proc' });
-  const items = PROC.map((p, i) => {
-    const el = h('button', { class: 'key proc-item' + (done[p.id] ? ' done' : '') + (nav && p.id === S.step ? ' cur' : ''), type: 'button', 'data-id': p.id },
-      h('span', { class: 'no' }, String(i + 1).padStart(2, '0')), h('span', { html: icon(p.ic, 'ki') }), h('b', {}, p.name));
-    row.append(h('div', { class: 'well proc-slot' }, el)); return el;
-  });
-  const touch = h('div', { class: 'proc-touch' }, mode === 'home' ? '화면을 터치해 보세요' : '');
-  row.append(touch);
-  row.style.position = 'relative';
-  tray.append(top, row);
-  let revealed = false, busy = false;
-  const reveal = (fast) => {
-    revealed = true; touch.remove();
-    items.forEach((el, i) => setTimeout(() => { el.classList.add('show'); AE.ctx && AE.click(.08); }, (fast ? 90 : 320) * i));
-    setTimeout(() => {
-      const n = items.find(el => el.dataset.id === next) || items[0];
-      if (!nav) { n.classList.add('next'); n.append(h('span', { class: 'badge' }, '눌러서 시작')); }
-    }, (fast ? 90 : 320) * items.length + 80);
-  };
-  if (mode !== 'home') setTimeout(() => reveal(true), 120);
-  tray.onclick = e => {
-    if (busy) return;
-    if (!revealed) { reveal(false); return; }
-    const hit = e.target.closest('.proc-item');
-    if (nav) { if (!hit) return; goStep(hit.dataset.id); show('studio'); return; }
-    const pick = mode === 'home' ? 'script' : (hit ? hit.dataset.id : next);
-    const el = items.find(x => x.dataset.id === pick);
-    busy = true;
-    growFrom(el, PROC.find(p => p.id === pick).name, ov => {
-      if (mode === 'home') { openLibrary(); dropOverlay(ov); }
-      else if (mode === 'new') { openStudio(pick); dropOverlay(ov); }
-      else setupProject(pick, ov);
-    });
-  };
-}
-function growFrom(el, label, cb) {
-  const r = appRect(el), a = appRect($('#app'));
-  const ov = h('div', { class: 'grow-overlay', style: { left: r.left - a.left + 'px', top: r.top - a.top + 'px', width: r.width + 'px', height: r.height + 'px' } }, h('b', {}, label));
-  $('#app').append(ov); void ov.offsetWidth;
-  Object.assign(ov.style, { left: '0px', top: '0px', width: '100%', height: '100%', borderRadius: '0px' }); ov.classList.add('full');
-  setTimeout(() => cb(ov), 620);
-}
-function dropOverlay(ov) { if (!ov) return; ov.style.transition = 'opacity .35s'; ov.style.opacity = '0'; setTimeout(() => ov.remove(), 380); }
-
 /* ---------- 3. 이야기 고르기 ----------
    갈래(전래동화 · 전국 팔도 민담 · 나만의 이야기) → 전래동화 카드 / 팔도 지도 / 바로 촬영.
    view: 'home' | 'tales' | 'map' — 상영관(p5e_theater)도 같은 화면을 써요 */
 function libTop(title, back) {
   const top = $('#libTop'); top.innerHTML = '';
-  top.append(back ? key('', { ic: 'back', cls: 'home', aria: '뒤로', onclick: back }) : key('', { ic: 'home', cls: 'home', aria: '처음으로', onclick: () => showProcess('home') }),
+  if (back !== false) top.append(key('', { ic: 'back', cls: 'home', aria: '뒤로', onclick: back || openGallery }));
+  top.append(
     h('div', { class: 'brand' }, h('i', { html: icon('film') }), BRAND.app),
     LCD.make(title));
   return top;
@@ -2096,9 +2111,7 @@ function openLibrary(view = 'home') {
   show('library'); stopIntro();
   if (view === 'tales') return openTales();
   if (view === 'map') return openMap();
-  libTop('어떤 이야기로 만들까요?').append(
-    key('내 작품함', { ic: 'film', cls: 'works', onclick: openWorks }),
-    key('상영관', { ic: 'trophy', cls: 'works hall', onclick: () => openTheater() }));
+  libTop('어떤 이야기로 만들까요?', openGallery);
   const g = libBody('home');
   for (const k of STORY_KINDS) {
     const el = h('button', { class: 'kind', type: 'button', 'data-kind': k.id, onclick: () => k.id === 'own' ? startOwnStory() : openLibrary(k.id) },
@@ -2108,7 +2121,7 @@ function openLibrary(view = 'home') {
   }
 }
 function openTales() {
-  libTop('전래동화', () => openLibrary()).append(key('내 작품함', { ic: 'film', cls: 'works', onclick: openWorks }));
+  libTop('전래동화', () => openLibrary());
   const g = libBody('tales');
   // 이야기 카드 — 별주부전만 켜짐, 같은 크기의 그림 카드
   TALES.forEach(t => {
@@ -2121,7 +2134,7 @@ function openTales() {
 }
 /* 팔도 지도 — 깜빡이는 곳(장소)을 누르면 오른쪽에 그곳 민담이 나와요 */
 function openMap() {
-  libTop('전국 팔도 민담', () => openLibrary()).append(key('내 작품함', { ic: 'film', cls: 'works', onclick: openWorks }));
+  libTop('전국 팔도 민담', () => openLibrary());
   const g = libBody('map');
   const places = [];
   for (const l of LEGENDS) { let p = places.find(p => p.name === l.place); if (!p) places.push(p = { name: l.place, at: l.at, p: l.p, items: [] }); p.items.push(l); }
@@ -2171,13 +2184,13 @@ function startLegend(l) {
   P = newProject('나의 ' + l.title, l.scenes[0], l.id);
   for (const n of l.scenes.slice(1)) P.scenes.push(newScene(n));
   P.synopsis = l.syn; P.scriptMode = 'new'; P.script = []; TLc = null; scheduleSave();
-  openStudio('script');
+  openEditor('story');
 }
 /* 나만의 이야기 — 바로 촬영 (제목·시나리오는 나중에 써도 돼요) */
 function startOwnStory() {
   AE.init();
   P = newProject('나만의 이야기', '1장면', 'new'); P.scriptMode = 'new'; P.script = []; TLc = null; scheduleSave();
-  openStudio('shoot');
+  openEditor();
 }
 /* 지운 작품은 휴지통에 30일 동안 남아요 (d.trashed = 지운 시각) */
 const TRASH_DAYS = 30;
@@ -2188,29 +2201,6 @@ async function loadWorks() {
   for (const d of all.filter(d => d.trashed && d.trashed < old)) { try { await DB.del(d.id); } catch (e) { } }
   return { list: all.filter(d => !d.trashed), trash: all.filter(d => d.trashed && d.trashed >= old) };
 }
-async function openWorks() {
-  const { list, trash } = await loadWorks();
-  modal((b, m) => {
-    const up = h('input', { type: 'file', accept: '.json,application/json', hidden: true, onchange: async e => { const f = e.target.files[0]; if (!f) return; const d = await importProjectFile(f); if (d) { toast(`“${d.title}”을(를) 불러왔어요`); m.close(); openWorks(); } } });
-    b.append(h('div', { class: 'panel-title' }, h('h2', {}, '내 작품함'),
-      h('div', { class: 'row' }, up, ib('upload', '파일 불러오기', 'btn sm', { onclick: () => up.click() }),
-        ib('trash', `휴지통${trash.length ? ' ' + trash.length : ''}`, 'btn sm ghost', { onclick: () => { m.close(); openTrash(); } }))));
-    if (!list.length) b.append(h('p', { class: 'hint' }, '아직 저장된 작품이 없어요. 작품은 이 기기의 브라우저에 저장돼요. 다른 기기에서 만든 작품 파일은 “파일 불러오기”로 열어요.'));
-    const box = h('div', { class: 'works' });
-    for (const d of list) {
-      const th = h('div', { class: 'th' }); if (d.thumb) th.style.backgroundImage = `url(${URL.createObjectURL(d.thumb)})`;
-      const frames = d.scenes.reduce((a, s) => a + s.frames.length, 0);
-      box.append(h('div', { class: 'work-i' }, th,
-        h('div', {}, h('b', { style: { fontFamily: 'var(--display)', fontWeight: 800, fontSize: '16px' } }, d.title), h('div', { class: 'hint' }, `${storyInfo(d.storyId).title} · 장면 ${d.scenes.length}개 · 컷 ${frames}개`)),
-        h('div', { class: 'row' },
-          ib('trash', '', 'btn sm icon ghost', { 'aria-label': '작품 지우기', onclick: async () => { if (await confirmBox('작품을 휴지통에 넣을까요?', `“${d.title}”은(는) 휴지통에 ${TRASH_DAYS}일 동안 있어요. 그동안은 되살릴 수 있어요.`, '휴지통에 넣기', true)) { d.trashed = Date.now(); await DB.put(d); m.close(); openWorks(); toast('휴지통에 넣었어요'); } } }),
-          ib('download', '', 'btn sm icon', { 'aria-label': '작품 파일로 저장', title: '작품 파일로 저장 (백업 · 다른 기기로 옮기기)', onclick: () => exportProjectFile(d) }),
-          h('button', { class: 'btn sm accent', type: 'button', onclick: async () => { m.close(); toast('작품을 여는 중…'); await openProject(d); openStudio(d.lastStep || 'shoot'); } }, '이어서 만들기'))));
-    }
-    b.append(box, h('div', { class: 'acts' }, h('button', { class: 'btn', type: 'button', onclick: m.close }, '닫기')));
-  }, { wide: true });
-}
-
 async function openTrash() {
   const { trash } = await loadWorks();
   modal((b, m) => {
@@ -2224,9 +2214,9 @@ async function openTrash() {
         h('div', {}, h('b', { style: { fontFamily: 'var(--display)', fontWeight: 800, fontSize: '16px' } }, d.title), h('div', { class: 'hint' }, `${left}일 뒤에 없어져요`)),
         h('div', { class: 'row' },
           ib('trash', '', 'btn sm icon ghost', { 'aria-label': '완전히 지우기', onclick: async () => { if (await confirmBox('완전히 지울까요?', `“${d.title}”을(를) 완전히 지우면 다시 되살릴 수 없어요.`, '완전히 지우기', true)) { await DB.del(d.id); m.close(); openTrash(); } } }),
-          h('button', { class: 'btn sm accent', type: 'button', onclick: async () => { delete d.trashed; await DB.put(d); toast(`“${d.title}”을(를) 되살렸어요`); m.close(); openWorks(); } }, '되살리기'))));
+          h('button', { class: 'btn sm accent', type: 'button', onclick: async () => { delete d.trashed; await DB.put(d); toast(`“${d.title}”을(를) 되살렸어요`); m.close(); openGallery(); } }, '되살리기'))));
     }
-    b.append(box, h('div', { class: 'acts' }, ib('back', '작품함으로', 'btn', { onclick: () => { m.close(); openWorks(); } }), h('button', { class: 'btn primary', type: 'button', onclick: m.close }, '닫기')));
+    b.append(box, h('div', { class: 'acts' }, ib('back', '내 작품으로', 'btn', { onclick: () => { m.close(); openGallery(); } }), h('button', { class: 'btn primary', type: 'button', onclick: m.close }, '닫기')));
   }, { wide: true });
 }
 
@@ -2234,7 +2224,7 @@ async function openTrash() {
 let introReturn = null;
 function startIntro() {
   show('intro'); stopIntro();
-  const done = () => { stopIntro(); $$('video', $('#introFrame')).forEach(v => { v.pause(); v.remove(); }); if (introReturn && P) { const st = introReturn; introReturn = null; openStudio(st); } else showProcess('byeoljubu'); };
+  const done = () => { stopIntro(); $$('video', $('#introFrame')).forEach(v => { v.pause(); v.remove(); }); if (introReturn && P) { introReturn = null; openEditor('story'); } else setupProject(); };
   $('#introSkip').innerHTML = '<span>건너뛰기</span>' + icon('next');
   $('#introSkip').onclick = done;
   const frame = $('#introFrame'), vb = $('#introVoice');
@@ -2276,103 +2266,19 @@ function playCutoutIntro(done) {
 function sceneNameChips(input) {
   return h('div', { class: 'row' }, ...storyInfo(P.storyId).scenes.map((n, i) => h('button', { class: 'chip', type: 'button', onclick: () => { input.value = n; input.focus(); } }, `${i + 1}. ${n}`)));
 }
-function setupProject(step, ov) {
-  // 제목·첫 장면은 기본값으로 바로 시작해요 (제목은 시나리오·완성 화면에서 바꿀 수 있어요)
+function setupProject() {
+  // 제목·첫 장면은 기본값으로 바로 촬영부터 (제목·장면은 이야기 판에서 바꿀 수 있어요)
   P = newProject('나의 별주부전', ORIGINAL_SCENES[0], 'byeoljubu'); P.done.script = true; TLc = null;
-  openStudio(step || 'shoot'); dropOverlay(ov); scheduleSave();
+  openEditor(); scheduleSave();
 }
 
-/* =========================================================
-   스튜디오 틀 — 트레이 안에 [왼쪽 키 | 모니터 | 오른쪽 도구] + 아래 타임라인
-   ========================================================= */
-const STEPS = [
-  { id: 'script', name: '시나리오' },
-  { id: 'shoot', name: '촬영' },
-  { id: 'voice', name: '대사 녹음' },
-  { id: 'sound', name: '사운드' },
-  { id: 'edit', name: '편집' },
-  { id: 'final', name: '완성' }
-];
-const STEP_MOD = {};
-let curMod = null;
-function openStudio(step) { show('studio'); stopIntro(); goStep(step); }
-function renderRail() { }
-function undoKey() { return key('', { ic: 'undo', cls: 'navkey dim undo', aria: '되돌리기', title: '되돌리기', onclick: undo }); }
-function navKey(extraCls = '') { return key('단계', { ic: 'menu', cls: 'navkey row dim ' + extraCls, aria: '다른 단계로 가기', onclick: stepMenu }); }
-/* 단계 키 — 어느 화면에서든 한 번 눌러 단계 6개 중 하나로 바로 가요 */
-const STEP_IC = { script: 'book', shoot: 'cam', voice: 'mic', sound: 'music', edit: 'scissors', final: 'sparkle' };
-function stepMenu() {
-  modal((b, m) => {
-    const grid = h('div', { class: 'step-menu' });
-    STEPS.forEach((s, i) => grid.append(h('button', { class: 'key step-go' + (s.id === S.step ? ' cur' : '') + (P && P.done[s.id] ? ' done' : ''), type: 'button',
-      onclick: () => { m.close(); if (s.id !== S.step) goStep(s.id); } },
-      h('span', { class: 'no' }, String(i + 1).padStart(2, '0')), h('span', { html: icon(STEP_IC[s.id], 'ki') }), h('b', {}, s.name), s.id === S.step ? h('small', {}, '지금') : '')));
-    b.append(h('h2', {}, '어느 단계로 갈까요?'), grid,
-      h('div', { class: 'acts' },
-        ib('home', '이야기 목록', 'btn ghost', { onclick: async () => { m.close(); if (await confirmBox('이야기 목록으로 갈까요?', '작품은 자동으로 저장돼요. 내 작품함에서 다시 열 수 있어요.', '목록으로')) { leaveStep(); await saveProject(); P = null; openLibrary(); } } }),
-        P ? ib('download', '작품 파일로 저장', 'btn ghost', { onclick: async () => { m.close(); await saveProject(); const d = await DB.get(P.id).catch(() => null); d ? exportProjectFile(d) : toast('먼저 저장이 되어야 해요'); } }) : '',
-        h('div', { class: 'spacer' }),
-        h('button', { class: 'btn primary', type: 'button', onclick: m.close }, '닫기')));
-  }, { wide: true });
-}
-function leaveStep() { Player.pause(); AE.stopPreview(); if (curMod && curMod.unmount) curMod.unmount(); curMod = null; }
-function goStep(id) {
-  leaveStep(); S.step = id; S.sel = null;
-  if ($('#studio').hidden) show('studio');
-  if (P) { histInit(); if (P.lastStep !== id && id !== 'final') { P.lastStep = id; scheduleSave(); } }
-  stepGuide(id);
-  const body = $('#stBody'); body.innerHTML = '';
-  curMod = STEP_MOD[id];
-  const layout = curMod.layout || 'std';
-  if (layout === 'shoot') { curMod.mount({ main: body }); return; }
-  if (layout === 'doc') { const main = h('div', { class: 'doc' }); body.append(main); curMod.mount({ main }); return; }
-  // 왼쪽 줄(단계·되돌리기·재생) | 가운데 화면(+다음 알약, 도구 판) | 오른쪽 줄(도구) / 아래 타임라인
-  const L = h('div', { class: 'L' }, h('div', { class: 'navrow' }, navKey(), undoKey())), M = h('div', { class: 'M' }, nextKey(id, 'pill')), RR = h('div', { class: 'RR' });
-  const R = h('div', { class: 'R' }), sheetEl = h('div', { class: 'sheet', hidden: true }, h('button', { class: 'shx', type: 'button', 'aria-label': '도구 판 닫기', html: icon('x'), onclick: () => sheet.close() }), R);
-  const sheet = { el: sheetEl, open() { sheetEl.hidden = false; sheet.onToggle && sheet.onToggle(true); }, close() { sheetEl.hidden = true; sheet.onToggle && sheet.onToggle(false); }, get isOpen() { return !sheetEl.hidden; } };
-  M.append(sheetEl);
-  const tlw = h('div', { class: 'tlw well' }), B = h('div', { class: 'B' }, tlw);
-  body.append(h('div', { class: 'lay' }, L, M, RR, B));
-  curMod.mount({ L, M, R, RR, B, tlw, sheet });
-}
-const STEP_ORDER = ['script', 'shoot', 'voice', 'sound', 'edit', 'final'];
-/* 화면마다 한 번, 무엇을 하면 되는지 짧게 알려 줘요 */
-const GUIDE = {
-  script: '장면을 나누고 대사를 써요. 다 되면 오른쪽 위 주황색 “다음”!',
-  shoot: '빨간 찰칵을 누를 때마다 한 컷씩 찍혀요. 다 찍으면 오른쪽 위 주황색 “다음”!',
-  voice: '빨간 마이크를 누르면 3·2·1 뒤에 녹음돼요. 다 하면 오른쪽 위 주황색 “다음”!',
-  sound: '소리 키를 한 번 누르면 들어 보고, 한 번 더 누르면 들어가요. 다 하면 오른쪽 위 “다음”!',
-  edit: '효과 키를 한 번 누르면 미리 보고, 한 번 더 누르면 들어가요. 다 하면 오른쪽 위 “다음”!',
-  final: '제목을 확인하고 저장해요'
-};
-const guided = {};
-function stepGuide(id) { if (guided[id] || !GUIDE[id]) return; guided[id] = true; setTimeout(() => { if (S.step === id) toast(GUIDE[id], 4200, true); }, 500); }
-function nextTarget() { const i = STEP_ORDER.indexOf(S.step); const n = STEP_ORDER[i + 1]; return n ? { id: n, label: STEPS.find(s => s.id === n).name } : null; }
-function nextStep(cur) { const t = nextTarget(); if (!t) return; P.done[cur] = true; changed(); goStep(t.id); }
+/* 무대 캔버스 (전체 보기 창에서 써요) */
 function stageEl(extra) {
   const wrap = h('div', { class: 'stage-wrap' }); const cv = h('canvas', { class: 'stage', width: W, height: H }); wrap.append(cv); if (extra) wrap.append(...extra);
   return { wrap, cv };
 }
-function monitorEl(extra) { const st = stageEl(extra); const mon = h('div', { class: 'monitor' }, st.wrap); return { mon, ...st }; }
-function needFrames(M) {
-  if (TL().total > 0) return false;
-  const st = monitorEl([h('div', { class: 'empty-mon' }, h('b', {}, '먼저 장면을 촬영해 주세요'), key('촬영하러 가기', { ic: 'cam', cls: 'orange row', onclick: () => goStep('shoot') }))]);
-  st.cv.getContext('2d').fillRect(0, 0, W, H);
-  M.append(st.mon);
-  return true;
-}
-/* 다음 단계 키 — 모든 단계에서 같은 모양·같은 자리(왼쪽 위 단계 키 바로 아래, 촬영은 필름 아래, 시나리오는 오른쪽 위) */
-function nextKey(cur, extraCls = '') {
-  const t = nextTarget(); if (!t) return '';
-  return key('', { cls: 'orange big nextkey ' + extraCls, aria: `다음 단계: ${t.label}`, onclick: () => nextStep(cur),
-    html: `<span class="nk-a"><span class="kl">다음</span>${icon('next', 'ki')}</span><small class="nk-b">${t.label}</small>` });
-}
-/* 할 일을 다 했을 때 다음 키를 반짝여서 알려 줘요 */
-function pulseNext(msg) { const el = $('.nextkey'); if (!el) return; el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); if (msg) toast(msg, 3200, true); }
-function nextButton() { return null; }
-function nextBtn() { return document.createComment('next'); }
 /* =========================================================
-   촬영 — 카메라 전용. 왼쪽에 컷이 쌓이고, 오른쪽에 촬영 버튼
+   촬영 도우미 — 카메라 · 사진 불러오기 · 스토리보드 스케치 · 전체 보기 (화면은 p6_editor)
    ========================================================= */
 const Cam = {
   stream: null, video: null, devices: [], di: -1, failed: false, reason: '',
@@ -2447,284 +2353,6 @@ function sketchModal(s, onChange) {
   }, { wide: true });
 }
 
-STEP_MOD.shoot = (() => {
-  let raf = 0, onion = true, grid = false, sel = null, insertAt = null, previewing = false, pvStart = 0;
-  let cdT = null, autoOn = false, locked = false;   // 타이머 · 자동 촬영 · 카메라 고정
-  let root, cv, ctx, flashEl, badge, sketchEl, cdEl, timerBtn, lockBtn, shutterEl, list, headEl, popEl, nocamEl, pvBtn, onionBtn, gridBtn, holdBtn, counterEl;
-  const scene = () => { let s = P.scenes.find(s => s.id === S.curScene); if (!s) { s = P.scenes[P.scenes.length - 1]; S.curScene = s.id; } return s; };
-
-  function mount({ main }) {
-    root = main;
-    // 가운데: 카메라 화면 (높이 전체) + 위에 겹치는 것들 + 아래 필름 띠
-    flashEl = h('div', { class: 'flash' }); badge = h('div', { class: 'stage-badge' }); popEl = h('div', { class: 'frame-pop', hidden: true });
-    nocamEl = h('div', { class: 'nocam', hidden: true });
-    sketchEl = h('button', { class: 'mon-sketch', type: 'button', hidden: true, 'aria-label': '장면 스케치 크게 보기', onclick: () => sketchModal(scene(), buildStrip) });
-    cdEl = h('div', { class: 'countdown', hidden: true });
-    headEl = key('', { cls: 'scn', onclick: sceneSheet, aria: '장면 목록' });
-    list = h('div', { class: 'list' }); counterEl = h('div', { class: 'cnt' });
-    const fbar = h('div', { class: 'fbar' }, headEl, list, counterEl, key('장면 끝', { ic: 'check', cls: 'endk', onclick: endScene }));
-    const mon = monitorEl([flashEl, badge, sketchEl, cdEl, nocamEl, popEl, fbar]); cv = mon.cv; ctx = cv.getContext('2d');
-    const area = h('div', { class: 'cam-area' }, mon.mon, nextKey('shoot', 'pill'));
-    // 왼쪽 줄: 단계 · 되돌리기 · 겹쳐보기(+진하기) · 격자
-    onionBtn = key('겹쳐보기', { ic: 'onion', cls: onion ? 'on' : '', onclick: () => { onion = !onion; onionBtn.classList.toggle('on', onion); onionA.disabled = !onion; toast(onion ? '앞 컷 겹쳐 보기 켬' : '앞 컷 겹쳐 보기 끔', 1100); } });
-    const onionA = h('input', { class: 'onion-a', type: 'range', min: .15, max: .8, step: .05, value: S.onionA || .42, 'aria-label': '겹쳐 보기 진하기', oninput: e => { S.onionA = +e.target.value; } });
-    gridBtn = key('격자', { ic: 'grid', onclick: () => { grid = !grid; gridBtn.classList.toggle('on', grid); } });
-    const left = h('div', { class: 'rail' }, navKey(), key('되돌리기', { ic: 'undo', aria: '마지막 컷 지우기', onclick: undoLast }), onionBtn, onionA, gridBtn);
-    // 오른쪽 줄: 카메라 바꾸기 · 타이머 · 고정 · 큰 빨간 찰칵 · 재생 · ×N · 장면 끝
-    timerBtn = key('타이머', { ic: 'timer', aria: '타이머 · 자동 촬영', onclick: timerSheet });
-    lockBtn = key('고정', { ic: 'camlock', aria: '카메라 고정 (밝기·초점·색)', onclick: toggleLock });
-    pvBtn = key('재생', { ic: 'play', onclick: togglePreview });
-    holdBtn = key('', { cls: 'hold3', aria: '한 번에 찍는 프레임 수 바꾸기', onclick: () => { P.hold = P.hold % 4 + 1; paintHold(); changed(); toast(`한 번 누르면 ${P.hold}프레임씩 찍어요`, 1200); } });
-    shutterEl = h('button', { class: 'key shutter', type: 'button', 'aria-label': '촬영', onclick: shutterPress });
-    const right = h('div', { class: 'rail' }, key('카메라', { ic: 'switchCam', aria: '앞·뒤 카메라 바꾸기', onclick: switchCam }), timerBtn, lockBtn, shutterEl, pvBtn, holdBtn);
-    root.append(h('div', { class: 'shoot' }, left, area, right));
-    paintHold(); paintShutter(); paintTimer(); buildStrip(true);
-    startCamera();
-    addEventListener('keydown', onKey);
-    loop();
-  }
-  function unmount() { stopTimer(); locked = false; cancelAnimationFrame(raf); Cam.stop(); removeEventListener('keydown', onKey); previewing = false; }
-  function onKey(e) { if (e.target.closest('input,textarea,select')) return; if (e.code === 'Space' || e.code === 'VolumeUp') { e.preventDefault(); shutterPress(); } }
-  function paintHold() { holdBtn.innerHTML = `<span class="ki">×${P.hold}</span><span class="kl">장씩</span>`; holdBtn.title = `한 번 누르면 ${P.hold}프레임씩 찍어요`; }
-  function paintCounter() { const sc = scene(); const sec = sc.frames.reduce((a, f) => a + f.hold, 0) / P.fps; counterEl.textContent = `${sc.frames.length}컷 · ${sec.toFixed(1)}초`; }
-
-  async function startCamera() {
-    nocamEl.hidden = true;
-    const ok = await Cam.start();
-    if (!ok) showNoCam();
-  }
-  async function switchCam() {
-    if (Cam.failed) { startCamera(); return; }
-    if (!(await Cam.next())) toast('바꿀 수 있는 다른 카메라가 없어요');
-    else { locked = false; lockBtn.classList.remove('on'); }
-  }
-  function showNoCam() {
-    nocamEl.hidden = false; nocamEl.innerHTML = '';
-    const denied = Cam.reason === 'NotAllowedError';
-    nocamEl.append(h('span', { html: icon('cam') , style: { width: '40px', height: '40px', color: '#CF5D2A' } }),
-      h('b', {}, denied ? '카메라 사용이 막혀 있어요' : '이 화면에서는 실시간 카메라를 켤 수 없어요'),
-      h('p', {}, denied ? '주소창 옆 자물쇠(또는 설정)에서 카메라를 허용한 뒤 다시 시도를 눌러 주세요. 그동안 아래 버튼으로 폰 카메라 앱을 열어 한 컷씩 찍을 수도 있어요.'
-        : '아래 버튼을 누르면 폰의 카메라 앱이 열려요. 한 장 찍을 때마다 한 컷이 쌓여요. 겹쳐 보기까지 쓰려면 앱을 https 주소로 열어 주세요.'),
-      h('div', { class: 'row', style: { justifyContent: 'center' } },
-        ib('cam', '카메라 앱으로 한 컷 찍기', 'btn accent', { onclick: async () => { const f = await pickImages({ capture: true }); for (const x of f) { const b = await fileToFrameBlob(x); b && await addFrame(b); } } }),
-        ib('image', '사진 여러 장 불러오기', 'btn sm', { onclick: async () => { const f = await pickImages({ multiple: true }); for (const x of f) { const b = await fileToFrameBlob(x); b && await addFrame(b); } if (f.length) toast(`사진 ${f.length}장을 넣었어요`); } }),
-        ib('rotR', '다시 시도', 'btn sm ghost', { style: { color: '#fff' }, onclick: startCamera })));
-  }
-
-  /* ----- 무대 그리기 ----- */
-  function loop() {
-    const sc = scene();
-    ctx.setTransform(1, 0, 0, 1, 0, 0); paintShadowOff();
-    ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
-    if (previewing) {
-      const fr = sc.frames, tot = fr.reduce((a, f) => a + f.hold, 0);
-      if (!tot) stopPreview();
-      else {
-        const k = Math.floor((performance.now() - pvStart) / 1000 * P.fps) % tot; let acc = 0, f = fr[0];
-        for (const x of fr) { if (k < acc + x.hold) { f = x; break; } acc += x.hold; }
-        drawCover(ctx, f.img); badge.textContent = '미리보기 중';
-        raf = requestAnimationFrame(loop); return;
-      }
-    }
-    if (Cam.video && Cam.stream && Cam.video.videoWidth) drawCam(ctx, Cam.video);
-    else if (sc.frames.length) { const f = sc.frames[(insertAt ?? sc.frames.length) - 1]; f && drawCover(ctx, f.img); }
-    if (onion && Cam.stream) {
-      const base = insertAt ?? sc.frames.length, p1 = sc.frames[base - 1], p2 = sc.frames[base - 2];
-      const oa = S.onionA || .42;
-      if (p2) { ctx.globalAlpha = oa * .5; drawCover(ctx, p2.img); }
-      if (p1) { ctx.globalAlpha = oa; drawCover(ctx, p1.img); }
-      ctx.globalAlpha = 1;
-    }
-    if (grid) { ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 1.5; ctx.beginPath(); for (const x of [W / 3, W * 2 / 3]) { ctx.moveTo(x, 0); ctx.lineTo(x, H); } for (const y of [H / 3, H * 2 / 3]) { ctx.moveTo(0, y); ctx.lineTo(W, y); } ctx.stroke(); }
-    const frames = sc.frames.reduce((a, f) => a + f.hold, 0);
-    badge.textContent = `${sc.name} · ${(frames / P.fps).toFixed(1)}초` + (insertAt != null ? ` · ${insertAt}번 뒤에 끼워 찍는 중` : '');
-    raf = requestAnimationFrame(loop);
-  }
-  function paintShadowOff() { ctx.shadowColor = 'transparent'; }
-  function togglePreview() { if (previewing) stopPreview(); else { if (!scene().frames.length) { toast('먼저 몇 컷을 찍어 보세요'); return; } previewing = true; pvStart = performance.now(); pvBtn.innerHTML = icon('stop', 'ki') + '<span class="kl">멈춤</span>'; } }
-  function stopPreview() { previewing = false; pvBtn.innerHTML = icon('play', 'ki') + '<span class="kl">재생</span>'; }
-
-  /* ----- 타이머 · 자동 촬영 ----- */
-  /* S.shot = { delay: 찰칵 뒤 몇 초 뒤에 찍을지, auto: 몇 초마다 계속 찍을지 } — 둘 중 하나만 써요 */
-  const shot = () => S.shot || (S.shot = { delay: 0, auto: 0 });
-  function paintTimer() {
-    const s = shot(), t = s.auto ? s.auto + '초마다' : s.delay ? s.delay + '초' : '';
-    timerBtn.innerHTML = icon('timer', 'ki') + `<span class="kl">${t || '타이머'}</span>`; timerBtn.classList.toggle('on', !!t);
-  }
-  function paintShutter() { shutterEl.classList.toggle('running', autoOn || !!cdT); shutterEl.innerHTML = icon(autoOn || cdT ? 'stop' : 'cam', 'ki') + `<span class="kl">${autoOn ? '멈춤' : cdT ? '취소' : '찰칵'}</span>`; }
-  function timerSheet() {
-    modal((b, m) => {
-      const pick = (delay, auto) => { stopTimer(); Object.assign(shot(), { delay, auto }); paintTimer(); m.close(); toast(auto ? `찰칵을 누르면 ${auto}초마다 계속 찍어요. 한 번 더 누르면 멈춰요` : delay ? `찰칵을 누르고 ${delay}초 뒤에 찍어요` : '찰칵을 누르면 바로 찍어요', 2600); };
-      const s = shot(), chip = (label, d, a) => h('button', { class: 'chip' + (s.delay === d && s.auto === a ? ' on' : ''), type: 'button', onclick: () => pick(d, a) }, label);
-      b.append(h('h2', {}, '찰칵 방법'),
-        h('p', { class: 'hint', style: { margin: 0 } }, '폰을 누를 때 흔들리면 타이머를 써 보세요. 자동은 손을 떼고 인형만 움직이면 돼요.'),
-        h('span', { class: 'label' }, '타이머'), h('div', { class: 'row' }, chip('바로 찍기', 0, 0), chip('3초 뒤', 3, 0), chip('5초 뒤', 5, 0)),
-        h('span', { class: 'label' }, '자동으로 계속 찍기'), h('div', { class: 'row' }, chip('2초마다', 0, 2), chip('3초마다', 0, 3), chip('5초마다', 0, 5)),
-        h('div', { class: 'acts' }, h('button', { class: 'btn primary', type: 'button', onclick: m.close }, '닫기')));
-    });
-  }
-  function shutterPress() {
-    if (autoOn || cdT) { const was = autoOn; stopTimer(); if (was) toast('자동 촬영을 멈췄어요', 1200); return; }
-    const s = shot();
-    if ((!s.delay && !s.auto) || !Cam.stream) { capture(); return; }
-    if (previewing) stopPreview();
-    autoOn = !!s.auto; countdown();
-  }
-  function countdown() {
-    let n = shot().auto || shot().delay;
-    const tick = () => {
-      if (n <= 0) { cdEl.hidden = true; cdT = null; paintShutter(); capture().then(() => { if (autoOn) countdown(); }); return; }
-      cdEl.hidden = false; cdEl.textContent = n; cdEl.classList.toggle('soft', autoOn); beep(n === 1 ? 1320 : 880); n--;
-      cdT = setTimeout(tick, 1000); paintShutter();
-    };
-    tick();
-  }
-  function stopTimer() { clearTimeout(cdT); cdT = null; autoOn = false; if (cdEl) cdEl.hidden = true; if (shutterEl) paintShutter(); }
-  function beep(f) { AE.init(); const c = AE.ctx; if (!c) return; const o = c.createOscillator(), g = c.createGain(); o.frequency.value = f; g.gain.setValueAtTime(.12, c.currentTime); g.gain.exponentialRampToValueAtTime(.001, c.currentTime + .12); o.connect(g).connect(AE.buses.ui); o.start(); o.stop(c.currentTime + .14); }
-
-  /* ----- 카메라 고정 — 컷마다 밝기·초점·색이 바뀌어 깜빡이지 않게 지금 값으로 묶어요 (되는 기기만) ----- */
-  async function toggleLock() {
-    const tr = Cam.stream && Cam.stream.getVideoTracks()[0];
-    if (!tr || !tr.getCapabilities) { toast('카메라가 켜져 있을 때 쓸 수 있어요'); return; }
-    const cap = tr.getCapabilities(), cur = tr.getSettings(), want = !locked, adv = {};
-    for (const [mode, val] of [['exposureMode', ['exposureTime', 'iso']], ['focusMode', ['focusDistance']], ['whiteBalanceMode', ['colorTemperature']]]) {
-      const modes = cap[mode] || [];
-      if (!want) { if (modes.includes('continuous')) adv[mode] = 'continuous'; continue; }
-      const vals = val.filter(k => cur[k] != null && cap[k]);
-      if (modes.includes('manual') && vals.length) { adv[mode] = 'manual'; for (const k of vals) adv[k] = cur[k]; }
-      else if (modes.includes('single-shot')) adv[mode] = 'single-shot';
-      else if (modes.includes('manual')) adv[mode] = 'manual';
-    }
-    if (!Object.keys(adv).length) { toast(want ? '이 기기 카메라는 고정 기능이 없어요. 불빛이 바뀌지 않는 곳에서 찍어 주세요' : '카메라 고정을 풀었어요', 3200); locked = false; lockBtn.classList.remove('on'); return; }
-    try { await tr.applyConstraints({ advanced: [adv] }); locked = want; lockBtn.classList.toggle('on', locked); toast(locked ? '카메라를 고정했어요. 밝기·초점이 이제 안 바뀌어요' : '카메라 고정을 풀었어요', 2200); }
-    catch (e) { toast('카메라를 고정하지 못했어요'); }
-  }
-
-  /* ----- 촬영 ----- */
-  async function capture() {
-    if (previewing) stopPreview();
-    if (!Cam.stream || !Cam.video || !Cam.video.videoWidth) {
-      const f = await pickImages({ capture: true }); for (const x of f) { const b = await fileToFrameBlob(x); b && await addFrame(b); } return;
-    }
-    const off = h('canvas', { width: W, height: H }), c = off.getContext('2d');
-    c.fillStyle = '#000'; c.fillRect(0, 0, W, H); drawCam(c, Cam.video);
-    AE.init(); AE.click(); flashEl.classList.remove('go'); void flashEl.offsetWidth; flashEl.classList.add('go');
-    try { navigator.vibrate && navigator.vibrate(15); } catch (e) { }
-    await addFrame(await new Promise(r => off.toBlob(r, 'image/jpeg', .88)));
-  }
-  async function addFrame(blob) {
-    const sc = scene(); const f = { id: uid(), hold: P.hold, blob, ...loadImg(blob) };
-    if (insertAt != null) { sc.frames.splice(insertAt, 0, f); insertAt++; if (insertAt >= sc.frames.length) insertAt = null; }
-    else sc.frames.push(f);
-    sel = null; changed(); buildStrip(insertAt == null);
-  }
-  function undoLast() {
-    const sc = scene(); if (!sc.frames.length) return;
-    if (insertAt != null && insertAt > 0) { sc.frames.splice(insertAt - 1, 1); insertAt--; } else sc.frames.pop();
-    sel = null; changed(); buildStrip(); toast('마지막 컷을 지웠어요', 1200);
-  }
-
-  /* ----- 왼쪽 컷 줄 ----- */
-  function buildStrip(scrollEnd) {
-    const sc = scene(), fr = sc.frames.reduce((a, f) => a + f.hold, 0);
-    headEl.innerHTML = `<span class="kl">${sc.name.replace(/</g, '&lt;')}</span><small>▾</small>`;
-    list.innerHTML = '';
-    if (!sc.frames.length) list.append(h('div', { class: 'strip-empty' }, '빨간 찰칵을 누르면 여기에 컷이 쌓여요'));
-    sc.frames.forEach((f, i) => {
-      if (insertAt === i) list.append(h('span', { class: 'ins-mark' }));
-      list.append(h('button', { class: 'fr' + (sel === i ? ' sel' : '') + (i === sc.frames.length - 1 ? ' last' : ''), type: 'button', 'aria-label': `${i + 1}번 컷`, onclick: () => { sel = sel === i ? null : i; buildStrip(); } },
-        h('img', { src: f.url, alt: '' }), h('b', {}, String(i + 1).padStart(3, '0')), h('em', {}, '×' + f.hold)));
-    });
-    if (scrollEnd) requestAnimationFrame(() => list.scrollLeft = list.scrollWidth);
-    sketchEl.hidden = !sc.sketch; if (sc.sketch) sketchEl.style.backgroundImage = `url(${sc.sketch.url})`;
-    paintCounter(); buildPop();
-  }
-  function buildPop() {
-    const sc = scene(); popEl.innerHTML = '';
-    if (sel == null || !sc.frames[sel]) { popEl.hidden = insertAt == null; if (insertAt != null) popEl.append(h('b', { style: { fontSize: '13px' } }, `${insertAt}번 컷 뒤에 끼워 찍는 중`), ib('next', '맨 끝으로', 'btn sm', { onclick: () => { insertAt = null; buildStrip(true); } })); return; }
-    const f = sc.frames[sel]; popEl.hidden = false;
-    popEl.append(h('b', { style: { fontSize: '13px' } }, `${sel + 1}번 컷`),
-      ib('rewind', '여기부터 다시 찍기', 'btn sm accent', { onclick: async () => { if (!await confirmBox('여기부터 다시 찍을까요?', `${sel + 1}번 컷부터 끝까지 ${sc.frames.length - sel}개 컷이 지워지고, 그 자리부터 이어서 찍어요.`, '지우고 다시 찍기', true)) return; sc.frames.splice(sel); insertAt = null; sel = null; changed(); buildStrip(true); } }),
-      ib('insert', '뒤에 끼워 찍기', 'btn sm', { onclick: () => { insertAt = sel + 1; if (insertAt >= sc.frames.length) insertAt = null; sel = null; buildStrip(); } }),
-      ib('copy', '복사', 'btn sm', { 'aria-label': '이 컷을 바로 뒤에 하나 더', onclick: () => { sc.frames.splice(sel + 1, 0, { ...f, id: uid() }); sel++; changed(); buildStrip(); toast('컷을 하나 더 넣었어요', 1100); } }),
-      sel < sc.frames.length - 1 ? ib('pingpong', '거꾸로 이어 붙이기', 'btn sm', { 'aria-label': '여기부터 끝까지를 거꾸로 이어 붙이기', onclick: () => {
-        const back = sc.frames.slice(sel, -1).reverse().map(x => ({ ...x, id: uid() })); sc.frames.push(...back); sel = null; insertAt = null; changed(); buildStrip(true);
-        toast(`컷 ${back.length}개를 거꾸로 붙였어요. 갔다가 돌아와요`, 1800); } }) : '',
-      ib('trash', '', 'btn sm icon', { 'aria-label': '이 컷 지우기', onclick: () => { sc.frames.splice(sel, 1); if (insertAt != null && insertAt > sel) insertAt--; sel = null; changed(); buildStrip(); } }),
-      h('div', { class: 'seg', 'aria-label': '이 컷을 보여 줄 프레임 수' }, ...[1, 2, 3, 4, 6].map(n => h('button', { type: 'button', class: f.hold === n ? 'on' : '', onclick: () => { f.hold = n; changed(); buildStrip(); } }, '×' + n))),
-      ib('x', '', 'btn sm icon ghost', { 'aria-label': '닫기', onclick: () => { sel = null; buildStrip(); } }));
-  }
-
-  /* ----- 장면 ----- */
-  async function endScene() {
-    const sc = scene();
-    if (!sc.frames.length) { toast('아직 찍은 컷이 없어요'); return; }
-    insertAt = null; sel = null; await saveProject();
-    modal((b, m) => {
-      const used = P.scenes.map(s => s.name);
-      const pool = storyInfo(P.storyId).scenes.filter(n => !used.includes(n));
-      let nextName = P.scenes[P.scenes.indexOf(sc) + 1]?.name || pool[0] || `${P.scenes.length + 1}장면`;
-      const chips = h('div', { class: 'row' });
-      const paintChips = () => { chips.innerHTML = ''; for (const n of [...new Set([nextName, ...pool])].slice(0, 6)) chips.append(h('button', { class: 'chip' + (n === nextName ? ' on' : ''), type: 'button', onclick: () => { nextName = n; paintChips(); } }, n)); };
-      paintChips();
-      b.append(h('h2', {}, `“${sc.name}” 저장했어요!`),
-        h('p', { class: 'hint', style: { margin: 0 } }, `컷 ${sc.frames.length}개 · ${(sc.frames.reduce((a, f) => a + f.hold, 0) / P.fps).toFixed(1)}초`),
-        h('span', { class: 'label' }, '다음에 찍을 장면'), chips,
-        h('div', { class: 'endacts' },
-          h('button', { class: 'btn accent big', type: 'button', onclick: () => { m.close(); goScene(nextName); }, html: icon('cam') + '<span>다음 장면 찍기</span>' }),
-          h('div', { class: 'row nowrap' },
-            h('button', { class: 'btn grow', type: 'button', onclick: () => { m.close(); nextStep('shoot'); }, html: '<span>촬영 끝 → 대사 녹음</span>' }),
-            h('button', { class: 'btn grow', type: 'button', onclick: () => { m.close(); playAll(); }, html: icon('film') + '<span>전체 보기</span>' }))));
-    });
-  }
-  function goScene(name) {
-    let s = P.scenes.find(x => x.name === name && !x.frames.length);
-    if (!s) { s = newScene(name); P.scenes.push(s); }
-    S.curScene = s.id; insertAt = null; sel = null; changed(); buildStrip(true); toast(`“${s.name}” 촬영을 시작해요`);
-  }
-  function sceneSheet() {
-    modal((b, m) => {
-      const listBox = h('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(220px,1fr))', gap: '8px' } });
-      P.scenes.forEach((s, i) => {
-        const fr = s.frames.reduce((a, f) => a + f.hold, 0);
-        listBox.append(h('div', { class: 'scene' + (s.id === S.curScene ? ' cur' : '') },
-          h('span', { class: 'th', style: { backgroundImage: s.frames[0] ? `url(${s.frames[0].url})` : '' } }),
-          h('div', {}, h('b', {}, `${i + 1}. ${s.name}`), h('small', {}, s.frames.length ? `컷 ${s.frames.length} · ${(fr / P.fps).toFixed(1)}초` : '아직 안 찍었어요')),
-          h('div', { class: 'acts' },
-            s.id === S.curScene ? h('span', { class: 'chip', style: { color: 'var(--gold)', borderColor: 'var(--gold)' } }, '촬영 중') :
-              ib('cam', s.frames.length ? '다시 촬영' : '촬영', 'btn sm', { onclick: () => { S.curScene = s.id; insertAt = null; sel = null; m.close(); buildStrip(true); } }),
-            ib('edit', '', 'btn sm icon', { 'aria-label': '이름 바꾸기', onclick: () => { m.close(); renameScene(s); } }),
-            P.scenes.length > 1 ? ib('trash', '', 'btn sm icon ghost', { 'aria-label': '장면 지우기', onclick: () => { m.close(); deleteScene(s); } }) : '')));
-      });
-      b.append(h('div', { class: 'panel-title' }, h('h2', {}, '장면 목록'), h('span', { class: 'hint' }, `${P.scenes.length}개 · ${fmt(TL().total)}`)), listBox,
-        h('div', { class: 'acts' }, ib('film', '전체 영상 보기', 'btn', { onclick: () => { m.close(); playAll(); } }), ib('plus', '새 장면', 'btn', { onclick: () => { m.close(); newScenePrompt(); } }), h('button', { class: 'btn primary', type: 'button', onclick: m.close }, '닫기')));
-    }, { wide: true });
-  }
-  function newScenePrompt() {
-    modal((b, m) => {
-      const used = P.scenes.map(s => s.name); const nn = storyInfo(P.storyId).scenes.find(n => !used.includes(n)) || `${P.scenes.length + 1}장면`;
-      const ni = h('input', { id: 'newSceneName', value: nn, maxlength: 30 });
-      b.append(h('h2', {}, '새 장면'), h('label', { class: 'field' }, h('span', { class: 'label' }, '장면 이름'), ni), storyInfo(P.storyId).scenes.length ? sceneNameChips(ni) : '',
-        h('div', { class: 'acts' }, h('button', { class: 'btn', type: 'button', onclick: m.close }, '취소'), h('button', { class: 'btn accent', type: 'button', onclick: () => { m.close(); const s = newScene(ni.value.trim() || nn); P.scenes.push(s); S.curScene = s.id; changed(); buildStrip(true); } }, '만들고 촬영하기')));
-    });
-  }
-  function renameScene(s) {
-    modal((b, m) => {
-      const ni = h('input', { id: 'renameScene', value: s.name, maxlength: 30 });
-      b.append(h('h2', {}, '장면 이름 바꾸기'), h('label', { class: 'field' }, h('span', { class: 'label' }, '장면 이름'), ni),
-        h('div', { class: 'acts' }, h('button', { class: 'btn', type: 'button', onclick: m.close }, '취소'), h('button', { class: 'btn primary', type: 'button', onclick: () => { s.name = ni.value.trim() || s.name; changed(); m.close(); buildStrip(); } }, '바꾸기')));
-    });
-  }
-  async function deleteScene(s) {
-    if (!await confirmBox('장면을 지울까요?', `“${s.name}” 장면과 그 안의 효과·효과음·대사가 함께 지워져요.`, '지우기', true)) return;
-    P.scenes = P.scenes.filter(x => x !== s);
-    for (const k of ['fx', 'sfx', 'voices', 'narrs']) P[k] = P[k].filter(it => it.sid !== s.id);
-    if (S.curScene === s.id) S.curScene = P.scenes[P.scenes.length - 1].id;
-    changed(); buildStrip(true);
-  }
-  return { mount, unmount, layout: 'shoot' };
-})();
-
 /* 전체 영상 보기 (어느 단계에서나) */
 function playAll() {
   if (!TL().total) { toast('아직 찍은 장면이 없어요'); return; }
@@ -2741,43 +2369,13 @@ function playAll() {
   }, { wide: true });
 }
 /* =========================================================
-   공통: 모니터 + 왼쪽 재생 키 + 아래 색깔 타임라인
+   편집기 공통 도우미: 효과·효과음 키, 장면 자르기 창
    ========================================================= */
-function transportEl() {
-  const time = h('div', { class: 'time' }, '0:00');
-  const play = key('', { ic: 'play', cls: 'orange play', aria: '재생', onclick: () => Player.toggle() });
-  const jump = d => {
-    const rs = TL().ranges.filter(r => r.t1 > r.t0); if (!rs.length) return;
-    const t = Player.t; let i = rs.findIndex(r => t >= r.t0 && t < r.t1); if (i < 0) i = rs.length - 1;
-    if (d < 0) Player.seek(t - rs[i].t0 > .4 ? rs[i].t0 : rs[Math.max(0, i - 1)].t0);
-    else Player.seek(i + 1 < rs.length ? rs[i + 1].t0 + .001 : TL().total);
-  };
-  const box = h('div', { class: 'transport well' }, play,
-    key('', { ic: 'rew', aria: '앞 장면으로', onclick: () => jump(-1) }), key('', { ic: 'ff', aria: '다음 장면으로', onclick: () => jump(1) }), time);
-  let last = null;
-  return { box, update(t) { time.textContent = fmt(t).replace(/\.\d$/, '') + ' / ' + fmt(TL().total).replace(/\.\d$/, ''); const p = Player.playing; if (p !== last) { last = p; play.innerHTML = icon(p ? 'pause' : 'play', 'ki'); play.setAttribute('aria-label', p ? '멈춤' : '재생'); } } };
-}
-function mountPlayerStage({ L, M, tlw }, { tracks = [], sceneDim = false, overlay = [], onTick, onScene } = {}) {
-  const mon = monitorEl(overlay);
-  M.append(mon.mon);
-  const tp = transportEl(); L.append(tp.box);
-  const tl = new Timeline(tlw, { tracks, sceneDim, onScene });
-  Player.attach(mon.cv, { onTick: t => { tl.update(t); tp.update(t); onTick && onTick(t); } });
-  Player.onState = () => { tl.update(Player.t); tp.update(Player.t); };
-  return { st: mon, tl };
-}
 function sceneAt(t) { const r = TL().ranges.find(r => r.t1 > r.t0 && t >= r.t0 && t < r.t1) || TL().ranges.filter(r => r.t1 > r.t0).pop(); return r ? r.sc : P.scenes[0]; }
 const sfxLen = s => { const p = AE.sfx[s.snd]; return p && p.__buf ? p.__buf.duration : .6; };
 const FX_IC = { sparkle: 'sparkle', bubbles: 'bubbles', hearts: 'hearts', boom: 'boom', speed: 'speed', puff: 'puff', excl: 'excl', quest: 'quest', sweat: 'drop', light: 'light', rain: 'rain', snow: 'snow', dizzy: 'dizzy', text: 'text' };
 const SFX_IC = { pop: 'pop', boing: 'spring', boom: 'boom', swoosh: 'wind', ding: 'bell', sparkle: 'sparkle', drop: 'drop', bubbles: 'bubbles', splash: 'splash', wave: 'wave', steps: 'foot', drum: 'drum', gong: 'gong', fail: 'sad' };
 const TC = { fx: '#8A63C9', voice: '#3E7CB1', sfx: '#CF5D2A', bgm: '#4E9A63', narr: '#2F9C9A' };
-const TRACK = {
-  fx: (o = {}) => ({ key: 'fx', label: '효과', color: TC.fx, items: () => P.fx, len: e => e.dur, text: e => FX.find(f => f.id === e.type).name, ...o }),
-  sfx: (o = {}) => ({ key: 'sfx', label: '효과음', color: TC.sfx, icon: 'speaker', items: () => P.sfx, len: s => Math.max(sfxLen(s), .8), text: s => SFX.find(x => x.id === s.snd).name, ...o }),
-  voice: (o = {}) => ({ key: 'voice', label: '대사', color: TC.voice, items: () => P.voices, len: v => v.dur || 1, text: v => (v.who ? v.who + ' ' : '') + (v.text || '녹음'), ...o }),
-  narr: (o = {}) => ({ key: 'narr', label: '내레이션', color: TC.narr, icon: 'mic', items: () => P.narrs, len: v => v.dur || 1, text: () => '내레이션', ...o }),
-  bgm: (o = {}) => ({ key: 'bgm', label: '음악', color: TC.bgm, ...o })
-};
 /* 한 번 누르면 미리 보기·듣기, 한 번 더 누르면 넣기 */
 function fxKey(name, ic, color, preview, insert, sub) {
   const k = h('button', { class: 'key fxk', type: 'button', style: { '--kc': color } },
@@ -2835,358 +2433,10 @@ function trimModal(after) {
     build();
   }, { wide: true });
 }
-/* 타임라인에서 장면을 누르면: 여기서 나누기 · 다듬기 · 다시 찍기 · 지우기 */
-function sceneMenu(sc, t, after) {
-  const r = TL().map[sc.id]; if (!r) return;
-  modal((b, m) => {
-    const seg = segAt(t); const idx = seg && seg.sc === sc ? seg.idx : sc.trimIn;
-    const split = () => {
-      if (idx <= sc.trimIn) { toast('장면 맨 앞이라 나눌 수 없어요'); return; }
-      const cutT = sc.frames.slice(sc.trimIn, idx).reduce((a, f) => a + f.hold, 0) / P.fps;
-      const nb = { ...newScene(sc.name + ' 2'), frames: sc.frames.slice(idx), trimOut: sc.trimOut, bgm: sc.bgm };
-      sc.frames = sc.frames.slice(0, idx); sc.trimOut = 0;
-      for (const k of ['fx', 'sfx', 'voices', 'narrs']) for (const it of P[k]) if (it.sid === sc.id && it.off >= cutT) { it.sid = nb.id; it.off -= cutT; }
-      P.scenes.splice(P.scenes.indexOf(sc) + 1, 0, nb); changed(); m.close(); after && after(); toast('장면을 둘로 나눴어요');
-    };
-    b.append(h('h2', {}, `${P.scenes.indexOf(sc) + 1}. ${sc.name}`), h('p', { class: 'hint', style: { margin: 0 } }, '이 장면으로 무엇을 할까요?'),
-      h('div', { class: 'menu-grid' },
-        h('button', { class: 'btn', type: 'button', onclick: split, html: icon('scissors') + '<span>여기서 나누기</span>' }),
-        h('button', { class: 'btn', type: 'button', onclick: () => { m.close(); trimModal(after); }, html: icon('edit') + '<span>앞뒤 다듬기</span>' }),
-        h('button', { class: 'btn accent', type: 'button', onclick: () => { m.close(); S.curScene = sc.id; goStep('shoot'); }, html: icon('cam') + '<span>다시 찍기</span>' }),
-        P.scenes.length > 1 ? h('button', { class: 'btn', type: 'button', onclick: async () => { m.close(); if (!await confirmBox('장면을 지울까요?', `“${sc.name}” 장면과 그 안의 효과·소리가 함께 지워져요. 되돌리기로 살릴 수 있어요.`, '지우기', true)) return; P.scenes = P.scenes.filter(x => x !== sc); for (const k of ['fx', 'sfx', 'voices', 'narrs']) P[k] = P[k].filter(it => it.sid !== sc.id); changed(); after && after(); }, html: icon('trash') + '<span>지우기</span>' }) : ''),
-      h('div', { class: 'acts' }, h('button', { class: 'btn primary', type: 'button', onclick: m.close }, '닫기')));
-  });
-}
-/* 오른쪽 줄 도구 키 — 도구 판(sheet)이 열려 있으면 켜진 모양 */
-function railTool(label, ic, onclick, cls = '') { return key(label, { ic, cls: 'rt ' + cls, onclick }); }
-function paintRail(RR, on) { for (const k of RR.querySelectorAll('.rt')) k.classList.toggle('on', k.dataset.tab === on); }
-function cutKey(ui) { return key('자르기', { ic: 'scissors', onclick: () => trimModal(() => ui && ui.tl.render()) }); }
-
 /* =========================================================
-   편집 (영상) — 왼쪽: 완성 · 사운드 · 재생 / 오른쪽: 영상 효과 / 아래: 타임라인 + 자르기
-   ========================================================= */
-STEP_MOD.edit = (() => {
-  let ui, bar, M, sheet, RR;
-  const SEL = () => S.sel && S.sel.kind === 'fx' ? P.fx.find(e => e.id === S.sel.id) : null;
-  function mount(r) {
-    M = r.M;
-    r.L.append(key('사운드', { ic: 'back', aria: '사운드로 돌아가기', onclick: () => goStep('sound') }));
-    if (needFrames(r.M)) { r.L.append(transportEl().box); return; }
-    sheet = r.sheet; RR = r.RR;
-    const fxBtn = railTool('효과', 'sparkle', () => sheet.isOpen ? sheet.close() : sheet.open()); fxBtn.dataset.tab = 'fx';
-    sheet.onToggle = o => paintRail(RR, o ? 'fx' : null);
-    bar = h('div', { class: 'sel-bar', hidden: true });
-    ui = mountPlayerStage(r, { tracks: [TRACK.fx({ onSelect: () => { buildBar(); Player.draw(); } }), TRACK.voice()], onTick: drawSel, onScene: (sc, t) => sceneMenu(sc, t, () => goStep('edit')) });
-    setupStagePointer(ui.st.cv);
-    const grid = h('div', { class: 'kgrid' });
-    for (const f of FX) { const k = fxKey(f.name, FX_IC[f.id] || 'sparkle', TC.fx, () => previewFx(f.id), () => addFx(f.id, .5, .45)); paletteDrag(k, f, ui.st.cv); grid.append(k); }
-    r.R.append(h('div', { class: 'rhead' }, h('h3', {}, '영상 효과'), h('span', { class: 'hint' }, '한 번: 미리 보기 · 두 번: 넣기')), grid, bar);
-    RR.append(fxBtn, cutKey(ui));
-    sheet.open(); buildBar();
-  }
-  let pvRaf = 0;
-  function previewFx(type) {
-    cancelAnimationFrame(pvRaf); Player.pause(); const t0 = performance.now(), D = 1.8;
-    const loop = () => {
-      const lt = (performance.now() - t0) / 1000; Player.draw();
-      if (lt > D || !Player.ctx) return;
-      drawFx(Player.ctx, { id: 'pv' + type, type, x: .5, y: .45, s: 1, dur: D, text: type === 'text' ? '앗!' : type === 'boom' ? '쾅!' : undefined }, lt);
-      pvRaf = requestAnimationFrame(loop);
-    };
-    loop();
-  }
-  function addFx(type, x, y) {
-    const full = FULLSCREEN_FX[type];
-    const e = { id: uid(), type, x: full ? .5 : x, y: full ? .5 : y, s: 1, dur: full ? 4 : 2, text: type === 'text' ? '앗!' : type === 'boom' ? '쾅!' : undefined };
-    setAbs(e, Player.t); P.fx.push(e); S.sel = { kind: 'fx', id: e.id }; changed(); ui.tl.render(); buildBar(); Player.draw();
-  }
-  function paletteDrag(it, f, stage) {
-    it.addEventListener('pointerdown', e => {
-      if (e.pointerType !== 'mouse') return;
-      const p0 = appPt(e), a = appRect($('#app')); let ghost = null;
-      const mv = ev => { const p = appPt(ev); if (!ghost && Math.hypot(p.x - p0.x, p.y - p0.y) > 8) { ghost = h('div', { class: 'key fxk', style: { position: 'absolute', zIndex: 999, pointerEvents: 'none', width: '64px', height: '56px', transform: 'translate(-50%,-50%)', '--kc': TC.fx }, html: `<span class="dot">${icon(FX_IC[f.id])}</span>` }); ghost.style.setProperty('--kc', TC.fx); $('#app').append(ghost); }
-        if (ghost) { ghost.style.left = p.x - a.left + 'px'; ghost.style.top = p.y - a.top + 'px'; } };
-      const up = ev => { removeEventListener('pointermove', mv); removeEventListener('pointerup', up);
-        if (ghost) { it.__dragged = true; ghost.remove(); const r = appRect(stage), p = appPt(ev); if (p.x >= r.left && p.x <= r.right && p.y >= r.top && p.y <= r.bottom) addFx(f.id, (p.x - r.left) / r.width, (p.y - r.top) / r.height); else toast('영상 화면 위에 놓아 주세요'); } };
-      addEventListener('pointermove', mv); addEventListener('pointerup', up);
-    });
-  }
-  function setupStagePointer(cv) {
-    let drag = null;
-    const rel = e => { const r = appRect(cv), p = appPt(e); return { x: (p.x - r.left) / r.width, y: (p.y - r.top) / r.height }; };
-    cv.addEventListener('pointerdown', e => {
-      const p = rel(e), t = Player.t; let hit = null, best = 1e9;
-      for (const fx of P.fx) { const et = absT(fx); if (et == null || t < et || t > et + fx.dur) continue; const d = Math.hypot((p.x - fx.x) * W, (p.y - fx.y) * H); if (d < 110 * fx.s && d < best) { best = d; hit = fx; } }
-      S.sel = hit ? { kind: 'fx', id: hit.id } : null; buildBar(); ui.tl.render(); Player.draw();
-      if (hit) { Player.pause(); cv.setPointerCapture(e.pointerId); drag = { fx: hit, dx: p.x - hit.x, dy: p.y - hit.y }; }
-    });
-    cv.addEventListener('pointermove', e => { if (!drag) return; const p = rel(e); drag.fx.x = clamp(p.x - drag.dx, 0, 1); drag.fx.y = clamp(p.y - drag.dy, 0, 1); Player.draw(); });
-    const up = () => { if (drag) { drag = null; changed(); } }; cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
-  }
-  function drawSel() {
-    const e = SEL(); if (!e || !Player.ctx) return; const et = absT(e); if (et == null || Player.t < et || Player.t > et + e.dur) return;
-    const c = Player.ctx; c.save(); c.setLineDash([10, 8]); c.lineWidth = 3; c.strokeStyle = TC.fx; c.beginPath(); c.arc(e.x * W, e.y * H, 90 * e.s, 0, 7); c.stroke(); c.restore();
-  }
-  function buildBar() {
-    if (!bar) return; bar.innerHTML = ''; const e = SEL(); bar.hidden = !e; if (!e) return; if (sheet && !sheet.isOpen) sheet.open();
-    bar.append(h('b', {}, FX.find(f => f.id === e.type).name),
-      h('span', { class: 'label' }, '크기'), h('input', { type: 'range', min: .4, max: 2.5, step: .05, value: e.s, 'aria-label': '크기', oninput: ev => { e.s = +ev.target.value; Player.draw(); }, onchange: changed }),
-      h('span', { class: 'label' }, '시간'), h('input', { type: 'range', min: .5, max: 8, step: .1, value: e.dur, 'aria-label': '보이는 시간', oninput: ev => { e.dur = +ev.target.value; Player.draw(); }, onchange: () => { changed(); ui.tl.render(); } }),
-      (e.type === 'text' || e.type === 'boom') ? h('input', { class: 'txt', value: e.text || '', maxlength: 12, 'aria-label': '글자', oninput: ev => { e.text = ev.target.value; Player.draw(); }, onchange: changed }) : '',
-      ib('next', '', 'btn sm icon', { 'aria-label': '지금 시간으로 옮기기', onclick: () => { setAbs(e, Player.t); changed(); ui.tl.render(); Player.draw(); } }),
-      ib('copy', '', 'btn sm icon', { 'aria-label': '복사', onclick: () => { const c = { ...e, id: uid() }; setAbs(c, absT(e) + e.dur); P.fx.push(c); S.sel = { kind: 'fx', id: c.id }; changed(); ui.tl.render(); buildBar(); } }),
-      ib('trash', '', 'btn sm icon', { 'aria-label': '지우기', onclick: () => { P.fx = P.fx.filter(x => x !== e); S.sel = null; changed(); ui.tl.render(); buildBar(); Player.draw(); } }),
-      ib('x', '', 'btn sm icon ghost', { 'aria-label': '닫기', onclick: () => { S.sel = null; buildBar(); ui.tl.render(); Player.draw(); } }));
-  }
-  return { mount, unmount() { } };
-})();
-
-/* =========================================================
-   사운드 — 오른쪽이 효과음 / 배경음악 / 나레이션 키로 바뀌어요 (완성 키는 숨겨요)
-   ========================================================= */
-STEP_MOD.sound = (() => {
-  let ui, R, bar, guide, rec = null, recBtn, M, sheet, RR;
-  const SEL = () => S.sel && S.sel.kind === 'sfx' ? P.sfx.find(x => x.id === S.sel.id) : S.sel && S.sel.kind === 'narr' ? P.narrs.find(x => x.id === S.sel.id) : null;
-  function mount(r) {
-    R = r.R; M = r.M;
-    r.L.append(key('대사 녹음', { ic: 'back', aria: '대사 녹음으로 돌아가기', onclick: () => goStep('voice') }));
-    if (needFrames(r.M)) { r.L.append(transportEl().box); return; }
-    sheet = r.sheet; RR = r.RR;
-    // 오른쪽 줄: 효과음 · 배경음악 · 내레이션 — 누르면 그 도구 판이 열려요 (열린 걸 또 누르면 닫혀요)
-    for (const [k, l, ic] of [['sfx', '효과음', 'speaker'], ['bgm', '배경음악', 'music'], ['narr', '내레이션', 'mic']]) {
-      const b = railTool(l, ic, () => { if (sheet.isOpen && S.soundTab === k) { sheet.close(); return; } if (S.soundTab !== k) S.sel = null; S.soundTab = k; AE.stopPreview(); build(); buildBar(); ui.tl.render(); sheet.open(); }); b.dataset.tab = k; RR.append(b);
-    }
-    sheet.onToggle = o => paintRail(RR, o ? S.soundTab : null);
-    AE.init(); Promise.all(SFX.map(s => AE.getSfx(s.id))).then(() => ui && ui.tl.render());
-    bar = h('div', { class: 'sel-bar', hidden: true }); guide = h('div', { class: 'guide', hidden: true });
-    ui = mountPlayerStage(r, { overlay: [guide], sceneDim: true, onScene: (sc, t) => sceneMenu(sc, t, () => goStep('sound')), tracks: [TRACK.sfx({ onSelect: buildBar }), TRACK.bgm({ onSelect: () => { S.soundTab = 'bgm'; build(); sheet.open(); } }), TRACK.narr({ onSelect: buildBar })],
-      onTick: t => { if (S.soundTab === 'bgm') { const sc = sceneAt(t); if (sc && sc.id !== curBgmScene) build(); } } });
-    RR.append(h('div', { class: 'gap' }), cutKey(ui));
-    S.soundTab = S.soundTab || 'sfx';
-    build(); sheet.open(); buildBar();
-  }
-  let curBgmScene = null;
-  function unmount() { if (rec && rec.active) rec.stop(); Mic.release(); AE.stopPreview(); }
-  function build() {
-    R.innerHTML = '';
-    const tabs = [['sfx', '효과음'], ['bgm', '배경음악'], ['narr', '내레이션']];
-    R.append(h('div', { class: 'rhead' }, h('h3', {}, tabs.find(t => t[0] === S.soundTab)[1])));
-    if (sheet && sheet.isOpen) paintRail(RR, S.soundTab);
-    if (S.soundTab === 'sfx') {
-      const grid = h('div', { class: 'kgrid' });
-      for (const s of SFX) { const k = fxKey(s.name, SFX_IC[s.id] || 'speaker', TC.sfx, () => { AE.init(); AE.playPreview('sfx', s.id); }, () => addSfx(s.id)); k.title = s.desc; grid.append(k); }
-      R.append(h('div', { class: 'hint tiphint' }, '한 번: 들어 보기 · 두 번: 지금 시간에 넣기'), grid);
-    } else if (S.soundTab === 'bgm') {
-      const sc = sceneAt(Player.t); curBgmScene = sc.id; const i = P.scenes.indexOf(sc);
-      const pick = id => { sc.bgm = id; changed(); ui.tl.render(); build(); if (id) AE.playPreview('bgm', id); else AE.stopPreview(); };
-      const jump = d => { const n = P.scenes[clamp(i + d, 0, P.scenes.length - 1)]; const rr = TL().map[n.id]; if (rr) Player.seek(rr.t0 + .001); build(); };
-      R.append(h('div', { class: 'scnav' }, key('', { ic: 'back', aria: '앞 장면', onclick: () => jump(-1) }), h('b', {}, `${i + 1}. ${sc.name}`), key('', { ic: 'next', aria: '다음 장면', onclick: () => jump(1) }),
-        key('', { ic: 'copy', aria: '이 음악을 모든 장면에', title: '이 음악을 모든 장면에', onclick: () => { P.scenes.forEach(s => s.bgm = sc.bgm); changed(); ui.tl.render(); toast('모든 장면에 같은 음악을 넣었어요', 1500); } })),
-        h('div', { class: 'kgrid c2' }, h('button', { class: 'sbtn' + (!sc.bgm ? ' on' : ''), type: 'button', onclick: () => pick(null) }, '음악 없음'),
-          ...BGM.map(b => h('button', { class: 'sbtn' + (sc.bgm === b.id ? ' on' : ''), type: 'button', onclick: () => pick(b.id) }, b.name, h('small', {}, b.desc)))));
-    } else {
-      recBtn = key(rec && rec.active ? '녹음 멈추기' : '내레이션 녹음', { ic: rec && rec.active ? 'stop' : 'mic', cls: 'orange wide', onclick: toggleRec });
-      const slider = (k, label) => h('label', { class: 'mini' }, label, h('input', { type: 'range', min: 0, max: 1.5, step: .05, value: P.mix[k], oninput: e => { P.mix[k] = +e.target.value; applyMix(); }, onchange: changed }));
-      R.append(h('textarea', { class: 'input', rows: 2, placeholder: '읽을 글을 써 두면 녹음할 때 화면에 보여 줘요', style: { fontSize: '13px', resize: 'none', flex: 'none', height: '44px', padding: '6px 9px' }, oninput: e => { P.narrText = e.target.value; }, onchange: changed }, P.narrText || ''),
-        h('div', { class: 'minirow' }, recBtn, key('파일', { ic: 'upload', cls: 'wide', onclick: () => uploadAudio('narrs', null, () => { ui.tl.render(); build(); }, Mic.failed) })),
-        h('div', { class: 'mix' }, slider('bgm', '음악'), slider('sfx', '효과음'), slider('voice', '대사'), slider('narr', '내레이션'),
-          h('label', { class: 'toggle', style: { fontSize: '11.5px', gap: '6px' } }, h('input', { type: 'checkbox', checked: P.duck, onchange: e => { P.duck = e.target.checked; changed(); } }), '말할 때 음악 작게')));
-    }
-    if (bar) R.append(bar);
-  }
-  function addSfx(id) {
-    const s = { id: uid(), snd: id, vol: 1 }; setAbs(s, Player.t); P.sfx.push(s);
-    if (!Player.playing) AE.playPreview('sfx', id); else AE.getSfx(id).then(b => { const n = AE.ctx.createBufferSource(); n.buffer = b; n.connect(AE.buses.sfx); n.start(); });
-    S.sel = { kind: 'sfx', id: s.id }; changed(); ui.tl.render(); buildBar();
-  }
-  function buildBar() {
-    if (!bar) return; bar.innerHTML = ''; const it = SEL(); bar.hidden = !it; if (!it) return;
-    if (sheet && !sheet.isOpen) { S.soundTab = S.sel.kind === 'narr' ? 'narr' : 'sfx'; build(); sheet.open(); bar.hidden = false; }
-    if (S.sel.kind === 'sfx') {
-      const s = it;
-      bar.append(h('b', {}, SFX.find(x => x.id === s.snd).name),
-        h('span', { class: 'label' }, '크기'), h('input', { type: 'range', min: 0, max: 1.5, step: .05, value: s.vol, 'aria-label': '소리 크기', onchange: e => { s.vol = +e.target.value; changed(); AE.playPreview('sfx', s.snd); } }),
-        ib('speaker', '', 'btn sm icon', { 'aria-label': '듣기', onclick: () => AE.playPreview('sfx', s.snd) }),
-        ib('next', '', 'btn sm icon', { 'aria-label': '지금 시간으로 옮기기', onclick: () => { setAbs(s, Player.t); changed(); ui.tl.render(); } }),
-        ib('trash', '', 'btn sm icon', { 'aria-label': '지우기', onclick: () => { P.sfx = P.sfx.filter(x => x !== s); S.sel = null; changed(); ui.tl.render(); buildBar(); } }),
-        ib('x', '', 'btn sm icon ghost', { 'aria-label': '닫기', onclick: () => { S.sel = null; buildBar(); ui.tl.render(); } }));
-    } else {
-      const n = it;
-      bar.append(h('b', {}, `내레이션 ${n.dur.toFixed(1)}초`),
-        ib('speaker', '듣기', 'btn sm', { onclick: () => { Player.seek(absT(n)); Player.play({ until: absT(n) + n.dur + .2 }); } }),
-        ib('trash', '지우기', 'btn sm', { onclick: () => { P.narrs = P.narrs.filter(x => x !== n); S.sel = null; changed(); ui.tl.render(); buildBar(); } }),
-        ib('x', '', 'btn sm icon ghost', { 'aria-label': '닫기', onclick: () => { S.sel = null; buildBar(); ui.tl.render(); } }));
-    }
-  }
-  function setState(s) {
-    if (s === 'rec' && P.narrText) { guide.hidden = false; guide.innerHTML = ''; guide.append(h('small', {}, '내레이션'), P.narrText); }
-    else if (s !== 'rec') guide.hidden = true;
-    if (S.soundTab === 'narr') build();
-  }
-  async function toggleRec() {
-    if (rec && rec.active) { rec.stop(); return; }
-    rec = recordFlow({ kind: 'narrs', wrap: ui.st.wrap, line: null, onState: setState, onDone: c => { S.sel = { kind: 'narr', id: c.id }; ui.tl.render(); build(); buildBar(); toast('내레이션을 넣었어요'); } });
-    await rec.start();
-  }
-  return { mount, unmount };
-})();
-
-/* =========================================================
-   대사 녹음
-   ========================================================= */
-STEP_MOD.voice = (() => {
-  /* 대사 녹음 — 대사는 화면 위 자막, 왼쪽 줄: 앞·뒤 대사 · 재생 / 오른쪽 줄: 듣기 · 큰 빨간 마이크 · 지우기 · 파일 · 고치기 */
-  let ui, R, cur = null, rec = null, guide, recBtn, sheet, pill, prevK, nextK, listenK, delK, micWarned = false;
-  const lines = () => P.script || [];
-  const voiceOf = l => l && P.voices.find(v => v.lineId === l.id);
-  function mount(r) {
-    R = r.R; sheet = r.sheet;
-    if (needFrames(r.M)) { r.L.append(transportEl().box); return; }
-    guide = h('div', { class: 'guide', hidden: true }); pill = h('div', { class: 'stage-pill' });
-    prevK = key('앞 대사', { ic: 'back', onclick: () => go(-1) }); nextK = key('뒤 대사', { ic: 'next', onclick: () => go(1) });
-    r.L.append(prevK, nextK);
-    ui = mountPlayerStage(r, { overlay: [guide, pill], tracks: [TRACK.voice({ onSelect: v => { const l = lines().find(l => l.id === v.lineId); if (l) { cur = l; build(); } } })] });
-    recBtn = key('녹음', { ic: 'mic', cls: 'rec', onclick: toggleRec });
-    listenK = key('듣기', { ic: 'speaker', onclick: () => { const v = voiceOf(cur); if (v) { Player.seek(absT(v)); Player.play({ until: absT(v) + v.dur + .2 }); } else toast('아직 녹음하지 않았어요'); } });
-    delK = key('지우기', { ic: 'trash', onclick: () => { const v = voiceOf(cur); if (!v) return; P.voices = P.voices.filter(x => x !== v); changed(); ui.tl.render(); build(); } });
-    r.RR.append(listenK, h('div', { class: 'gap' }), recBtn, h('div', { class: 'gap' }),
-      key('파일', { ic: 'upload', onclick: () => cur && uploadAudio('voices', cur, () => { ui.tl.render(); build(); }, Mic.failed) }),
-      key('고치기', { ic: 'edit', onclick: () => goStep('script') }));
-    if (!(P.script && P.script.length) && P.storyId === 'byeoljubu' && !P.scriptMode) choose(); else build();
-  }
-  function unmount() { if (rec && rec.active) rec.stop(); Mic.release(); }
-  function choose() {
-    modal((b, m) => {
-      b.append(h('h2', {}, '어떤 대사로 녹음할까요?'),
-        h('div', { class: 'choice' },
-          h('button', { type: 'button', onclick: () => { P.scriptMode = 'original'; P.script = originalScript(); changed(); m.close(); build(); } }, h('b', {}, '원작 대사 쓰기'), h('span', {}, '별주부전 원작 대사 12줄로 녹음해요.')),
-          h('button', { type: 'button', onclick: () => { P.scriptMode = 'new'; P.script = P.script || []; changed(); m.close(); goStep('script'); } }, h('b', {}, '새로 쓰기'), h('span', {}, '시나리오 단계에서 대사를 직접 쓰거나 파일로 불러와요.'))));
-    }, { close: false });
-  }
-  function showGuide() { if (!cur) { guide.hidden = true; return; } guide.hidden = false; guide.innerHTML = ''; guide.append(h('small', {}, cur.who), cur.text); }
-  function go(d) {
-    const ls = lines(), i = ls.indexOf(cur); cur = ls[clamp(i + d, 0, ls.length - 1)]; if (!cur) return;
-    const vv = voiceOf(cur); if (vv) Player.seek(absT(vv)); else { const s2 = P.scenes.find(s => s.id === cur.scene); const rr = s2 && TL().map[s2.id]; rr && Player.seek(rr.t0); }
-    build();
-  }
-  function build() {
-    const ls = lines();
-    if (!cur || !ls.includes(cur)) cur = ls.find(l => !voiceOf(l)) || ls[0] || null;
-    showGuide();
-    if (!cur) {
-      pill.textContent = '녹음할 대사가 없어요';
-      R.innerHTML = ''; R.append(h('div', { class: 'rhead' }, h('h3', {}, '대사 녹음')), h('p', { class: 'hint', style: { margin: 0 } }, '녹음할 대사가 아직 없어요. 시나리오 단계에서 대사 가이드를 먼저 써 주세요.'), key('시나리오로 가기', { ic: 'book', cls: 'orange row', onclick: () => goStep('script') }));
-      sheet.el.classList.add('auto'); sheet.open();
-      for (const k of [prevK, nextK, listenK, delK, recBtn]) k.disabled = true;
-      return;
-    }
-    sheet.close();
-    const i = ls.indexOf(cur), v = voiceOf(cur), sc = P.scenes.find(s => s.id === cur.scene), done = ls.filter(l => voiceOf(l)).length;
-    pill.textContent = `대사 ${i + 1} / ${ls.length} · ${cur.who || '?'}${sc ? ' · ' + sc.name : ''} · ${v ? '녹음됨 ✓' : `녹음 ${done}/${ls.length}`}`;
-    const on = rec && rec.active;
-    prevK.disabled = i === 0 || on; nextK.disabled = i === ls.length - 1 || on; listenK.disabled = !v || on; delK.disabled = !v || on; recBtn.disabled = false;
-    recBtn.innerHTML = icon(on ? 'stop' : 'mic', 'ki') + `<span class="kl">${on ? '멈추기' : v ? '다시 녹음' : '녹음'}</span>`;
-    recBtn.classList.toggle('recording', !!on);
-    if (Mic.failed && !micWarned) { micWarned = true; toast('마이크를 바로 쓸 수 없어요. 오른쪽 “파일” 키로 폰 녹음 앱을 쓰거나 녹음 파일을 넣어 주세요', 4200, true); }
-  }
-  function setState(s) { if (s === 'rec' || s === 'idle' || s === 'fail') build(); }
-  async function toggleRec() {
-    if (rec && rec.active) { rec.stop(); return; }
-    if (!cur) return;
-    rec = recordFlow({ kind: 'voices', wrap: ui.st.wrap, line: cur, onState: setState, onDone: () => { ui.tl.render(); const lines = P.script || []; const i = lines.indexOf(cur); const nx = lines.slice(i + 1).find(l => !P.voices.some(v => v.lineId === l.id)); if (nx) { cur = nx; build(); toast('녹음했어요! 다음 대사로 넘어갔어요', 1600); } else { build(); pulseNext('대사를 다 녹음했어요! 화면 오른쪽 위 주황색 “다음”을 눌러 사운드로 가요'); } } });
-    recBtn.disabled = true; await rec.start(); if (recBtn) recBtn.disabled = false;
-  }
-  return { mount, unmount };
-})();
-
-/* =========================================================
-   완성 · 저장
-   ========================================================= */
-STEP_MOD.final = (() => {
-  function mount(r) {
-    r.L.append(key('편집', { ic: 'back', aria: '편집으로 돌아가기', onclick: () => goStep('edit') }));
-    if (needFrames(r.M)) { r.L.append(transportEl().box); return; }
-    const ui = mountPlayerStage(r, { tracks: [TRACK.fx(), TRACK.voice(), TRACK.sfx()], onScene: (sc, t) => sceneMenu(sc, t, () => goStep('final')) });
-    const frames = P.scenes.reduce((a, s) => a + s.frames.length, 0);
-    const bgmN = new Set(P.scenes.map(s => s.bgm).filter(Boolean)).size;
-    const stat = (n, l, step) => h('button', { class: 'key', type: 'button', onclick: () => goStep(step), title: '고치러 가기' }, h('b', {}, n), h('span', {}, l));
-    r.R.append(h('div', { class: 'rhead' }, h('h3', {}, '완성!'), h('span', { class: 'hint' }, fmt(TL().total).replace(/\.\d$/, '') + ' 영상')),
-      h('input', { class: 'input', value: P.title, maxlength: 40, 'aria-label': '영상 제목', style: { flex: 'none', padding: '7px 10px' }, oninput: e => { P.title = e.target.value; changed(); } }),
-      h('div', { class: 'check' },
-        stat(P.scenes.length, '장면', 'shoot'), stat(frames, '컷', 'shoot'), stat(P.voices.length, '대사', 'voice'), stat(P.sfx.length, '효과음', 'sound'),
-        stat(bgmN, '음악', 'sound'), stat(P.narrs.length, '내레이션', 'sound'), stat(P.fx.length, '효과', 'edit'), stat(P.fps, '빠르기', 'edit')),
-      h('div', { class: 'hint' }, '숫자를 누르면 그 단계로 고치러 가요.'));
-    const sheet = r.sheet, sum = railTool('한눈에', 'grid', () => sheet.isOpen ? sheet.close() : sheet.open()); sum.dataset.tab = 'sum';
-    sheet.onToggle = o => paintRail(r.RR, o ? 'sum' : null);
-    r.RR.append(key('영상 파일', { ic: 'download', cls: 'orange', onclick: exportVideo }), sum,
-      key('처음부터', { ic: 'play', onclick: () => { sheet.close(); Player.seek(0); Player.play(); } }),
-      key('작품함', { ic: 'save', onclick: async () => { P.done.final = true; const ok = await saveProject(); toast(ok ? '내 작품함에 저장했어요' : '이 화면에서는 작품함 저장이 안 돼요. 영상 파일로 저장해 주세요.'); } }),
-      key('상영관', { ic: 'trophy', aria: '상영관에 올리고 별점 받기', onclick: async () => { const first = !P.show; P.done.final = true; P.show = P.show || Date.now(); P.stars = P.stars || []; changed(); await openTheater(); toast(first ? '상영관에 올렸어요! 친구들에게 별점을 받아 보세요' : '상영관이에요', 3000, true); } }));
-    sheet.open();
-  }
-  return { mount, unmount() { } };
-})();
-/* =========================================================
-   시나리오 (줄거리 · 장면 나누기 · 대사 가이드) — 한 화면, 목록만 안에서 넘겨 봐요
+   시나리오 — 별주부전 줄거리 (화면은 편집기의 이야기 판)
    ========================================================= */
 const ORIGINAL_SYNOPSIS = '용왕님이 병에 걸려 토끼의 간이 필요해요. 자라(별주부)가 육지에서 토끼를 꾀어 용궁으로 데려오지만, 토끼는 “간을 육지에 두고 왔다”고 속이고 달아나요.';
-STEP_MOD.script = (() => {
-  let main;
-  function mount(r) { main = r.main; render(); }
-  function render(focusLast) {
-    main.innerHTML = '';
-    const orig = P.storyId === 'byeoljubu';
-    const top = h('div', { class: 'row nowrap', style: { gridColumn: '1 / -1' } }, navKey(), undoKey(),
-      h('span', { class: 'label', style: { whiteSpace: 'nowrap' } }, '영상 제목'),
-      h('input', { class: 'input grow', value: P.title, maxlength: 40, style: { maxWidth: '320px', padding: '7px 10px' }, oninput: e => { P.title = e.target.value; changed(); } }),
-      h('div', { class: 'spacer' }),
-      orig ? key('원작 보기', { ic: 'play', cls: 'row', onclick: () => { leaveStep(); introReturn = 'script'; startIntro(); } }) : '',
-      nextKey('script', 'pill'));
-    // 왼쪽: 줄거리 + 장면
-    const scenes = h('div', { class: 'scroll' });
-    P.scenes.forEach((s, i) => scenes.append(h('div', { class: 'sc-card', style: { padding: '6px', gridTemplateColumns: '24px auto minmax(0,1fr) auto' } },
-      h('span', { class: 'n', style: { paddingTop: '4px' } }, i + 1),
-      h('button', { class: 'sk-slot' + (s.sketch ? ' has' : ''), type: 'button', style: s.sketch ? { backgroundImage: `url(${s.sketch.url})` } : {},
-        'aria-label': s.sketch ? `${i + 1}번 장면 스케치 보기` : `${i + 1}번 장면 스케치 사진 찍기`,
-        onclick: async () => { if (s.sketch) sketchModal(s, render); else if (await takeSketch(s)) render(); },
-        html: s.sketch ? '' : icon('cam') + '<span>스케치</span>' }),
-      h('div', { class: 'f' },
-        h('input', { class: 'input', value: s.name, maxlength: 30, 'aria-label': `${i + 1}번 장면 이름`, oninput: e => { s.name = e.target.value; changed(); } }),
-        h('input', { class: 'input', value: s.desc || '', placeholder: '이 장면에서 무슨 일이 일어나나요?', 'aria-label': `${i + 1}번 장면 설명`, style: { fontSize: '13px' }, oninput: e => { s.desc = e.target.value; changed(); } })),
-      h('div', { style: { display: 'flex', flexDirection: 'column', gap: '4px' } },
-        ib('up', '', 'btn sm icon ghost', { 'aria-label': '위로', disabled: i === 0, onclick: () => { [P.scenes[i - 1], P.scenes[i]] = [P.scenes[i], P.scenes[i - 1]]; changed(); render(); } }),
-        P.scenes.length > 1 ? ib('trash', '', 'btn sm icon ghost', { 'aria-label': '장면 지우기', onclick: async () => { if (s.frames.length && !await confirmBox('장면을 지울까요?', `“${s.name}”에 찍은 컷 ${s.frames.length}개도 함께 지워져요.`, '지우기', true)) return; P.scenes.splice(i, 1); for (const k of ['fx', 'sfx', 'voices', 'narrs']) P[k] = P[k].filter(it => it.sid !== s.id); changed(); render(); } }) : ''))));
-    const left = h('div', { class: 'col well' },
-      h('h3', {}, '줄거리'),
-      orig ? h('div', { class: 'card', style: { fontSize: '12.5px', lineHeight: 1.55, padding: '8px 10px' } }, ORIGINAL_SYNOPSIS)
-        : h('textarea', { class: 'input', rows: 2, placeholder: '누가, 어디서, 무슨 일이 생기고, 어떻게 끝나나요?', style: { fontSize: '13.5px', resize: 'none' }, oninput: e => { P.synopsis = e.target.value; changed(); } }, P.synopsis || ''),
-      h('div', { class: 'panel-title' }, h('h3', {}, `장면 ${P.scenes.length}개`),
-        h('div', { class: 'row' }, orig && P.scenes.length < ORIGINAL_SCENES.length ? ib('book', '원작 장면', 'btn sm', { onclick: () => { for (const n of ORIGINAL_SCENES) if (!P.scenes.some(s => s.name === n)) P.scenes.push(newScene(n)); changed(); render(); } }) : '',
-          ib('plus', '장면', 'btn sm', { onclick: () => { P.scenes.push(newScene(`${P.scenes.length + 1}장면`)); changed(); render(true); } }))),
-      scenes);
-    // 오른쪽: 대사 가이드
-    P.script = P.script || [];
-    const up = h('input', { type: 'file', accept: '.txt,.csv,.md,.text,text/plain', hidden: true, onchange: async e => { const f = e.target.files[0]; if (!f) return; const parsed = parseScript(await f.text()); P.script.push(...parsed); if (!P.scriptMode) P.scriptMode = 'new'; changed(); render(); toast(`대사 ${parsed.length}줄을 불러왔어요`); } });
-    const dl = h('datalist', { id: 'whoList2' }, ...Object.keys(CHAR_COLORS).map(k => h('option', { value: k })));
-    const lines = h('div', { class: 'scroll' });
-    if (!P.script.length) lines.append(h('div', { class: 'card hint' }, orig ? '“원작 대사”를 누르면 별주부전 대사 12줄이 들어와요. 미리 써 둔 파일(.txt, .csv)은 한 줄에 “인물: 대사”로 쓰면 그대로 불러와요.' : '“＋ 대사”를 눌러 첫 대사를 써 보세요. 미리 써 둔 파일(.txt, .csv)은 한 줄에 “인물: 대사”로 쓰면 그대로 불러와요.'));
-    P.script.forEach((r, i) => lines.append(h('div', { class: 'script-row' },
-      h('input', { class: 'input', value: r.who, list: 'whoList2', placeholder: '누가', 'aria-label': `${i + 1}번 대사 인물`, oninput: e => { r.who = e.target.value; changed(); } }),
-      h('input', { class: 'input', value: r.text, placeholder: '무슨 말을 할까요?', 'aria-label': `${i + 1}번 대사 내용`, oninput: e => { r.text = e.target.value; changed(); } }),
-      h('select', { class: 'input', 'aria-label': `${i + 1}번 대사 장면`, onchange: e => { r.scene = e.target.value || null; changed(); } }, h('option', { value: '' }, '장면'), ...P.scenes.map(s => h('option', { value: s.id, selected: r.scene === s.id }, s.name))),
-      ib('trash', '', 'btn sm icon ghost', { 'aria-label': '대사 지우기', onclick: () => { P.script.splice(i, 1); changed(); render(); } }))));
-    const right = h('div', { class: 'col well' },
-      h('div', { class: 'panel-title' }, h('h3', {}, `대사 ${P.script.length}줄`),
-        h('div', { class: 'row' },
-          ib('upload', '', 'btn sm icon', { 'aria-label': '대사 파일 불러오기', title: '대사 파일 불러오기 (.txt, .csv)', onclick: () => up.click() }),
-          orig ? ib('book', '원작', 'btn sm', { onclick: () => { P.script.push(...originalScript()); P.scriptMode = P.scriptMode || 'original'; changed(); render(); } }) : '',
-          ib('plus', '대사', 'btn sm', { onclick: () => { P.script.push({ id: uid(), who: P.script.length ? P.script[P.script.length - 1].who : '', text: '', scene: P.scenes[0].id }); if (!P.scriptMode) P.scriptMode = 'new'; changed(); render(true); } }), up, dl)),
-      lines);
-    main.append(top, left, right);
-    if (focusLast) requestAnimationFrame(() => { for (const box of [scenes, lines]) box.scrollTop = box.scrollHeight; const inp = $$('.script-row input:nth-child(2)', main).pop(); inp && !inp.value && inp.focus(); });
-  }
-  return { mount, unmount() { }, layout: 'doc' };
-})();
 /* =========================================================
    녹음 도우미 (대사·나레이션)
    ========================================================= */
@@ -3256,32 +2506,6 @@ function parseScript(text) {
   return out;
 }
 function originalScript() { return ORIGINAL_SCRIPT.map(l => ({ id: uid(), who: l.who, text: l.text, scene: P.scenes[l.scene] ? P.scenes[l.scene].id : null })); }
-function scriptEditor(onSave) {
-  const rows = (P.script || []).map(l => ({ ...l }));
-  modal((b, m) => {
-    const list = h('div', { class: 'script-table' });
-    const dl = h('datalist', { id: 'whoList' }, ...Object.keys(CHAR_COLORS).map(k => h('option', { value: k })));
-    const draw = () => {
-      list.innerHTML = '';
-      if (!rows.length) list.append(h('p', { class: 'hint' }, '아직 대사가 없어요. “＋ 대사 한 줄”을 누르거나, 미리 써 둔 대사 파일을 불러오세요.'));
-      rows.forEach((r, i) => list.append(h('div', { class: 'script-row' },
-        h('input', { class: 'input', value: r.who, list: 'whoList', placeholder: '누가', 'aria-label': `${i + 1}번 대사 인물`, oninput: e => r.who = e.target.value }),
-        h('textarea', { class: 'input', rows: 2, placeholder: '무슨 말을 할까요?', 'aria-label': `${i + 1}번 대사 내용`, oninput: e => r.text = e.target.value }, r.text),
-        h('select', { class: 'input', 'aria-label': `${i + 1}번 대사 장면`, onchange: e => r.scene = e.target.value || null }, h('option', { value: '' }, '장면 선택'), ...P.scenes.map(s => h('option', { value: s.id, selected: r.scene === s.id }, s.name))),
-        h('div', { class: 'row nowrap' },
-          ib('up', '', 'btn sm icon ghost', { 'aria-label': '위로', onclick: () => { if (i) { [rows[i - 1], rows[i]] = [rows[i], rows[i - 1]]; draw(); } } }),
-          ib('trash', '', 'btn sm icon ghost', { 'aria-label': '지우기', onclick: () => { rows.splice(i, 1); draw(); } })))));
-    };
-    const up = h('input', { type: 'file', accept: '.txt,.csv,.md,.text,text/plain', hidden: true, onchange: async e => { const f = e.target.files[0]; if (!f) return; const parsed = parseScript(await f.text()); rows.push(...parsed); draw(); toast(`대사 ${parsed.length}줄을 불러왔어요`); } });
-    b.append(h('h2', {}, '대사 가이드 쓰기'),
-      h('p', { class: 'hint', style: { margin: 0 } }, '녹음할 때 화면에 나오는 대사 대본이에요. 미리 써 둔 파일(.txt, .csv)이 있으면 불러올 수 있어요. 한 줄에 “인물: 대사” 모양으로 쓰면 인물과 대사가 나뉘어 들어가요.'),
-      h('div', { class: 'row' }, ib('upload', '대사 파일 불러오기', 'btn sm', { onclick: () => up.click() }), ib('book', '원작 대사 넣기', 'btn sm', { onclick: () => { rows.push(...originalScript()); draw(); } }), up, dl),
-      list,
-      h('div', { class: 'row' }, ib('plus', '대사 한 줄', 'btn sm', { onclick: () => { rows.push({ id: uid(), who: rows.length ? rows[rows.length - 1].who : '토끼', text: '', scene: P.scenes[0].id }); draw(); setTimeout(() => { const t = $$('textarea', list).pop(); t && t.focus(); }, 30); } })),
-      h('div', { class: 'acts' }, h('button', { class: 'btn', onclick: m.close }, '닫기'), h('button', { class: 'btn primary', onclick: () => { P.script = rows.filter(r => r.text.trim()); changed(); m.close(); onSave && onSave(); } }, '대사 가이드 저장')));
-    draw();
-  }, { wide: true, close: false });
-}
 /* =========================================================
    상영관 — 다 만든 작품을 올려서 친구들이 보고 별점을 줘요. 별점이 높을수록 순위가 올라가요.
    작품 문서(DB)에 d.show(올린 시각, 0이면 안 올림)와 d.stars(받은 별점 배열)로 저장해요.
@@ -3301,8 +2525,8 @@ async function openTheater() {
   if (P && !$('#studio').hidden) { leaveStep(); await saveProject(); theaterBack = P.id; P = null; TLc = null; }
   show('library'); stopIntro();
   libTop('상영관 · 인기 순위', async () => {
-    if (theaterBack) { const d = await DB.get(theaterBack).catch(() => null); theaterBack = null; if (d) { await openProject(d); openStudio('final'); return; } }
-    openLibrary();
+    if (theaterBack) { const d = await DB.get(theaterBack).catch(() => null); theaterBack = null; if (d) { await openProject(d); openEditor(); return; } }
+    openGallery();
   }).append(key('작품 올리기', { ic: 'upload', cls: 'works hall', onclick: pickToShow }));
   const g = libBody('theater');
   const { list } = await loadWorks();
@@ -3378,6 +2602,607 @@ async function watchWork(d) {
   playK.onclick = () => Player.toggle();
   Player.t = 0; Player.draw();
   Player.play();
+}
+/* =========================================================
+   한 화면 편집기 (Stop Motion Studio 방식, 2026-10-29)
+   갤러리 → 편집기 한 장. 가운데 카메라/컷 · 왼쪽 둥근 버튼(갤러리·재생·이야기·소리·효과·되돌리기)
+   · 오른쪽 카메라 설정·찰칵·겹쳐보기 · 아래 필름(장면 칸막이 + 컷 + 빨간 "지금 카메라" 칸 + 소리 색 줄)
+   · 왼쪽 버튼을 누르면 오른쪽에서 판이 나와요. 위 주황 "완성"에서 영상 저장·상영관.
+   ========================================================= */
+IC.share = '<path d="M12 3v12M7 8l5-5 5 5M5 14v6h14v-6"/>';
+IC.more = '<circle cx="5" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="19" cy="12" r="1.6" fill="currentColor"/>';
+const ED = { open: false, live: true, sel: null, insertAt: null, panel: null, tab: 'voice', onion: true, grid: false, locked: false, raf: 0, cdT: null, autoOn: false, line: null, rec: null, fxSel: null };
+let EDel = {};
+const edScene = () => { let s = P.scenes.find(s => s.id === S.curScene); if (!s) { s = P.scenes[P.scenes.length - 1]; S.curScene = s.id; } return s; };
+const shotSet = () => S.shot || (S.shot = { delay: 0, auto: 0 });
+
+/* 컷 하나의 시간 (잘라 낸 컷이면 그 장면 처음) */
+function frameT(sc, i) {
+  const r = TL().map[sc.id]; if (!r) return 0;
+  const a = sc.trimIn, b = sc.frames.length - sc.trimOut;
+  if (i < a || i >= b) return r.t0;
+  return r.t0 + sc.frames.slice(a, i).reduce((s, f) => s + f.hold, 0) / P.fps;
+}
+
+/* ---------- 열기 · 닫기 ---------- */
+function openEditor(firstPanel) {
+  show('studio'); stopIntro();
+  ED.open = true; ED.live = true; ED.sel = null; ED.insertAt = null; ED.panel = null; ED.fxSel = null; S.sel = null; S.step = 'shoot';
+  histInit();
+  const body = $('#stBody'); body.innerHTML = '';
+  const cv = h('canvas', { class: 'stage', width: W, height: H });
+  const flash = h('div', { class: 'flash' }), cd = h('div', { class: 'countdown', hidden: true }), nocam = h('div', { class: 'nocam', hidden: true });
+  const sub = h('div', { class: 'guide', hidden: true }), sketch = h('button', { class: 'mon-sketch', type: 'button', hidden: true, 'aria-label': '장면 스케치 크게 보기', onclick: () => sketchModal(edScene(), edStrip) });
+  const mon = h('div', { class: 'stage-wrap ed-mon' }, cv, flash, cd, nocam, sub, sketch);
+  const fb = (ic, label, onclick, cls = '') => h('button', { class: 'efb ' + cls, type: 'button', 'aria-label': label, onclick }, h('span', { class: 'c', html: icon(ic) }), h('small', {}, label));
+  const playB = fb('play', '재생', edTogglePlay, 'play');
+  const left = h('div', { class: 'ed-l' },
+    h('div', { class: 'ed-top' }, fb('back', '내 작품', edToGallery, 'big'), fb('undo', '되돌리기', undo)), playB,
+    fb('book', '이야기', () => edPanel('story')), fb('music', '소리', () => edPanel('sound')), fb('sparkle', '효과', () => edPanel('fx')));
+  const shutter = h('button', { class: 'ed-shut', type: 'button', 'aria-label': '촬영', onclick: edShutter }, h('span', { class: 'in' }));
+  const camB = fb('cam', '카메라', edCamPop), onionB = fb('onion', '겹쳐보기', () => { ED.onion = !ED.onion; onionB.classList.toggle('on', ED.onion); toast(ED.onion ? '앞 컷 겹쳐 보기 켬' : '앞 컷 겹쳐 보기 끔', 1000); }, ED.onion ? 'on' : '');
+  const right = h('div', { class: 'ed-r' }, camB, shutter, onionB);
+  const pill = h('div', { class: 'ed-pill' });
+  const done = h('button', { class: 'ed-done', type: 'button', onclick: edFinish, html: icon('share') + '<span>완성</span>' });
+  const stage = h('div', { class: 'ed-stage' }, mon, left, right, pill, done);
+  const panel = h('div', { class: 'ed-panel', hidden: true });
+  const film = h('div', { class: 'ef' }), strip = h('div', { class: 'ed-strip list' }, film);
+  const pop = h('div', { class: 'ed-pop', hidden: true });
+  body.append(h('div', { class: 'ed' }, h('div', { class: 'ed-main' }, stage, panel), strip, pop));
+  EDel = { cv, ctx: cv.getContext('2d'), flash, cd, nocam, sub, sketch, mon, playB, shutter, camB, onionB, pill, stage, panel, film, strip, pop, right };
+  Player.attach(cv, { onTick: edTick });
+  Player.onState = on => { EDel.playB.querySelector('.c').innerHTML = icon(on ? 'pause' : 'play'); EDel.playB.classList.toggle('on', on); if (!on) edAfterPlay(); };
+  edStrip(true); edShutterPaint();
+  edCamStart();
+  addEventListener('keydown', edKey);
+  cancelAnimationFrame(ED.raf); edLoop();
+  if (firstPanel) edPanel(firstPanel);
+  if (!edGuided) { edGuided = true; setTimeout(() => ED.open && toast('빨간 찰칵을 누를 때마다 한 컷씩 찍혀요. 아래 필름에 쌓여요', 3600, true), 600); }
+}
+let edGuided = false;
+function edClose() {
+  if (!ED.open) return;
+  ED.open = false; edStopTimer(); Player.pause(); Player.onState = null; Player.attach(null); AE.stopPreview();
+  if (ED.rec && ED.rec.active) ED.rec.stop(); Mic.release();
+  cancelAnimationFrame(ED.raf); Cam.stop(); ED.locked = false; removeEventListener('keydown', edKey);
+}
+/* 예전 코드가 부르는 이름들 — 모두 편집기로 이어 줘요 */
+function leaveStep() { edClose(); }
+function openStudio(step) { if (!ED.open) openEditor(); goStep(step); }
+const STEP_PANEL = { script: 'story', voice: 'sound', sound: 'sound', edit: 'fx' };
+function goStep(id) {
+  if (!P) return;
+  if (!ED.open) { openEditor(); }
+  else { TLc = null; edStrip(); }
+  if (id === 'final') { edFinish(); return; }
+  if (id === 'voice') ED.tab = 'voice';
+  const want = STEP_PANEL[id] || (id === 'shoot' ? null : ED.panel);
+  if (id === 'shoot' && ED.panel) { edPanel(null); edGoLive(); }
+  else if (want) edPanel(want, true);
+}
+async function edToGallery() { edClose(); await saveProject(); P = null; TLc = null; openGallery(); }
+function edKey(e) { if (e.target.closest('input,textarea,select')) return; if (e.code === 'Space' || e.code === 'VolumeUp') { e.preventDefault(); edShutter(); } }
+
+/* ---------- 카메라 ---------- */
+async function edCamStart() {
+  EDel.nocam.hidden = true;
+  const ok = await Cam.start();
+  if (!ok && ED.open) edNoCam();
+}
+function edNoCam() {
+  const n = EDel.nocam; n.hidden = !ED.live; n.innerHTML = '';
+  const denied = Cam.reason === 'NotAllowedError';
+  n.append(h('span', { html: icon('cam'), style: { width: '40px', height: '40px', color: '#CF5D2A' } }),
+    h('b', {}, denied ? '카메라 사용이 막혀 있어요' : '이 화면에서는 실시간 카메라를 켤 수 없어요'),
+    h('p', {}, denied ? '주소창 옆 자물쇠(또는 설정)에서 카메라를 허용한 뒤 다시 시도를 눌러 주세요. 그동안 빨간 찰칵을 누르면 폰 카메라 앱으로 한 컷씩 찍어요.'
+      : '빨간 찰칵을 누르면 폰의 카메라 앱이 열려요. 한 장 찍을 때마다 한 컷이 쌓여요.'),
+    h('div', { class: 'row', style: { justifyContent: 'center' } },
+      ib('image', '사진 여러 장 불러오기', 'btn sm', { onclick: edImport }),
+      ib('rotR', '다시 시도', 'btn sm ghost', { style: { color: '#fff' }, onclick: edCamStart })));
+}
+async function edImport() { const f = await pickImages({ multiple: true }); for (const x of f) { const b = await fileToFrameBlob(x); b && await edAddFrame(b); } if (f.length) toast(`사진 ${f.length}장을 넣었어요`); }
+
+/* ---------- 그리기 ---------- */
+function edLoop() {
+  if (!ED.open) return;
+  ED.raf = requestAnimationFrame(edLoop);
+  if (Player.playing) return;              // 재생·녹음 중에는 Player가 그려요
+  const ctx = EDel.ctx; ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.shadowColor = 'transparent';
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+  if (ED.live) {
+    const sc = edScene(), base = ED.insertAt ?? sc.frames.length;
+    if (Cam.video && Cam.stream && Cam.video.videoWidth) drawCam(ctx, Cam.video);
+    else if (sc.frames[base - 1]) drawCover(ctx, sc.frames[base - 1].img);
+    if (ED.onion && Cam.stream) {
+      const oa = S.onionA || .42, p1 = sc.frames[base - 1], p2 = sc.frames[base - 2];
+      if (p2) { ctx.globalAlpha = oa * .5; drawCover(ctx, p2.img); }
+      if (p1) { ctx.globalAlpha = oa; drawCover(ctx, p1.img); }
+      ctx.globalAlpha = 1;
+    }
+    if (ED.grid) { ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 1.5; ctx.beginPath(); for (const x of [W / 3, W * 2 / 3]) { ctx.moveTo(x, 0); ctx.lineTo(x, H); } for (const y of [H / 3, H * 2 / 3]) { ctx.moveTo(0, y); ctx.lineTo(W, y); } ctx.stroke(); }
+    return;
+  }
+  const s = ED.sel && P.scenes.find(x => x.id === ED.sel.sid), f = s && s.frames[ED.sel.i];
+  if (!f) { edGoLive(); return; }
+  const trimmed = ED.sel.i < s.trimIn || ED.sel.i >= s.frames.length - s.trimOut;
+  if (trimmed) { drawCover(ctx, f.img); ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fillRect(0, 0, W, H); ctx.fillStyle = '#fff'; ctx.font = '30px Jua, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('잘라 낸 컷이에요', W / 2, H / 2); return; }
+  renderAt(ctx, Player.t, {});
+  const e = ED.fxSel && P.fx.find(x => x.id === ED.fxSel);
+  if (e) { const et = absT(e); if (et != null && Player.t >= et && Player.t <= et + e.dur) { ctx.save(); ctx.setLineDash([10, 8]); ctx.lineWidth = 3; ctx.strokeStyle = TC.fx; ctx.beginPath(); ctx.arc(e.x * W, e.y * H, 90 * e.s, 0, 7); ctx.stroke(); ctx.restore(); } }
+}
+
+/* ---------- 필름 ---------- */
+function edStrip(scrollToLive) {
+  if (!ED.open) return;
+  const film = EDel.film; film.innerHTML = '';
+  const cur = edScene(); let n = 0;
+  const liveCell = () => h('button', { class: 'ef-live' + (ED.live ? ' on' : ''), type: 'button', 'aria-label': '지금 카메라', onclick: () => { edGoLive(); } , html: icon('cam') });
+  P.scenes.forEach((s, k) => {
+    film.append(h('button', { class: 'ef-scn' + (s.id === cur.id ? ' cur' : ''), type: 'button', 'aria-label': `${k + 1}번 장면 ${s.name}`, onclick: () => edSceneMenu(s) },
+      h('b', {}, String(k + 1)), h('span', {}, s.name)));
+    s.frames.forEach((f, i) => {
+      if (s.id === cur.id && ED.insertAt === i) film.append(liveCell());
+      n++;
+      const trimmed = i < s.trimIn || i >= s.frames.length - s.trimOut;
+      const sel = ED.sel && ED.sel.sid === s.id && ED.sel.i === i;
+      film.append(h('button', { class: 'ef-fr' + (sel ? ' sel' : '') + (trimmed ? ' cut' : ''), type: 'button', 'data-fid': f.id, 'aria-label': `${n}번 컷`, onclick: () => edPick(s, i) },
+        h('img', { src: f.url, alt: '' }), h('i', {}, String(n)), f.hold !== P.hold ? h('em', {}, '×' + f.hold) : ''));
+    });
+    if (s.id === cur.id && (ED.insertAt == null || ED.insertAt >= s.frames.length)) film.append(liveCell());
+  });
+  film.append(h('button', { class: 'ef-add', type: 'button', onclick: edNewScene, html: icon('plus') + '<span>장면</span>' }));
+  film.append(h('div', { class: 'ef-trk' }));
+  requestAnimationFrame(() => { edTracks(); if (scrollToLive) { const l = $('.ef-live', film); if (l) EDel.strip.scrollLeft = l.offsetLeft - EDel.strip.clientWidth + l.offsetWidth * 3; } });
+  edPill(); edPopPaint();
+  const sk = ED.live ? cur.sketch : null; EDel.sketch.hidden = !sk; if (sk) EDel.sketch.style.backgroundImage = `url(${sk.url})`;
+  EDel.nocam.hidden = !(ED.live && Cam.failed);
+}
+/* 필름 아래 색 줄: 초록 배경음악 · 파랑 대사 · 청록 내레이션 · 주황 효과음 · 보라 효과 */
+function edTracks() {
+  const film = EDel.film, trk = $('.ef-trk', film); if (!trk) return; trk.innerHTML = '';
+  const tl = TL(); if (!tl.total) return;
+  const els = {}; for (const el of $$('.ef-fr', film)) els[el.dataset.fid] = el;
+  const xAt = t => {
+    const seg = segAt(t); if (!seg) return 0; const el = els[seg.f.id]; if (!el) return 0;
+    if (t >= tl.total) return el.offsetLeft + el.offsetWidth;
+    return el.offsetLeft + clamp((t - seg.t0) / (seg.t1 - seg.t0), 0, 1) * el.offsetWidth;
+  };
+  const bar = (t0, t1, row, c, label, onclick, on) => {
+    const x0 = xAt(t0), x1 = Math.max(x0 + 8, xAt(Math.min(t1, tl.total)));
+    trk.append(h('button', { class: 'tb' + (on ? ' on' : ''), type: 'button', 'aria-label': label, title: label, style: { left: x0 + 'px', width: (x1 - x0) + 'px', top: row * 6.5 + 'px', background: c }, onclick }));
+  };
+  for (const r of tl.ranges) if (r.sc.bgm && r.t1 > r.t0) bar(r.t0, r.t1, 0, TC.bgm, '배경음악 ' + (BGM.find(b => b.id === r.sc.bgm) || {}).name, () => { Player.seek(r.t0 + .001); edSelectAt(r.t0 + .001); ED.tab = 'bgm'; edPanel('sound', true); });
+  for (const v of P.voices) { const t = absT(v); if (t != null) bar(t, t + (v.dur || 1), 1, TC.voice, '대사 ' + (v.who || ''), () => { edSelectAt(t); ED.tab = 'voice'; ED.line = (P.script || []).find(l => l.id === v.lineId) || ED.line; edPanel('sound', true); }); }
+  for (const v of P.narrs) { const t = absT(v); if (t != null) bar(t, t + (v.dur || 1), 1, TC.narr, '내레이션', () => { edSelectAt(t); S.sel = { kind: 'narr', id: v.id }; ED.tab = 'narr'; edPanel('sound', true); }, S.sel && S.sel.id === v.id); }
+  for (const s of P.sfx) { const t = absT(s); if (t != null) bar(t, t + Math.max(sfxLen(s), .5), 2, TC.sfx, '효과음 ' + SFX.find(x => x.id === s.snd).name, () => { edSelectAt(t); S.sel = { kind: 'sfx', id: s.id }; ED.tab = 'sfx'; edPanel('sound', true); }, S.sel && S.sel.id === s.id); }
+  for (const e of P.fx) { const t = absT(e); if (t != null) bar(t, t + e.dur, 3, TC.fx, '효과 ' + FX.find(f => f.id === e.type).name, () => { edSelectAt(t); ED.fxSel = e.id; edPanel('fx', true); }, ED.fxSel === e.id); }
+}
+function edPill() {
+  const sc = edScene(), tl = TL();
+  if (ED.live) { const sec = sc.frames.reduce((a, f) => a + f.hold, 0) / P.fps; EDel.pill.innerHTML = ''; EDel.pill.append(h('span', {}, `${P.scenes.indexOf(sc) + 1} · ${sc.name}`), h('i', {}, `컷 ${sc.frames.length} · ${sec.toFixed(1)}초`)); }
+  else { const s = P.scenes.find(x => x.id === ED.sel.sid); let n = 0; for (const x of P.scenes) { if (x === s) break; n += x.frames.length; } EDel.pill.innerHTML = ''; EDel.pill.append(h('span', {}, `컷 ${n + ED.sel.i + 1} / ${P.scenes.reduce((a, x) => a + x.frames.length, 0)}`), h('i', {}, fmt(Player.t).replace(/\.\d$/, '') + ' / ' + fmt(tl.total).replace(/\.\d$/, ''))); }
+}
+function edPick(s, i) {
+  if (Player.playing) Player.pause();
+  const same = ED.sel && ED.sel.sid === s.id && ED.sel.i === i && !ED.live;
+  ED.live = false; ED.sel = { sid: s.id, i }; ED.popOpen = same ? !ED.popOpen : !ED.panel;
+  Player.t = frameT(s, i); edStrip();
+}
+/* 시간 t에 있는 컷을 골라요 (판을 열 때 · 소리 줄을 누를 때) */
+function edSelectAt(t) {
+  const seg = segAt(t); if (!seg) return false;
+  ED.live = false; ED.sel = { sid: seg.sc.id, i: seg.idx }; ED.popOpen = false; Player.t = clamp(t, 0, TL().total); edStrip(); return true;
+}
+function edGoLive() { if (Player.playing) Player.pause(); ED.live = true; ED.sel = null; ED.popOpen = false; edStrip(true); }
+
+/* 컷을 누르면 바로 위에 뜨는 말풍선 메뉴 */
+function edPopPaint() {
+  const pop = EDel.pop; pop.innerHTML = '';
+  if (ED.live || !ED.sel || !ED.popOpen) { pop.hidden = true; return; }
+  const s = P.scenes.find(x => x.id === ED.sel.sid), i = ED.sel.i, f = s && s.frames[i]; if (!f) { pop.hidden = true; return; }
+  const it = (ic, label, fn, cls = '') => h('button', { class: cls, type: 'button', onclick: fn, html: icon(ic) + `<span>${label}</span>` });
+  pop.append(
+    it('copy', '복사', () => { s.frames.splice(i + 1, 0, { ...f, id: uid() }); ED.sel.i++; changed(); edStrip(); toast('컷을 하나 더 넣었어요', 1000); }),
+    i < s.frames.length - 1 ? it('pingpong', '거꾸로', () => { const back = s.frames.slice(i, -1).reverse().map(x => ({ ...x, id: uid() })); s.frames.push(...back); changed(); edStrip(); toast(`컷 ${back.length}개를 거꾸로 붙였어요. 갔다가 돌아와요`, 1800); }) : '',
+    it('timer', '×' + f.hold, () => { f.hold = f.hold % 6 + 1; changed(); edStrip(); }),
+    i > 0 ? it('scissors', '장면 나누기', () => edSplit(s, i)) : '',
+    it('cam', '여기에 찍기', () => { S.curScene = s.id; ED.insertAt = i + 1 >= s.frames.length ? null : i + 1; edGoLive(); toast(`${i + 1}번째 컷 뒤에 끼워 찍어요`, 1500); }),
+    it('trash', '지우기', () => { s.frames.splice(i, 1); if (s.trimIn > i) s.trimIn--; if (ED.insertAt != null && S.curScene === s.id && ED.insertAt > i) ED.insertAt--; changed(); if (!s.frames[i]) { if (s.frames[i - 1]) ED.sel.i = i - 1; else { edGoLive(); return; } } Player.t = frameT(s, ED.sel.i); edStrip(); }, 'red'));
+  pop.hidden = false;
+  requestAnimationFrame(() => {
+    const el = $(`.ef-fr[data-fid="${f.id}"]`, EDel.film); if (!el) return;
+    const er = appRect(el), br = appRect($('#stBody')), pw = pop.offsetWidth;
+    pop.style.left = clamp(er.left - br.left + er.width / 2 - pw / 2, 6, br.width - pw - 6) + 'px';
+    pop.style.setProperty('--ax', clamp(er.left - br.left + er.width / 2 - parseFloat(pop.style.left), 14, pw - 14) + 'px');
+  });
+}
+function edSplit(s, i) {
+  const cutT = s.frames.slice(s.trimIn, i).reduce((a, f) => a + f.hold, 0) / P.fps;
+  const nb = { ...newScene(s.name + ' 2'), frames: s.frames.slice(i), trimOut: s.trimOut, bgm: s.bgm };
+  s.frames = s.frames.slice(0, i); s.trimOut = 0;
+  for (const k of ['fx', 'sfx', 'voices', 'narrs']) for (const it of P[k]) if (it.sid === s.id && it.off >= cutT) { it.sid = nb.id; it.off -= cutT; }
+  P.scenes.splice(P.scenes.indexOf(s) + 1, 0, nb); ED.sel = { sid: nb.id, i: 0 }; changed(); edStrip(); toast('장면을 둘로 나눴어요');
+}
+
+/* ---------- 장면 칸막이 메뉴 ---------- */
+function edSceneMenu(s) {
+  const i = P.scenes.indexOf(s);
+  modal((b, m) => {
+    const ni = h('input', { class: 'input', value: s.name, maxlength: 30, 'aria-label': '장면 이름', oninput: e => { s.name = e.target.value; changed(); } });
+    const go = fn => () => { m.close(); fn(); };
+    b.append(h('h2', {}, `${i + 1}번 장면`), ni,
+      h('div', { class: 'menu-grid' },
+        h('button', { class: 'btn accent', type: 'button', onclick: go(() => { S.curScene = s.id; ED.insertAt = null; edGoLive(); toast(`“${s.name}”에 이어서 찍어요`, 1300); }), html: icon('cam') + '<span>이 장면 이어 찍기</span>' }),
+        h('button', { class: 'btn', type: 'button', onclick: go(() => { const r = TL().map[s.id]; if (r && r.t1 > r.t0) { Player.seek(r.t0 + .001); edSelectAt(r.t0 + .001); } trimModal(() => edStrip()); }), html: icon('scissors') + '<span>앞뒤 자르기 · 빠르기</span>' }),
+        h('button', { class: 'btn', type: 'button', onclick: go(() => sketchModal(s, edStrip)), html: icon('image') + '<span>스케치</span>' }),
+        h('button', { class: 'btn', type: 'button', disabled: i === 0 || null, onclick: go(() => { [P.scenes[i - 1], P.scenes[i]] = [P.scenes[i], P.scenes[i - 1]]; changed(); edStrip(); }), html: icon('back') + '<span>앞으로</span>' }),
+        h('button', { class: 'btn', type: 'button', onclick: go(() => { s.frames.reverse(); [s.trimIn, s.trimOut] = [s.trimOut, s.trimIn]; changed(); edStrip(); toast('장면을 거꾸로 돌렸어요', 1200); }), html: icon('pingpong') + '<span>거꾸로</span>' }),
+        P.scenes.length > 1 ? h('button', { class: 'btn', type: 'button', onclick: go(async () => { if (!await confirmBox('장면을 지울까요?', `“${s.name}” 장면과 그 안의 컷·효과·소리가 함께 지워져요. 되돌리기로 살릴 수 있어요.`, '지우기', true)) return; P.scenes = P.scenes.filter(x => x !== s); for (const k of ['fx', 'sfx', 'voices', 'narrs']) P[k] = P[k].filter(it => it.sid !== s.id); if (S.curScene === s.id) S.curScene = P.scenes[P.scenes.length - 1].id; changed(); edGoLive(); }), html: icon('trash') + '<span>지우기</span>' }) : ''),
+      h('div', { class: 'acts' }, h('button', { class: 'btn primary', type: 'button', onclick: () => { m.close(); edStrip(); } }, '닫기')));
+  });
+}
+function edNewScene() {
+  modal((b, m) => {
+    const used = P.scenes.map(s => s.name), nn = storyInfo(P.storyId).scenes.find(n => !used.includes(n)) || `${P.scenes.length + 1}장면`;
+    const ni = h('input', { id: 'newSceneName', value: nn, maxlength: 30 });
+    const make = () => { m.close(); const s = newScene(ni.value.trim() || nn); P.scenes.push(s); S.curScene = s.id; ED.insertAt = null; changed(); edGoLive(); toast(`“${s.name}” 촬영을 시작해요`, 1400); };
+    ni.addEventListener('keydown', e => { if (e.key === 'Enter') make(); });
+    b.append(h('h2', {}, '새 장면'), h('label', { class: 'field' }, h('span', { class: 'label' }, '장면 이름'), ni), storyInfo(P.storyId).scenes.length ? sceneNameChips(ni) : '',
+      h('div', { class: 'acts' }, h('button', { class: 'btn', type: 'button', onclick: m.close }, '취소'), h('button', { class: 'btn accent', type: 'button', onclick: make }, '만들고 찍기')));
+  });
+}
+
+/* ---------- 찍기 ---------- */
+function edShutterPaint() { const sh = EDel.shutter; if (!sh) return; const run = ED.autoOn || !!ED.cdT; sh.classList.toggle('run', run); sh.setAttribute('aria-label', ED.autoOn ? '자동 촬영 멈추기' : ED.cdT ? '타이머 취소' : '촬영'); }
+function edShutter() {
+  if (ED.autoOn || ED.cdT) { const was = ED.autoOn; edStopTimer(); if (was) toast('자동 촬영을 멈췄어요', 1200); return; }
+  if (Player.playing) Player.pause();
+  if (!ED.live) edGoLive();
+  if (ED.panel) edPanel(null);
+  const s = shotSet();
+  if ((!s.delay && !s.auto) || !Cam.stream) { edCapture(); return; }
+  ED.autoOn = !!s.auto; edCountdown();
+}
+function edCountdown() {
+  let n = shotSet().auto || shotSet().delay;
+  const tick = () => {
+    if (!ED.open) return;
+    if (n <= 0) { EDel.cd.hidden = true; ED.cdT = null; edShutterPaint(); edCapture().then(() => { if (ED.autoOn) edCountdown(); }); return; }
+    EDel.cd.hidden = false; EDel.cd.textContent = n; EDel.cd.classList.toggle('soft', ED.autoOn); edBeep(n === 1 ? 1320 : 880); n--;
+    ED.cdT = setTimeout(tick, 1000); edShutterPaint();
+  };
+  tick();
+}
+function edStopTimer() { clearTimeout(ED.cdT); ED.cdT = null; ED.autoOn = false; if (EDel.cd) EDel.cd.hidden = true; edShutterPaint(); }
+function edBeep(f) { AE.init(); const c = AE.ctx; if (!c) return; const o = c.createOscillator(), g = c.createGain(); o.frequency.value = f; g.gain.setValueAtTime(.12, c.currentTime); g.gain.exponentialRampToValueAtTime(.001, c.currentTime + .12); o.connect(g).connect(AE.buses.ui); o.start(); o.stop(c.currentTime + .14); }
+async function edCapture() {
+  if (!Cam.stream || !Cam.video || !Cam.video.videoWidth) { const f = await pickImages({ capture: true }); for (const x of f) { const b = await fileToFrameBlob(x); b && await edAddFrame(b); } return; }
+  const off = h('canvas', { width: W, height: H }), c = off.getContext('2d');
+  c.fillStyle = '#000'; c.fillRect(0, 0, W, H); drawCam(c, Cam.video);
+  AE.init(); AE.click(); EDel.flash.classList.remove('go'); void EDel.flash.offsetWidth; EDel.flash.classList.add('go');
+  try { navigator.vibrate && navigator.vibrate(15); } catch (e) { }
+  await edAddFrame(await new Promise(r => off.toBlob(r, 'image/jpeg', .88)));
+}
+async function edAddFrame(blob) {
+  const sc = edScene(), f = { id: uid(), hold: P.hold, blob, ...loadImg(blob) };
+  if (ED.insertAt != null) { sc.frames.splice(ED.insertAt, 0, f); ED.insertAt++; if (ED.insertAt >= sc.frames.length) ED.insertAt = null; }
+  else sc.frames.push(f);
+  changed(); edStrip(true);
+}
+
+/* ---------- 카메라 설정 말풍선 ---------- */
+function edCamPop() {
+  const old = $('.ed-cpop'); if (old) { old.remove(); EDel.camB.classList.remove('on'); return; }
+  const box = h('div', { class: 'ed-cpop' });
+  const seg = (vals, cur, set) => h('div', { class: 'seg' }, ...vals.map(([v, l]) => h('button', { type: 'button', class: cur() === v ? 'on' : '', onclick: e => { set(v); [...e.target.parentElement.children].forEach(b => b.classList.toggle('on', b === e.target)); } }, l)));
+  const tog = (on, set, label) => h('label', { class: 'toggle' }, h('input', { type: 'checkbox', checked: on, 'aria-label': label, onchange: e => set(e.target.checked) }));
+  const row = (label, ctl) => h('div', { class: 'cp-row' }, h('span', {}, label), ctl);
+  const timerVal = () => { const s = shotSet(); return s.auto ? 'a' + s.auto : 'd' + s.delay; };
+  box.append(
+    row('카메라', h('button', { class: 'btn sm', type: 'button', onclick: async () => { if (Cam.failed) { edCamStart(); return; } if (!(await Cam.next())) toast('바꿀 수 있는 다른 카메라가 없어요'); else ED.locked = false; }, html: icon('switchCam') + '<span>앞·뒤 바꾸기</span>' })),
+    row('한 번에 찍기', seg([[1, '1컷'], [2, '2'], [3, '3'], [4, '4']], () => P.hold, v => { P.hold = v; changed(); })),
+    row('타이머', seg([['d0', '끔'], ['d3', '3초'], ['d5', '5초'], ['a2', '2초마다'], ['a3', '3초마다']], timerVal, v => { edStopTimer(); const n = +v.slice(1); Object.assign(shotSet(), v[0] === 'a' ? { delay: 0, auto: n } : { delay: n, auto: 0 }); })),
+    row('겹쳐보기 진하기', h('input', { type: 'range', min: .15, max: .8, step: .05, value: S.onionA || .42, 'aria-label': '겹쳐 보기 진하기', oninput: e => { S.onionA = +e.target.value; } })),
+    row('격자', tog(ED.grid, v => ED.grid = v, '격자')),
+    row('밝기·초점 고정', tog(ED.locked, v => edLock(v), '카메라 고정')),
+    row('사진 불러오기', ib('image', '앨범', 'btn sm', { onclick: () => { box.remove(); edImport(); } })));
+  EDel.stage.append(box); EDel.camB.classList.add('on');
+  setTimeout(() => { const away = e => { if (!box.contains(e.target) && !EDel.camB.contains(e.target)) { box.remove(); EDel.camB.classList.remove('on'); removeEventListener('pointerdown', away, true); } }; addEventListener('pointerdown', away, true); }, 0);
+}
+/* 카메라 고정 — 컷마다 밝기·초점·색이 바뀌어 깜빡이지 않게 지금 값으로 묶어요 (되는 기기만) */
+async function edLock(want) {
+  const tr = Cam.stream && Cam.stream.getVideoTracks()[0];
+  if (!tr || !tr.getCapabilities) { toast('카메라가 켜져 있을 때 쓸 수 있어요'); return; }
+  const cap = tr.getCapabilities(), cur = tr.getSettings(), adv = {};
+  for (const [mode, val] of [['exposureMode', ['exposureTime', 'iso']], ['focusMode', ['focusDistance']], ['whiteBalanceMode', ['colorTemperature']]]) {
+    const modes = cap[mode] || [];
+    if (!want) { if (modes.includes('continuous')) adv[mode] = 'continuous'; continue; }
+    const vals = val.filter(k => cur[k] != null && cap[k]);
+    if (modes.includes('manual') && vals.length) { adv[mode] = 'manual'; for (const k of vals) adv[k] = cur[k]; }
+    else if (modes.includes('single-shot')) adv[mode] = 'single-shot';
+    else if (modes.includes('manual')) adv[mode] = 'manual';
+  }
+  if (!Object.keys(adv).length) { ED.locked = false; toast(want ? '이 기기 카메라는 고정 기능이 없어요. 불빛이 바뀌지 않는 곳에서 찍어 주세요' : '카메라 고정을 풀었어요', 3200); return; }
+  try { await tr.applyConstraints({ advanced: [adv] }); ED.locked = want; toast(want ? '카메라를 고정했어요. 밝기·초점이 이제 안 바뀌어요' : '카메라 고정을 풀었어요', 2200); }
+  catch (e) { toast('카메라를 고정하지 못했어요'); }
+}
+
+/* ---------- 재생 ---------- */
+function edTogglePlay() {
+  if (Player.playing) { Player.pause(); return; }
+  if (!TL().total) { toast('먼저 몇 컷을 찍어 보세요'); return; }
+  if (ED.live) Player.t = 0;
+  ED.popOpen = false; edPopPaint();
+  Player.play();
+}
+function edTick(t) {
+  if (!ED.open || !Player.playing) return;
+  const seg = segAt(t); if (!seg) return;
+  const el = $(`.ef-fr[data-fid="${seg.f.id}"]`, EDel.film);
+  const prev = $('.ef-fr.play', EDel.film); if (prev !== el) { prev && prev.classList.remove('play'); if (el) { el.classList.add('play'); const st = EDel.strip; if (el.offsetLeft < st.scrollLeft || el.offsetLeft + el.offsetWidth > st.scrollLeft + st.clientWidth) st.scrollLeft = el.offsetLeft - 40; } }
+}
+function edAfterPlay() {
+  if (!ED.open) return;
+  const prev = $('.ef-fr.play', EDel.film); prev && prev.classList.remove('play');
+  if (ED.rec && ED.rec.active) return;
+  edSelectAt(Math.min(Player.t, TL().total - .001));
+}
+
+/* ---------- 오른쪽 판 ---------- */
+function edPanel(name, keep) {
+  if (!ED.open) return;
+  if (!keep && ED.panel === name) name = null;
+  if (ED.rec && ED.rec.active) ED.rec.stop();
+  AE.stopPreview();
+  ED.panel = name; S.step = name === 'story' ? 'script' : name === 'sound' ? 'sound' : name === 'fx' ? 'edit' : 'shoot';
+  const p = EDel.panel; p.innerHTML = ''; p.hidden = !name; p.className = 'ed-panel' + (name ? ' p-' + name : '');
+  $$('.ed-l .efb').forEach(b => b.classList.toggle('on', !!name && b.getAttribute('aria-label') === { story: '이야기', sound: '소리', fx: '효과' }[name]));
+  EDel.right.hidden = !!name; $('.ed').classList.toggle('has-panel', !!name); $('.ed-cpop') && $('.ed-cpop').remove();
+  if (!name) { ED.fxSel = null; S.sel = null; EDel.sub.hidden = true; edStrip(); return; }
+  if (name !== 'story' && ED.live) { if (!edSelectAt(Math.max(0, TL().total - .001))) { /* 아직 컷이 없어요 */ } }
+  p.append(h('div', { class: 'pn-head' }, h('h3', {}, { story: '이야기', sound: '소리', fx: '효과' }[name]), h('button', { class: 'pn-x', type: 'button', 'aria-label': '판 닫기', html: icon('x'), onclick: () => edPanel(null) })));
+  const body = h('div', { class: 'pn-body' }); p.append(body);
+  if (name === 'story') { body.classList.add('scroll'); edStoryPanel(body); }
+  else if (!TL().total) body.append(h('div', { class: 'pn-empty' }, h('b', {}, '먼저 몇 컷을 찍어 주세요'), h('p', { class: 'hint' }, '소리와 효과는 찍은 컷 위에 넣어요.'), ib('cam', '찍으러 가기', 'btn accent', { onclick: () => { edPanel(null); edGoLive(); } })));
+  else if (name === 'sound') edSoundPanel(body);
+  else edFxPanel(body);
+  edStrip();
+}
+
+/* 이야기(시나리오): 줄거리 · 장면 · 대사 */
+function edStoryPanel(R) {
+  const orig = P.storyId === 'byeoljubu', info = storyInfo(P.storyId);
+  const render = () => {
+    R.innerHTML = '';
+    const top = h('div', { class: 'row nowrap' }, h('span', { class: 'label' }, '제목'),
+      h('input', { class: 'input grow', value: P.title, maxlength: 40, 'aria-label': '영상 제목', oninput: e => { P.title = e.target.value; changed(); } }),
+      orig ? ib('play', '원작 보기', 'btn sm', { onclick: () => { edClose(); introReturn = 'script'; startIntro(); } }) : '');
+    const syn = orig ? h('div', { class: 'card pn-syn' }, ORIGINAL_SYNOPSIS)
+      : h('textarea', { class: 'input', rows: 3, placeholder: '누가, 어디서, 무슨 일이 생기고, 어떻게 끝나나요?', 'aria-label': '줄거리', oninput: e => { P.synopsis = e.target.value; changed(); } }, P.synopsis || '');
+    const scenes = h('div', { class: 'pn-items' });
+    P.scenes.forEach((s, i) => scenes.append(h('div', { class: 'sc-card' },
+      h('span', { class: 'n' }, i + 1),
+      h('button', { class: 'sk-slot' + (s.sketch ? ' has' : ''), type: 'button', style: s.sketch ? { backgroundImage: `url(${s.sketch.url})` } : {}, 'aria-label': s.sketch ? `${i + 1}번 장면 스케치 보기` : `${i + 1}번 장면 스케치 사진 찍기`,
+        onclick: async () => { if (s.sketch) sketchModal(s, render); else if (await takeSketch(s)) render(); }, html: s.sketch ? '' : icon('cam') + '<span>스케치</span>' }),
+      h('div', { class: 'f' },
+        h('input', { class: 'input', value: s.name, maxlength: 30, 'aria-label': `${i + 1}번 장면 이름`, oninput: e => { s.name = e.target.value; changed(); } }),
+        h('input', { class: 'input', value: s.desc || '', placeholder: '이 장면에서 무슨 일이 일어나나요?', 'aria-label': `${i + 1}번 장면 설명`, oninput: e => { s.desc = e.target.value; changed(); } })),
+      ib('cam', '', 'btn sm icon', { 'aria-label': `${i + 1}번 장면 찍기`, onclick: () => { S.curScene = s.id; ED.insertAt = null; edPanel(null); edGoLive(); } }))));
+    P.script = P.script || [];
+    const lines = h('div', { class: 'pn-items' });
+    const up = h('input', { type: 'file', accept: '.txt,.csv,.md,.text,text/plain', hidden: true, onchange: async e => { const f = e.target.files[0]; if (!f) return; const parsed = parseScript(await f.text()); P.script.push(...parsed); P.scriptMode = P.scriptMode || 'new'; changed(); render(); toast(`대사 ${parsed.length}줄을 불러왔어요`); } });
+    if (!P.script.length) lines.append(h('div', { class: 'hint' }, orig ? '“원작 대사”를 누르면 별주부전 대사 12줄이 들어와요.' : '“＋ 대사”를 눌러 녹음할 대사를 써요. 파일(.txt)은 한 줄에 “인물: 대사”로 써요.'));
+    P.script.forEach((r, i) => lines.append(h('div', { class: 'script-row' },
+      h('input', { class: 'input', value: r.who, list: 'whoList3', placeholder: '누가', 'aria-label': `${i + 1}번 대사 인물`, oninput: e => { r.who = e.target.value; changed(); } }),
+      h('input', { class: 'input', value: r.text, placeholder: '무슨 말을 할까요?', 'aria-label': `${i + 1}번 대사 내용`, oninput: e => { r.text = e.target.value; changed(); } }),
+      h('select', { class: 'input', 'aria-label': `${i + 1}번 대사 장면`, onchange: e => { r.scene = e.target.value || null; changed(); } }, h('option', { value: '' }, '장면'), ...P.scenes.map(s => h('option', { value: s.id, selected: r.scene === s.id }, s.name))),
+      ib('trash', '', 'btn sm icon ghost', { 'aria-label': '대사 지우기', onclick: () => { P.script.splice(i, 1); changed(); render(); } }))));
+    R.append(top,
+      h('div', { class: 'pn-cols' },
+        h('div', { class: 'pn-col' }, h('h4', {}, '줄거리'), syn,
+          h('div', { class: 'pn-sub' }, h('h4', {}, `장면 ${P.scenes.length}개`),
+            orig && P.scenes.length < ORIGINAL_SCENES.length ? ib('book', '원작 장면', 'btn sm', { onclick: () => { for (const n of ORIGINAL_SCENES) if (!P.scenes.some(s => s.name === n)) P.scenes.push(newScene(n)); changed(); render(); edStrip(); } }) : '',
+            ib('plus', '장면', 'btn sm', { onclick: () => { P.scenes.push(newScene(info.scenes.find(n => !P.scenes.some(s => s.name === n)) || `${P.scenes.length + 1}장면`)); changed(); render(); edStrip(); } })),
+          scenes),
+        h('div', { class: 'pn-col' },
+          h('div', { class: 'pn-sub' }, h('h4', {}, `대사 ${P.script.length}줄`),
+            ib('upload', '', 'btn sm icon', { 'aria-label': '대사 파일 불러오기', onclick: () => up.click() }),
+            orig ? ib('book', '원작 대사', 'btn sm', { onclick: () => { P.script.push(...originalScript()); P.scriptMode = P.scriptMode || 'original'; changed(); render(); } }) : '',
+            ib('plus', '대사', 'btn sm', { onclick: () => { P.script.push({ id: uid(), who: P.script.length ? P.script[P.script.length - 1].who : '', text: '', scene: edScene().id }); P.scriptMode = P.scriptMode || 'new'; changed(); render(); const ins = $$('.script-row input:nth-child(2)', R).pop(); ins && ins.focus(); } }), up,
+            h('datalist', { id: 'whoList3' }, ...Object.keys(CHAR_COLORS).map(k => h('option', { value: k })))),
+          lines)));
+  };
+  render();
+}
+
+/* 소리: 대사 · 효과음 · 배경음악 · 내레이션 */
+function edSoundPanel(R) {
+  const tabs = [['voice', '대사'], ['sfx', '효과음'], ['bgm', '배경음악'], ['narr', '내레이션']];
+  const tabEl = h('div', { class: 'seg pn-tabs' }), box = h('div', { class: 'pn-tab' }), bar = h('div', { class: 'sel-bar', hidden: true });
+  R.append(tabEl, box, bar);
+  AE.init(); Promise.all(SFX.map(s => AE.getSfx(s.id))).then(() => ED.open && edTracks());
+  const paintTabs = () => { tabEl.innerHTML = ''; for (const [k, l] of tabs) tabEl.append(h('button', { type: 'button', class: ED.tab === k ? 'on' : '', onclick: () => { if (ED.rec && ED.rec.active) ED.rec.stop(); AE.stopPreview(); ED.tab = k; S.sel = null; build(); } }, l)); };
+  const SEL = () => S.sel && S.sel.kind === 'sfx' ? P.sfx.find(x => x.id === S.sel.id) : S.sel && S.sel.kind === 'narr' ? P.narrs.find(x => x.id === S.sel.id) : null;
+  const refresh = () => { TLc = null; edTracks(); edPill(); };
+  function buildBar() {
+    bar.innerHTML = ''; const it = SEL(); bar.hidden = !it; if (!it) return;
+    const close = ib('x', '', 'btn sm icon ghost', { 'aria-label': '닫기', onclick: () => { S.sel = null; buildBar(); edTracks(); } });
+    if (S.sel.kind === 'sfx') bar.append(h('b', {}, SFX.find(x => x.id === it.snd).name),
+      h('input', { type: 'range', min: 0, max: 1.5, step: .05, value: it.vol, 'aria-label': '소리 크기', onchange: e => { it.vol = +e.target.value; changed(); AE.playPreview('sfx', it.snd); } }),
+      ib('next', '', 'btn sm icon', { 'aria-label': '지금 컷으로 옮기기', onclick: () => { setAbs(it, Player.t); changed(); refresh(); } }),
+      ib('trash', '', 'btn sm icon', { 'aria-label': '지우기', onclick: () => { P.sfx = P.sfx.filter(x => x !== it); S.sel = null; changed(); refresh(); buildBar(); } }), close);
+    else bar.append(h('b', {}, `내레이션 ${it.dur.toFixed(1)}초`),
+      ib('speaker', '', 'btn sm icon', { 'aria-label': '듣기', onclick: () => { Player.seek(absT(it)); Player.play({ until: absT(it) + it.dur + .2 }); } }),
+      ib('trash', '', 'btn sm icon', { 'aria-label': '지우기', onclick: () => { P.narrs = P.narrs.filter(x => x !== it); S.sel = null; changed(); refresh(); buildBar(); } }), close);
+  }
+  const recState = s => { if (s === 'rec') { const l = ED.tab === 'voice' ? ED.line : null; const txt = l ? l.text : P.narrText; if (txt) { EDel.sub.hidden = false; EDel.sub.innerHTML = ''; EDel.sub.append(h('small', {}, l ? l.who : '내레이션'), txt); } } else EDel.sub.hidden = true; build(); };
+  function build() {
+    paintTabs(); box.innerHTML = ''; buildBar();
+    const on = ED.rec && ED.rec.active;
+    if (ED.tab === 'voice') {
+      const ls = P.script || [], voiceOf = l => P.voices.find(v => v.lineId === l.id);
+      if (!ls.length) {
+        box.append(h('div', { class: 'pn-empty' }, h('b', {}, '녹음할 대사가 없어요'), h('p', { class: 'hint' }, '이야기 판에서 대사를 먼저 써요.'),
+          h('div', { class: 'row' }, P.storyId === 'byeoljubu' ? ib('book', '원작 대사 넣기', 'btn sm accent', { onclick: () => { P.script = originalScript(); P.scriptMode = 'original'; changed(); build(); } }) : '',
+            ib('book', '대사 쓰기', 'btn sm', { onclick: () => edPanel('story') }))));
+        return;
+      }
+      if (!ED.line || !ls.includes(ED.line)) ED.line = ls.find(l => !voiceOf(l)) || ls[0];
+      const list = h('div', { class: 'pn-list' });
+      ls.forEach((l, i) => { const v = voiceOf(l);
+        list.append(h('button', { class: 'vl' + (l === ED.line ? ' on' : '') + (v ? ' ok' : ''), type: 'button', disabled: on || null, onclick: () => { ED.line = l; if (v) edSelectAt(absT(v)); else { const s2 = P.scenes.find(s => s.id === l.scene); const rr = s2 && TL().map[s2.id]; if (rr && rr.t1 > rr.t0) edSelectAt(rr.t0 + .001); } build(); } },
+          h('span', { class: 'd', html: v ? icon('check') : String(i + 1) }), h('span', { class: 't' }, h('b', {}, l.who || '?'), h('small', {}, l.text || '(빈 대사)')), v ? h('em', {}, v.dur.toFixed(1) + '초') : '')); });
+      const v = voiceOf(ED.line);
+      box.append(list, h('div', { class: 'pn-rec' },
+        ib('speaker', '', 'btn icon', { 'aria-label': '듣기', disabled: !v || on || null, onclick: () => { Player.seek(absT(v)); Player.play({ until: absT(v) + v.dur + .2 }); } }),
+        h('button', { class: 'mic' + (on ? ' run' : ''), type: 'button', 'aria-label': on ? '녹음 멈추기' : v ? '다시 녹음' : '녹음', onclick: () => recVoice(), html: icon(on ? 'stop' : 'mic') }),
+        ib('upload', '', 'btn icon', { 'aria-label': '녹음 파일 넣기', disabled: on || null, onclick: () => uploadAudio('voices', ED.line, () => { refresh(); build(); }, Mic.failed) })),
+        h('div', { class: 'hint pn-tip' }, on ? '말하고 나서 빨간 버튼을 눌러 멈춰요' : '지금 컷부터 영상이 흐르며 녹음돼요 · 3, 2, 1 뒤에 말해요'));
+    } else if (ED.tab === 'sfx') {
+      const grid = h('div', { class: 'kgrid' });
+      for (const s of SFX) { const k = fxKey(s.name, SFX_IC[s.id] || 'speaker', TC.sfx, () => { AE.init(); AE.playPreview('sfx', s.id); }, () => addSfx(s.id)); k.title = s.desc; grid.append(k); }
+      box.append(h('div', { class: 'hint pn-tip' }, '한 번: 들어 보기 · 두 번: 지금 컷에 넣기'), grid);
+    } else if (ED.tab === 'bgm') {
+      const sc = sceneAt(Player.t), i = P.scenes.indexOf(sc);
+      const pick = id => { sc.bgm = id; changed(); refresh(); build(); if (id) AE.playPreview('bgm', id); else AE.stopPreview(); };
+      box.append(h('div', { class: 'pn-sub' }, h('h4', {}, `${i + 1}. ${sc.name}`), ib('copy', '모든 장면에', 'btn sm', { onclick: () => { P.scenes.forEach(s => s.bgm = sc.bgm); changed(); refresh(); toast('모든 장면에 같은 음악을 넣었어요', 1500); } })),
+        h('div', { class: 'kgrid c2' }, h('button', { class: 'sbtn' + (!sc.bgm ? ' on' : ''), type: 'button', onclick: () => pick(null) }, '음악 없음'),
+          ...BGM.map(b => h('button', { class: 'sbtn' + (sc.bgm === b.id ? ' on' : ''), type: 'button', onclick: () => pick(b.id) }, b.name, h('small', {}, b.desc)))),
+        h('div', { class: 'hint pn-tip' }, '아래 필름에서 다른 장면의 컷을 누르면 그 장면 음악을 골라요'));
+    } else {
+      const slider = (k, label) => h('label', { class: 'mini' }, label, h('input', { type: 'range', min: 0, max: 1.5, step: .05, value: P.mix[k], oninput: e => { P.mix[k] = +e.target.value; applyMix(); }, onchange: changed }));
+      box.append(h('textarea', { class: 'input', rows: 2, placeholder: '읽을 글을 써 두면 녹음할 때 화면에 보여 줘요', 'aria-label': '내레이션 글', oninput: e => { P.narrText = e.target.value; }, onchange: changed }, P.narrText || ''),
+        h('div', { class: 'pn-rec' }, h('button', { class: 'mic' + (on ? ' run' : ''), type: 'button', 'aria-label': on ? '녹음 멈추기' : '내레이션 녹음', onclick: recNarr, html: icon(on ? 'stop' : 'mic') }),
+          ib('upload', '', 'btn icon', { 'aria-label': '녹음 파일 넣기', disabled: on || null, onclick: () => uploadAudio('narrs', null, () => { refresh(); build(); }, Mic.failed) })),
+        h('h4', {}, '소리 크기'),
+        h('div', { class: 'mix' }, slider('bgm', '음악'), slider('sfx', '효과음'), slider('voice', '대사'), slider('narr', '내레이션'),
+          h('label', { class: 'toggle' }, h('input', { type: 'checkbox', checked: P.duck, onchange: e => { P.duck = e.target.checked; changed(); } }), '말할 때 음악 작게')));
+    }
+  }
+  function addSfx(id) {
+    const s = { id: uid(), snd: id, vol: 1 }; setAbs(s, Player.t); P.sfx.push(s); AE.playPreview('sfx', id);
+    S.sel = { kind: 'sfx', id: s.id }; changed(); refresh(); buildBar();
+  }
+  async function recVoice() {
+    if (ED.rec && ED.rec.active) { ED.rec.stop(); return; }
+    const line = ED.line; if (!line) return;
+    ED.rec = recordFlow({ kind: 'voices', wrap: EDel.mon, line, onState: recState, onDone: () => {
+      refresh(); const ls = P.script || []; const nx = ls.slice(ls.indexOf(line) + 1).find(l => !P.voices.some(v => v.lineId === l.id));
+      if (nx) { ED.line = nx; toast('녹음했어요! 다음 대사로 넘어갔어요', 1600); } else toast('대사를 다 녹음했어요! 이제 효과음·배경음악을 넣거나 위의 “완성”을 눌러요', 3600, true);
+      edSelectAt(Math.min(Player.t, TL().total - .001)); build(); } });
+    await ED.rec.start();
+  }
+  async function recNarr() {
+    if (ED.rec && ED.rec.active) { ED.rec.stop(); return; }
+    ED.rec = recordFlow({ kind: 'narrs', wrap: EDel.mon, line: null, onState: recState, onDone: c => { S.sel = { kind: 'narr', id: c.id }; refresh(); edSelectAt(Math.min(Player.t, TL().total - .001)); build(); toast('내레이션을 넣었어요'); } });
+    await ED.rec.start();
+  }
+  build();
+}
+
+/* 효과: 한 번 누르면 미리 보기, 한 번 더 누르면 지금 컷에 넣기. 넣은 효과는 화면에서 끌어 옮겨요 */
+function edFxPanel(R) {
+  const bar = h('div', { class: 'sel-bar', hidden: true }), grid = h('div', { class: 'kgrid' });
+  let pvRaf = 0;
+  const SEL = () => ED.fxSel && P.fx.find(e => e.id === ED.fxSel);
+  const refresh = () => { TLc = null; edTracks(); };
+  const preview = type => {
+    cancelAnimationFrame(pvRaf); const t0 = performance.now(), D = 1.8;
+    const loop = () => { const lt = (performance.now() - t0) / 1000; if (lt > D || !ED.open || ED.panel !== 'fx') return; drawFx(EDel.ctx, { id: 'pv' + type, type, x: .5, y: .45, s: 1, dur: D, text: type === 'text' ? '앗!' : type === 'boom' ? '쾅!' : undefined }, lt); pvRaf = requestAnimationFrame(loop); };
+    requestAnimationFrame(loop);
+  };
+  const add = type => {
+    const full = FULLSCREEN_FX[type];
+    const e = { id: uid(), type, x: .5, y: .45, s: 1, dur: full ? 4 : 2, text: type === 'text' ? '앗!' : type === 'boom' ? '쾅!' : undefined };
+    if (full) e.y = .5;
+    setAbs(e, Player.t); P.fx.push(e); ED.fxSel = e.id; changed(); refresh(); buildBar();
+  };
+  function buildBar() {
+    bar.innerHTML = ''; const e = SEL(); bar.hidden = !e; if (!e) return;
+    bar.append(h('b', {}, FX.find(f => f.id === e.type).name),
+      h('span', { class: 'label' }, '크기'), h('input', { type: 'range', min: .4, max: 2.5, step: .05, value: e.s, 'aria-label': '크기', oninput: ev => { e.s = +ev.target.value; }, onchange: changed }),
+      h('span', { class: 'label' }, '시간'), h('input', { type: 'range', min: .5, max: 8, step: .1, value: e.dur, 'aria-label': '보이는 시간', oninput: ev => { e.dur = +ev.target.value; }, onchange: () => { changed(); refresh(); } }),
+      (e.type === 'text' || e.type === 'boom') ? h('input', { class: 'txt', value: e.text || '', maxlength: 12, 'aria-label': '글자', oninput: ev => { e.text = ev.target.value; }, onchange: changed }) : '',
+      ib('next', '', 'btn sm icon', { 'aria-label': '지금 컷으로 옮기기', onclick: () => { setAbs(e, Player.t); changed(); refresh(); } }),
+      ib('trash', '', 'btn sm icon', { 'aria-label': '지우기', onclick: () => { P.fx = P.fx.filter(x => x !== e); ED.fxSel = null; changed(); refresh(); buildBar(); } }),
+      ib('x', '', 'btn sm icon ghost', { 'aria-label': '닫기', onclick: () => { ED.fxSel = null; buildBar(); refresh(); } }));
+  }
+  for (const f of FX) grid.append(fxKey(f.name, FX_IC[f.id] || 'sparkle', TC.fx, () => preview(f.id), () => add(f.id)));
+  R.append(h('div', { class: 'hint pn-tip' }, '한 번: 미리 보기 · 두 번: 지금 컷에 넣기 · 넣은 효과는 화면에서 끌어 옮겨요'), grid, bar);
+  buildBar();
+  // 화면에서 효과 고르기·끌기
+  const cv = EDel.cv; let drag = null;
+  const rel = e => { const r = appRect(cv), p = appPt(e); return { x: (p.x - r.left) / r.width, y: (p.y - r.top) / r.height }; };
+  cv.onpointerdown = e => {
+    if (ED.panel !== 'fx' || ED.live) return;
+    const p = rel(e), t = Player.t; let hit = null, best = 1e9;
+    for (const fx of P.fx) { const et = absT(fx); if (et == null || t < et || t > et + fx.dur) continue; const d = Math.hypot((p.x - fx.x) * W, (p.y - fx.y) * H); if (d < 110 * fx.s && d < best) { best = d; hit = fx; } }
+    ED.fxSel = hit ? hit.id : null; buildBar(); edTracks();
+    if (hit) { cv.setPointerCapture(e.pointerId); drag = { fx: hit, dx: p.x - hit.x, dy: p.y - hit.y }; }
+  };
+  cv.onpointermove = e => { if (!drag) return; const p = rel(e); drag.fx.x = clamp(p.x - drag.dx, 0, 1); drag.fx.y = clamp(p.y - drag.dy, 0, 1); };
+  cv.onpointerup = cv.onpointercancel = () => { if (drag) { drag = null; changed(); } };
+}
+
+/* ---------- 완성 창: 제목 · 빠르기 · 영상 파일 · 상영관 ---------- */
+function edFinish() {
+  if (Player.playing) Player.pause();
+  if (!TL().total) { toast('먼저 몇 컷을 찍어 보세요'); return; }
+  const frames = P.scenes.reduce((a, s) => a + s.frames.length, 0);
+  modal((b, m) => {
+    const setFps = n => { const k = P.fps / n; for (const key of ['fx', 'sfx', 'voices', 'narrs']) for (const it of P[key]) it.off *= k; P.fps = n; changed(); edStrip(); info.textContent = stats(); };
+    const stats = () => `장면 ${P.scenes.length} · 컷 ${frames} · ${fmt(TL().total).replace(/\.\d$/, '')} · 대사 ${P.voices.length} · 효과음 ${P.sfx.length} · 효과 ${P.fx.length}`;
+    const info = h('p', { class: 'hint', style: { margin: 0 } }, stats());
+    const big = (ic, label, sub, onclick, cls = '') => h('button', { class: 'fin-b ' + cls, type: 'button', onclick, html: `${icon(ic)}<b>${label}</b><small>${sub}</small>` });
+    b.append(h('div', { class: 'fin-head' }, h('h2', {}, '완성!'),
+        h('input', { class: 'input', value: P.title, maxlength: 40, 'aria-label': '영상 제목', oninput: e => { P.title = e.target.value; changed(); } }),
+        h('button', { class: 'pn-x', type: 'button', 'aria-label': '닫기', html: icon('x'), onclick: m.close })), info,
+      h('div', { class: 'fin-grid' },
+        big('play', '처음부터 보기', '크게 틀어 봐요', () => { m.close(); playAll(); }),
+        big('download', '영상 파일', 'mp4로 저장 · 보내기', () => { m.close(); exportVideo(); }, 'or'),
+        big('trophy', '상영관에 올리기', '친구들의 별점 받기', async () => { m.close(); const first = !P.show; P.done.final = true; P.show = P.show || Date.now(); P.stars = P.stars || []; changed(); await openTheater(); toast(first ? '상영관에 올렸어요! 친구들에게 별점을 받아 보세요' : '상영관이에요', 3000, true); }),
+        big('save', '작품 파일', '백업 · 다른 기기로', async () => { m.close(); await saveProject(); const d = await DB.get(P.id).catch(() => null); d ? exportProjectFile(d) : toast('먼저 저장이 되어야 해요'); })),
+      h('div', { class: 'row fin-set' }, h('span', { class: 'label', style: { whiteSpace: 'nowrap' } }, '빠르기'),
+        h('div', { class: 'seg' }, ...[6, 8, 12, 15, 24].map(n => h('button', { type: 'button', class: P.fps === n ? 'on' : '', onclick: e => { setFps(n); [...e.target.parentElement.children].forEach(x => x.classList.toggle('on', x === e.target)); } }, n + ''))),
+        h('label', { class: 'toggle' }, h('input', { type: 'checkbox', checked: P.fade, onchange: e => { P.fade = e.target.checked; changed(); } }), '부드럽게'),
+        h('label', { class: 'toggle' }, h('input', { type: 'checkbox', checked: P.subs, onchange: e => { P.subs = e.target.checked; changed(); } }), '자막')));
+  }, { wide: true });
+}
+
+/* =========================================================
+   갤러리 — 첫 화면. 새 작품 + 내가 만든 작품 카드
+   ========================================================= */
+async function openGallery() {
+  show('library'); stopIntro();
+  const up = h('input', { type: 'file', accept: '.json,application/json', hidden: true, onchange: async e => { const f = e.target.files[0]; if (!f) return; const d = await importProjectFile(f); if (d) { toast(`“${d.title}”을(를) 불러왔어요`); openGallery(); } } });
+  libTop('내 작품', false).append(up,
+    key('', { ic: 'upload', cls: 'works', aria: '작품 파일 불러오기', title: '작품 파일 불러오기', onclick: () => up.click() }),
+    key('', { ic: 'trash', cls: 'works', aria: '휴지통', title: '휴지통', onclick: openTrash }),
+    key('상영관', { ic: 'trophy', cls: 'works hall', onclick: () => openTheater() }));
+  const g = libBody('gallery');
+  const grid = h('div', { class: 'gal scroll' });
+  grid.append(h('button', { class: 'gcard new', type: 'button', onclick: () => openLibrary(), html: `<span class="pl">${icon('plus')}</span><b>새 작품</b>` }));
+  g.append(grid);
+  const { list } = await loadWorks();
+  for (const d of list) {
+    const sec = d.scenes.reduce((a, s) => a + s.frames.slice(s.trimIn || 0, s.frames.length - (s.trimOut || 0)).reduce((x, f) => x + f.hold, 0), 0) / (d.fps || 12);
+    const th = h('span', { class: 'th' }, h('em', {}, fmt(sec).replace(/\.\d$/, '')));
+    if (d.thumb) th.style.backgroundImage = `url(${URL.createObjectURL(d.thumb)})`;
+    const more = h('button', { class: 'gmore', type: 'button', 'aria-label': `${d.title} 메뉴`, html: icon('more'), onclick: e => { e.stopPropagation(); workMenu(d); } });
+    grid.append(h('div', { class: 'gcard', role: 'button', tabindex: 0, 'aria-label': `${d.title} 열기`, onclick: async () => { toast('작품을 여는 중…', 1200); await openProject(d); openEditor(); } },
+      th, h('span', { class: 'tt' }, h('b', {}, d.title || '제목 없음'), h('small', {}, storyInfo(d.storyId).title + (d.show ? ' · 상영 중' : ''))), more));
+  }
+}
+function workMenu(d) {
+  modal((b, m) => {
+    b.append(h('h2', {}, d.title || '제목 없음'),
+      h('div', { class: 'menu-grid' },
+        h('button', { class: 'btn accent', type: 'button', onclick: async () => { m.close(); await openProject(d); openEditor(); }, html: icon('edit') + '<span>이어서 만들기</span>' }),
+        h('button', { class: 'btn', type: 'button', onclick: async () => { m.close(); const c = { ...d, id: uid(), title: (d.title || '작품') + ' 복사', created: Date.now(), updated: Date.now(), show: 0, stars: [] }; await DB.put(c); toast('작품을 복사했어요'); openGallery(); }, html: icon('copy') + '<span>복사하기</span>' }),
+        h('button', { class: 'btn', type: 'button', onclick: () => { m.close(); exportProjectFile(d); }, html: icon('download') + '<span>작품 파일로 저장</span>' }),
+        h('button', { class: 'btn', type: 'button', onclick: async () => { m.close(); if (await confirmBox('작품을 휴지통에 넣을까요?', `“${d.title}”은(는) 휴지통에 ${TRASH_DAYS}일 동안 있어요. 그동안은 되살릴 수 있어요.`, '휴지통에 넣기', true)) { d.trashed = Date.now(); await DB.put(d); openGallery(); toast('휴지통에 넣었어요'); } }, html: icon('trash') + '<span>지우기</span>' })),
+      h('div', { class: 'acts' }, h('button', { class: 'btn primary', type: 'button', onclick: m.close }, '닫기')));
+  });
 }
 async function saveFile(blob, filename, what = '영상 파일') {
   try {

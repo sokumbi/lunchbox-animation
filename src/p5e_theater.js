@@ -17,8 +17,8 @@ async function openTheater() {
   if (P && !$('#studio').hidden) { leaveStep(); await saveProject(); theaterBack = P.id; P = null; TLc = null; }
   show('library'); stopIntro();
   libTop('상영관 · 인기 순위', async () => {
-    if (theaterBack) { const d = await DB.get(theaterBack).catch(() => null); theaterBack = null; if (d) { await openProject(d); openStudio('final'); return; } }
-    openLibrary();
+    if (theaterBack) { const d = await DB.get(theaterBack).catch(() => null); theaterBack = null; if (d) { await openProject(d); openEditor(); return; } }
+    openGallery();
   }).append(key('작품 올리기', { ic: 'upload', cls: 'works hall', onclick: pickToShow }));
   const g = libBody('theater');
   const { list } = await loadWorks();

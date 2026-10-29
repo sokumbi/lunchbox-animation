@@ -67,29 +67,3 @@ function parseScript(text) {
   return out;
 }
 function originalScript() { return ORIGINAL_SCRIPT.map(l => ({ id: uid(), who: l.who, text: l.text, scene: P.scenes[l.scene] ? P.scenes[l.scene].id : null })); }
-function scriptEditor(onSave) {
-  const rows = (P.script || []).map(l => ({ ...l }));
-  modal((b, m) => {
-    const list = h('div', { class: 'script-table' });
-    const dl = h('datalist', { id: 'whoList' }, ...Object.keys(CHAR_COLORS).map(k => h('option', { value: k })));
-    const draw = () => {
-      list.innerHTML = '';
-      if (!rows.length) list.append(h('p', { class: 'hint' }, '아직 대사가 없어요. “＋ 대사 한 줄”을 누르거나, 미리 써 둔 대사 파일을 불러오세요.'));
-      rows.forEach((r, i) => list.append(h('div', { class: 'script-row' },
-        h('input', { class: 'input', value: r.who, list: 'whoList', placeholder: '누가', 'aria-label': `${i + 1}번 대사 인물`, oninput: e => r.who = e.target.value }),
-        h('textarea', { class: 'input', rows: 2, placeholder: '무슨 말을 할까요?', 'aria-label': `${i + 1}번 대사 내용`, oninput: e => r.text = e.target.value }, r.text),
-        h('select', { class: 'input', 'aria-label': `${i + 1}번 대사 장면`, onchange: e => r.scene = e.target.value || null }, h('option', { value: '' }, '장면 선택'), ...P.scenes.map(s => h('option', { value: s.id, selected: r.scene === s.id }, s.name))),
-        h('div', { class: 'row nowrap' },
-          ib('up', '', 'btn sm icon ghost', { 'aria-label': '위로', onclick: () => { if (i) { [rows[i - 1], rows[i]] = [rows[i], rows[i - 1]]; draw(); } } }),
-          ib('trash', '', 'btn sm icon ghost', { 'aria-label': '지우기', onclick: () => { rows.splice(i, 1); draw(); } })))));
-    };
-    const up = h('input', { type: 'file', accept: '.txt,.csv,.md,.text,text/plain', hidden: true, onchange: async e => { const f = e.target.files[0]; if (!f) return; const parsed = parseScript(await f.text()); rows.push(...parsed); draw(); toast(`대사 ${parsed.length}줄을 불러왔어요`); } });
-    b.append(h('h2', {}, '대사 가이드 쓰기'),
-      h('p', { class: 'hint', style: { margin: 0 } }, '녹음할 때 화면에 나오는 대사 대본이에요. 미리 써 둔 파일(.txt, .csv)이 있으면 불러올 수 있어요. 한 줄에 “인물: 대사” 모양으로 쓰면 인물과 대사가 나뉘어 들어가요.'),
-      h('div', { class: 'row' }, ib('upload', '대사 파일 불러오기', 'btn sm', { onclick: () => up.click() }), ib('book', '원작 대사 넣기', 'btn sm', { onclick: () => { rows.push(...originalScript()); draw(); } }), up, dl),
-      list,
-      h('div', { class: 'row' }, ib('plus', '대사 한 줄', 'btn sm', { onclick: () => { rows.push({ id: uid(), who: rows.length ? rows[rows.length - 1].who : '토끼', text: '', scene: P.scenes[0].id }); draw(); setTimeout(() => { const t = $$('textarea', list).pop(); t && t.focus(); }, 30); } })),
-      h('div', { class: 'acts' }, h('button', { class: 'btn', onclick: m.close }, '닫기'), h('button', { class: 'btn primary', onclick: () => { P.script = rows.filter(r => r.text.trim()); changed(); m.close(); onSave && onSave(); } }, '대사 가이드 저장')));
-    draw();
-  }, { wide: true, close: false });
-}
