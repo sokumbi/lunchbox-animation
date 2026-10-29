@@ -128,12 +128,23 @@ function newStoryPrompt() {
       h('div', { class: 'acts' }, h('button', { class: 'btn', type: 'button', onclick: m.close }, '취소'), h('button', { class: 'btn accent', type: 'button', onclick: go }, '시작하기')));
   });
 }
+/* 지운 작품은 휴지통에 30일 동안 남아요 (d.trashed = 지운 시각) */
+const TRASH_DAYS = 30;
+async function loadWorks() {
+  let all = [];
+  try { all = (await DB.all()).sort((a, b) => b.updated - a.updated); } catch (e) { }
+  const old = Date.now() - TRASH_DAYS * 864e5;
+  for (const d of all.filter(d => d.trashed && d.trashed < old)) { try { await DB.del(d.id); } catch (e) { } }
+  return { list: all.filter(d => !d.trashed), trash: all.filter(d => d.trashed && d.trashed >= old) };
+}
 async function openWorks() {
-  let list = [];
-  try { list = (await DB.all()).sort((a, b) => b.updated - a.updated); } catch (e) { }
+  const { list, trash } = await loadWorks();
   modal((b, m) => {
-    b.append(h('h2', {}, '내 작품함'));
-    if (!list.length) b.append(h('p', { class: 'hint' }, '아직 저장된 작품이 없어요. 작품은 이 기기의 브라우저에 저장돼요.'));
+    const up = h('input', { type: 'file', accept: '.json,application/json', hidden: true, onchange: async e => { const f = e.target.files[0]; if (!f) return; const d = await importProjectFile(f); if (d) { toast(`“${d.title}”을(를) 불러왔어요`); m.close(); openWorks(); } } });
+    b.append(h('div', { class: 'panel-title' }, h('h2', {}, '내 작품함'),
+      h('div', { class: 'row' }, up, ib('upload', '파일 불러오기', 'btn sm', { onclick: () => up.click() }),
+        ib('trash', `휴지통${trash.length ? ' ' + trash.length : ''}`, 'btn sm ghost', { onclick: () => { m.close(); openTrash(); } }))));
+    if (!list.length) b.append(h('p', { class: 'hint' }, '아직 저장된 작품이 없어요. 작품은 이 기기의 브라우저에 저장돼요. 다른 기기에서 만든 작품 파일은 “파일 불러오기”로 열어요.'));
     const box = h('div', { class: 'works' });
     for (const d of list) {
       const th = h('div', { class: 'th' }); if (d.thumb) th.style.backgroundImage = `url(${URL.createObjectURL(d.thumb)})`;
@@ -141,10 +152,30 @@ async function openWorks() {
       box.append(h('div', { class: 'work-i' }, th,
         h('div', {}, h('b', { style: { fontFamily: 'var(--display)', fontWeight: 800, fontSize: '16px' } }, d.title), h('div', { class: 'hint' }, `${d.storyId === 'new' ? '새 이야기' : '별주부전'} · 장면 ${d.scenes.length}개 · 컷 ${frames}개`)),
         h('div', { class: 'row' },
-          ib('trash', '', 'btn sm icon ghost', { 'aria-label': '작품 지우기', onclick: async () => { if (await confirmBox('작품을 지울까요?', `“${d.title}”을(를) 지우면 되돌릴 수 없어요.`, '지우기', true)) { await DB.del(d.id); m.close(); openWorks(); } } }),
+          ib('trash', '', 'btn sm icon ghost', { 'aria-label': '작품 지우기', onclick: async () => { if (await confirmBox('작품을 휴지통에 넣을까요?', `“${d.title}”은(는) 휴지통에 ${TRASH_DAYS}일 동안 있어요. 그동안은 되살릴 수 있어요.`, '휴지통에 넣기', true)) { d.trashed = Date.now(); await DB.put(d); m.close(); openWorks(); toast('휴지통에 넣었어요'); } } }),
+          ib('download', '', 'btn sm icon', { 'aria-label': '작품 파일로 저장', title: '작품 파일로 저장 (백업 · 다른 기기로 옮기기)', onclick: () => exportProjectFile(d) }),
           h('button', { class: 'btn sm accent', type: 'button', onclick: async () => { m.close(); toast('작품을 여는 중…'); await openProject(d); openStudio(d.lastStep || 'shoot'); } }, '이어서 만들기'))));
     }
     b.append(box, h('div', { class: 'acts' }, h('button', { class: 'btn', type: 'button', onclick: m.close }, '닫기')));
+  }, { wide: true });
+}
+
+async function openTrash() {
+  const { trash } = await loadWorks();
+  modal((b, m) => {
+    b.append(h('h2', {}, '휴지통'), h('p', { class: 'hint', style: { margin: 0 } }, `지운 작품은 ${TRASH_DAYS}일 동안 여기 있다가 저절로 없어져요.`));
+    if (!trash.length) b.append(h('p', { class: 'hint' }, '휴지통이 비어 있어요.'));
+    const box = h('div', { class: 'works' });
+    for (const d of trash) {
+      const left = Math.max(1, Math.ceil((d.trashed + TRASH_DAYS * 864e5 - Date.now()) / 864e5));
+      const th = h('div', { class: 'th' }); if (d.thumb) th.style.backgroundImage = `url(${URL.createObjectURL(d.thumb)})`;
+      box.append(h('div', { class: 'work-i' }, th,
+        h('div', {}, h('b', { style: { fontFamily: 'var(--display)', fontWeight: 800, fontSize: '16px' } }, d.title), h('div', { class: 'hint' }, `${left}일 뒤에 없어져요`)),
+        h('div', { class: 'row' },
+          ib('trash', '', 'btn sm icon ghost', { 'aria-label': '완전히 지우기', onclick: async () => { if (await confirmBox('완전히 지울까요?', `“${d.title}”을(를) 완전히 지우면 다시 되살릴 수 없어요.`, '완전히 지우기', true)) { await DB.del(d.id); m.close(); openTrash(); } } }),
+          h('button', { class: 'btn sm accent', type: 'button', onclick: async () => { delete d.trashed; await DB.put(d); toast(`“${d.title}”을(를) 되살렸어요`); m.close(); openWorks(); } }, '되살리기'))));
+    }
+    b.append(box, h('div', { class: 'acts' }, ib('back', '작품함으로', 'btn', { onclick: () => { m.close(); openWorks(); } }), h('button', { class: 'btn primary', type: 'button', onclick: m.close }, '닫기')));
   }, { wide: true });
 }
 
@@ -228,6 +259,7 @@ function stepMenu() {
     b.append(h('h2', {}, '어느 단계로 갈까요?'), grid,
       h('div', { class: 'acts' },
         ib('home', '이야기 목록', 'btn ghost', { onclick: async () => { m.close(); if (await confirmBox('이야기 목록으로 갈까요?', '작품은 자동으로 저장돼요. 내 작품함에서 다시 열 수 있어요.', '목록으로')) { leaveStep(); await saveProject(); P = null; openLibrary(); } } }),
+        P ? ib('download', '작품 파일로 저장', 'btn ghost', { onclick: async () => { m.close(); await saveProject(); const d = await DB.get(P.id).catch(() => null); d ? exportProjectFile(d) : toast('먼저 저장이 되어야 해요'); } }) : '',
         h('div', { class: 'spacer' }),
         h('button', { class: 'btn primary', type: 'button', onclick: m.close }, '닫기')));
   }, { wide: true });

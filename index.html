@@ -213,6 +213,12 @@ input[type=range]{accent-color:var(--orange);width:100%}
 .mon-tools{position:absolute;right:8px;top:8px;display:flex;gap:6px;z-index:4}
 .mon-tools button{width:clamp(28px,9cqh,38px);height:clamp(28px,9cqh,38px);border-radius:50%;border:0;background:#000000a0;color:#fff;display:grid;place-items:center;padding:0}
 .mon-tools button.on{background:var(--orange)}
+.mon-tools button{position:relative}
+.mon-tools .tb{position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);background:#fff;color:var(--orange);font:800 9.5px/1.3 var(--display,inherit);font-style:normal;border-radius:999px;padding:0 4px;white-space:nowrap;box-shadow:0 1px 2px #0004}
+.countdown{position:absolute;inset:0;display:grid;place-items:center;font:900 clamp(60px,40cqh,200px)/1 var(--display,inherit);color:#fff;text-shadow:0 4px 18px #000a;pointer-events:none;z-index:4;animation:cdpop 1s ease-out infinite}
+.countdown.soft{font-size:clamp(28px,14cqh,70px);place-items:end center;padding-bottom:6%;opacity:.85}
+@keyframes cdpop{from{transform:scale(1.25);opacity:.4}25%{transform:scale(1);opacity:1}}
+.cpad .shutter.running{filter:saturate(.6) brightness(.92)}
 .mon-tools svg{width:58%;height:58%}
 .flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
 .flash.go{animation:flash .25s}
@@ -1150,6 +1156,9 @@ const AE = {
    런치박스 UI 부품 — 계산기 액정(도트 글자) · 7세그먼트 숫자 · 추가 아이콘
    ========================================================= */
 Object.assign(IC, {
+  timer: '<circle cx="12" cy="13.5" r="7.5"/><path d="M12 9.5v4l2.5 2M9.5 2.5h5M12 2.5v3.5"/>',
+  camlock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/><circle cx="12" cy="16" r="1.6" fill="currentColor"/>',
+  pingpong: '<path d="M4 8h13l-3-3M20 16H7l3 3"/>',
   bubbles: '<circle cx="9" cy="15" r="4"/><circle cx="16" cy="8" r="3"/><circle cx="17.5" cy="17" r="2"/>',
   hearts: '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="currentColor"/>',
   boom: '<path d="M12 2.5l2 5 5-2-2 5 5 1.5-5 2 2 5-5-2-2 5-2-5-5 2 2-5-5-2 5-1.5-2-5 5 2z"/>',
@@ -1507,9 +1516,8 @@ class Timeline {
    ========================================================= */
 let saveT = null;
 function scheduleSave() { clearTimeout(saveT); const el = $('#savedState'); if (el) el.textContent = '저장 중…'; saveT = setTimeout(saveProject, 1200); }
-async function saveProject() {
-  if (!P) return false;
-  const dump = {
+function projectDump() {
+  return {
     id: P.id, title: P.title, storyId: P.storyId, created: P.created, updated: P.updated, fps: P.fps, hold: P.hold,
     synopsis: P.synopsis || '', lastStep: P.lastStep || 'shoot', scriptMode: P.scriptMode, script: P.script, narrText: P.narrText, mix: P.mix, duck: P.duck, fade: P.fade, subs: P.subs, done: P.done,
     fx: P.fx, sfx: P.sfx,
@@ -1517,9 +1525,52 @@ async function saveProject() {
     voices: P.voices.map(v => ({ ...v, buf: undefined })), narrs: P.narrs.map(v => ({ ...v, buf: undefined })),
     thumb: (P.scenes.find(s => s.frames.length) || { frames: [] }).frames[0]?.blob || null
   };
+}
+async function saveProject() {
+  if (!P) return false;
+  const dump = projectDump();
   try { await DB.put(dump); const el = $('#savedState'); if (el) el.textContent = '자동 저장됨 ' + new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }); return true; }
   catch (e) { const el = $('#savedState'); if (el) el.textContent = '이 화면에서는 자동 저장이 안 돼요'; return false; }
 }
+/* 작품 파일 — 작품 하나를 파일 하나(.lunchbox.json)로. 사진·소리는 글자(base64)로 바꿔 넣어요. 다른 기기로 옮기거나 백업할 때 써요 */
+const FILE_KIND = 'lunchbox-animation';
+async function packBlobs(o) {
+  if (o instanceof Blob) return { __blob: o.type, data: await new Promise(r => { const fr = new FileReader(); fr.onload = () => r(String(fr.result).split(',')[1] || ''); fr.readAsDataURL(o); }) };
+  if (Array.isArray(o)) { const out = []; for (const x of o) out.push(await packBlobs(x)); return out; }
+  if (o && typeof o === 'object') { const out = {}; for (const k in o) if (o[k] !== undefined) out[k] = await packBlobs(o[k]); return out; }
+  return o;
+}
+function unpackBlobs(o) {
+  if (Array.isArray(o)) return o.map(unpackBlobs);
+  if (o && typeof o === 'object') {
+    if ('__blob' in o) { const b = atob(o.data), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return new Blob([u], { type: o.__blob }); }
+    const out = {}; for (const k in o) out[k] = unpackBlobs(o[k]); return out;
+  }
+  return o;
+}
+/* d: DB에 저장된 모양. 파일을 다 만든 뒤 창에서 "보내기/저장"을 눌러요 (폰은 누르는 순간에만 공유 창이 열려요) */
+async function exportProjectFile(d) {
+  toast('작품 파일을 만드는 중…', 1500);
+  const { trashed, ...rest } = d;
+  const blob = new Blob([JSON.stringify({ kind: FILE_KIND, v: 1, saved: Date.now(), project: await packBlobs(rest) })], { type: 'application/json' });
+  const fname = (d.title || '나의 작품').replace(/[\\/:*?"<>|]/g, '') + '.lunchbox.json';
+  const file = new File([blob], fname, { type: 'application/json' });
+  const canShare = !!(navigator.canShare && navigator.canShare({ files: [file] }));
+  modal((b, m) => b.append(h('h2', {}, '작품 파일이 준비됐어요'),
+    h('p', { class: 'hint', style: { margin: 0 } }, `${fname} (${(blob.size / 1048576).toFixed(1)}MB) · 다른 기기의 런치박스에서 “내 작품함 → 파일 불러오기”로 열 수 있어요.`),
+    h('div', { class: 'acts' }, h('button', { class: 'btn', type: 'button', onclick: m.close }, '닫기'),
+      canShare ? ib('upload', '보내기', 'btn', { onclick: () => navigator.share({ files: [file], title: d.title }).catch(() => { }) }) : '',
+      ib('download', '파일로 저장', 'btn primary', { onclick: () => { saveFile(blob, fname, '작품 파일'); m.close(); } }))));
+}
+async function importProjectFile(file) {
+  let o = null; try { o = JSON.parse(await file.text()); } catch (e) { }
+  if (!o || o.kind !== FILE_KIND || !o.project || !Array.isArray(o.project.scenes)) { toast('런치박스 작품 파일이 아니에요'); return null; }
+  const d = unpackBlobs(o.project); delete d.trashed;
+  const all = await DB.all().catch(() => []);
+  if (all.some(x => x.id === d.id)) { d.id = uid(); d.title = (d.title || '작품') + ' (가져옴)'; }
+  d.updated = Date.now(); await DB.put(d); return d;
+}
+
 function loadImg(blob) { const url = URL.createObjectURL(blob); const img = new Image(); img.src = url; return { url, img }; }
 async function decodeBlob(blob) { AE.init(); const ab = await blob.arrayBuffer(); return await new Promise((res, rej) => AE.ctx.decodeAudioData(ab, res, rej)); }
 async function openProject(d) {
@@ -1720,12 +1771,23 @@ function newStoryPrompt() {
       h('div', { class: 'acts' }, h('button', { class: 'btn', type: 'button', onclick: m.close }, '취소'), h('button', { class: 'btn accent', type: 'button', onclick: go }, '시작하기')));
   });
 }
+/* 지운 작품은 휴지통에 30일 동안 남아요 (d.trashed = 지운 시각) */
+const TRASH_DAYS = 30;
+async function loadWorks() {
+  let all = [];
+  try { all = (await DB.all()).sort((a, b) => b.updated - a.updated); } catch (e) { }
+  const old = Date.now() - TRASH_DAYS * 864e5;
+  for (const d of all.filter(d => d.trashed && d.trashed < old)) { try { await DB.del(d.id); } catch (e) { } }
+  return { list: all.filter(d => !d.trashed), trash: all.filter(d => d.trashed && d.trashed >= old) };
+}
 async function openWorks() {
-  let list = [];
-  try { list = (await DB.all()).sort((a, b) => b.updated - a.updated); } catch (e) { }
+  const { list, trash } = await loadWorks();
   modal((b, m) => {
-    b.append(h('h2', {}, '내 작품함'));
-    if (!list.length) b.append(h('p', { class: 'hint' }, '아직 저장된 작품이 없어요. 작품은 이 기기의 브라우저에 저장돼요.'));
+    const up = h('input', { type: 'file', accept: '.json,application/json', hidden: true, onchange: async e => { const f = e.target.files[0]; if (!f) return; const d = await importProjectFile(f); if (d) { toast(`“${d.title}”을(를) 불러왔어요`); m.close(); openWorks(); } } });
+    b.append(h('div', { class: 'panel-title' }, h('h2', {}, '내 작품함'),
+      h('div', { class: 'row' }, up, ib('upload', '파일 불러오기', 'btn sm', { onclick: () => up.click() }),
+        ib('trash', `휴지통${trash.length ? ' ' + trash.length : ''}`, 'btn sm ghost', { onclick: () => { m.close(); openTrash(); } }))));
+    if (!list.length) b.append(h('p', { class: 'hint' }, '아직 저장된 작품이 없어요. 작품은 이 기기의 브라우저에 저장돼요. 다른 기기에서 만든 작품 파일은 “파일 불러오기”로 열어요.'));
     const box = h('div', { class: 'works' });
     for (const d of list) {
       const th = h('div', { class: 'th' }); if (d.thumb) th.style.backgroundImage = `url(${URL.createObjectURL(d.thumb)})`;
@@ -1733,10 +1795,30 @@ async function openWorks() {
       box.append(h('div', { class: 'work-i' }, th,
         h('div', {}, h('b', { style: { fontFamily: 'var(--display)', fontWeight: 800, fontSize: '16px' } }, d.title), h('div', { class: 'hint' }, `${d.storyId === 'new' ? '새 이야기' : '별주부전'} · 장면 ${d.scenes.length}개 · 컷 ${frames}개`)),
         h('div', { class: 'row' },
-          ib('trash', '', 'btn sm icon ghost', { 'aria-label': '작품 지우기', onclick: async () => { if (await confirmBox('작품을 지울까요?', `“${d.title}”을(를) 지우면 되돌릴 수 없어요.`, '지우기', true)) { await DB.del(d.id); m.close(); openWorks(); } } }),
+          ib('trash', '', 'btn sm icon ghost', { 'aria-label': '작품 지우기', onclick: async () => { if (await confirmBox('작품을 휴지통에 넣을까요?', `“${d.title}”은(는) 휴지통에 ${TRASH_DAYS}일 동안 있어요. 그동안은 되살릴 수 있어요.`, '휴지통에 넣기', true)) { d.trashed = Date.now(); await DB.put(d); m.close(); openWorks(); toast('휴지통에 넣었어요'); } } }),
+          ib('download', '', 'btn sm icon', { 'aria-label': '작품 파일로 저장', title: '작품 파일로 저장 (백업 · 다른 기기로 옮기기)', onclick: () => exportProjectFile(d) }),
           h('button', { class: 'btn sm accent', type: 'button', onclick: async () => { m.close(); toast('작품을 여는 중…'); await openProject(d); openStudio(d.lastStep || 'shoot'); } }, '이어서 만들기'))));
     }
     b.append(box, h('div', { class: 'acts' }, h('button', { class: 'btn', type: 'button', onclick: m.close }, '닫기')));
+  }, { wide: true });
+}
+
+async function openTrash() {
+  const { trash } = await loadWorks();
+  modal((b, m) => {
+    b.append(h('h2', {}, '휴지통'), h('p', { class: 'hint', style: { margin: 0 } }, `지운 작품은 ${TRASH_DAYS}일 동안 여기 있다가 저절로 없어져요.`));
+    if (!trash.length) b.append(h('p', { class: 'hint' }, '휴지통이 비어 있어요.'));
+    const box = h('div', { class: 'works' });
+    for (const d of trash) {
+      const left = Math.max(1, Math.ceil((d.trashed + TRASH_DAYS * 864e5 - Date.now()) / 864e5));
+      const th = h('div', { class: 'th' }); if (d.thumb) th.style.backgroundImage = `url(${URL.createObjectURL(d.thumb)})`;
+      box.append(h('div', { class: 'work-i' }, th,
+        h('div', {}, h('b', { style: { fontFamily: 'var(--display)', fontWeight: 800, fontSize: '16px' } }, d.title), h('div', { class: 'hint' }, `${left}일 뒤에 없어져요`)),
+        h('div', { class: 'row' },
+          ib('trash', '', 'btn sm icon ghost', { 'aria-label': '완전히 지우기', onclick: async () => { if (await confirmBox('완전히 지울까요?', `“${d.title}”을(를) 완전히 지우면 다시 되살릴 수 없어요.`, '완전히 지우기', true)) { await DB.del(d.id); m.close(); openTrash(); } } }),
+          h('button', { class: 'btn sm accent', type: 'button', onclick: async () => { delete d.trashed; await DB.put(d); toast(`“${d.title}”을(를) 되살렸어요`); m.close(); openWorks(); } }, '되살리기'))));
+    }
+    b.append(box, h('div', { class: 'acts' }, ib('back', '작품함으로', 'btn', { onclick: () => { m.close(); openWorks(); } }), h('button', { class: 'btn primary', type: 'button', onclick: m.close }, '닫기')));
   }, { wide: true });
 }
 
@@ -1820,6 +1902,7 @@ function stepMenu() {
     b.append(h('h2', {}, '어느 단계로 갈까요?'), grid,
       h('div', { class: 'acts' },
         ib('home', '이야기 목록', 'btn ghost', { onclick: async () => { m.close(); if (await confirmBox('이야기 목록으로 갈까요?', '작품은 자동으로 저장돼요. 내 작품함에서 다시 열 수 있어요.', '목록으로')) { leaveStep(); await saveProject(); P = null; openLibrary(); } } }),
+        P ? ib('download', '작품 파일로 저장', 'btn ghost', { onclick: async () => { m.close(); await saveProject(); const d = await DB.get(P.id).catch(() => null); d ? exportProjectFile(d) : toast('먼저 저장이 되어야 해요'); } }) : '',
         h('div', { class: 'spacer' }),
         h('button', { class: 'btn primary', type: 'button', onclick: m.close }, '닫기')));
   }, { wide: true });
@@ -1946,7 +2029,8 @@ function sketchModal(s, onChange) {
 
 STEP_MOD.shoot = (() => {
   let raf = 0, onion = true, grid = false, sel = null, insertAt = null, previewing = false, pvStart = 0;
-  let root, cv, ctx, flashEl, badge, sketchEl, list, headEl, popEl, nocamEl, pvBtn, onionBtn, gridBtn, holdBtn, counterEl;
+  let cdT = null, autoOn = false, locked = false;   // 타이머 · 자동 촬영 · 카메라 고정
+  let root, cv, ctx, flashEl, badge, sketchEl, cdEl, timerBtn, lockBtn, shutterEl, list, headEl, popEl, nocamEl, pvBtn, onionBtn, gridBtn, holdBtn, counterEl;
   const scene = () => { let s = P.scenes.find(s => s.id === S.curScene); if (!s) { s = P.scenes[P.scenes.length - 1]; S.curScene = s.id; } return s; };
 
   function mount({ main }) {
@@ -1960,8 +2044,11 @@ STEP_MOD.shoot = (() => {
     nocamEl = h('div', { class: 'nocam', hidden: true });
     sketchEl = h('button', { class: 'mon-sketch', type: 'button', hidden: true, 'aria-label': '장면 스케치 크게 보기', onclick: () => sketchModal(scene(), buildStrip) });
     gridBtn = h('button', { type: 'button', 'aria-label': '격자', html: icon('grid'), onclick: () => { grid = !grid; gridBtn.classList.toggle('on', grid); } });
-    const tools = h('div', { class: 'mon-tools' }, gridBtn, h('button', { type: 'button', 'aria-label': '앞·뒤 카메라 바꾸기', html: icon('switchCam'), onclick: switchCam }));
-    const mon = monitorEl([flashEl, badge, sketchEl, nocamEl, popEl, tools]); cv = mon.cv; ctx = cv.getContext('2d');
+    timerBtn = h('button', { type: 'button', 'aria-label': '타이머 · 자동 촬영', onclick: timerSheet });
+    lockBtn = h('button', { type: 'button', 'aria-label': '카메라 고정 (밝기·초점·색)', html: icon('camlock'), onclick: toggleLock });
+    const tools = h('div', { class: 'mon-tools' }, timerBtn, lockBtn, gridBtn, h('button', { type: 'button', 'aria-label': '앞·뒤 카메라 바꾸기', html: icon('switchCam'), onclick: switchCam }));
+    cdEl = h('div', { class: 'countdown', hidden: true });
+    const mon = monitorEl([flashEl, badge, sketchEl, cdEl, nocamEl, popEl, tools]); cv = mon.cv; ctx = cv.getContext('2d');
     const area = h('div', { class: 'cam-area' }, mon.mon);
     // 오른쪽: 조작판
     counterEl = h('div', { class: 'counter' });
@@ -1973,18 +2060,18 @@ STEP_MOD.shoot = (() => {
       counterEl,
       h('div', { class: 'cpad' },
         key('되돌리기', { ic: 'undo', onclick: undoLast }), pvBtn,
-        h('button', { class: 'key shutter', type: 'button', 'aria-label': '촬영', onclick: capture, html: icon('cam', 'ki') + '<span class="kl">찰칵</span>' }),
+        shutterEl = h('button', { class: 'key shutter', type: 'button', 'aria-label': '촬영', onclick: shutterPress }),
         onionBtn, key('장면 끝', { ic: 'grid', onclick: endScene })),
       holdBtn);
     const panel = h('div', { class: 'cpanel well' }, plate);
     root.append(h('div', { class: 'shoot' }, strip, area, panel));
-    paintHold(); buildStrip(true);
+    paintHold(); paintShutter(); paintTimer(); buildStrip(true);
     startCamera();
     addEventListener('keydown', onKey);
     loop();
   }
-  function unmount() { cancelAnimationFrame(raf); Cam.stop(); removeEventListener('keydown', onKey); previewing = false; }
-  function onKey(e) { if (e.target.closest('input,textarea,select')) return; if (e.code === 'Space' || e.code === 'VolumeUp') { e.preventDefault(); capture(); } }
+  function unmount() { stopTimer(); locked = false; cancelAnimationFrame(raf); Cam.stop(); removeEventListener('keydown', onKey); previewing = false; }
+  function onKey(e) { if (e.target.closest('input,textarea,select')) return; if (e.code === 'Space' || e.code === 'VolumeUp') { e.preventDefault(); shutterPress(); } }
   function paintHold() { holdBtn.innerHTML = `<b>×${P.hold}</b><span class="kl">장씩</span>`; holdBtn.title = `한 번 누르면 ${P.hold}프레임씩 찍어요`; }
   function paintCounter() { const sc = scene(); const sec = sc.frames.reduce((a, f) => a + f.hold, 0) / P.fps; counterEl.innerHTML = `<span>컷 · ${sec.toFixed(1)}초</span>` + seg7(String(Math.min(999, sc.frames.length)).padStart(3, '0')); }
 
@@ -1996,6 +2083,7 @@ STEP_MOD.shoot = (() => {
   async function switchCam() {
     if (Cam.failed) { startCamera(); return; }
     if (!(await Cam.next())) toast('바꿀 수 있는 다른 카메라가 없어요');
+    else { locked = false; lockBtn.classList.remove('on'); }
   }
   function showNoCam() {
     nocamEl.hidden = false; nocamEl.innerHTML = '';
@@ -2041,6 +2129,62 @@ STEP_MOD.shoot = (() => {
   function paintShadowOff() { ctx.shadowColor = 'transparent'; }
   function togglePreview() { if (previewing) stopPreview(); else { if (!scene().frames.length) { toast('먼저 몇 컷을 찍어 보세요'); return; } previewing = true; pvStart = performance.now(); pvBtn.innerHTML = icon('stop', 'ki') + '<span class="kl">멈춤</span>'; } }
   function stopPreview() { previewing = false; pvBtn.innerHTML = icon('play', 'ki') + '<span class="kl">재생</span>'; }
+
+  /* ----- 타이머 · 자동 촬영 ----- */
+  /* S.shot = { delay: 찰칵 뒤 몇 초 뒤에 찍을지, auto: 몇 초마다 계속 찍을지 } — 둘 중 하나만 써요 */
+  const shot = () => S.shot || (S.shot = { delay: 0, auto: 0 });
+  function paintTimer() {
+    const s = shot(), t = s.auto ? s.auto + '초마다' : s.delay ? s.delay + '초' : '';
+    timerBtn.innerHTML = icon('timer') + (t ? `<i class="tb">${t}</i>` : ''); timerBtn.classList.toggle('on', !!t);
+  }
+  function paintShutter() { shutterEl.classList.toggle('running', autoOn || !!cdT); shutterEl.innerHTML = icon(autoOn || cdT ? 'stop' : 'cam', 'ki') + `<span class="kl">${autoOn ? '멈춤' : cdT ? '취소' : '찰칵'}</span>`; }
+  function timerSheet() {
+    modal((b, m) => {
+      const pick = (delay, auto) => { stopTimer(); Object.assign(shot(), { delay, auto }); paintTimer(); m.close(); toast(auto ? `찰칵을 누르면 ${auto}초마다 계속 찍어요. 한 번 더 누르면 멈춰요` : delay ? `찰칵을 누르고 ${delay}초 뒤에 찍어요` : '찰칵을 누르면 바로 찍어요', 2600); };
+      const s = shot(), chip = (label, d, a) => h('button', { class: 'chip' + (s.delay === d && s.auto === a ? ' on' : ''), type: 'button', onclick: () => pick(d, a) }, label);
+      b.append(h('h2', {}, '찰칵 방법'),
+        h('p', { class: 'hint', style: { margin: 0 } }, '폰을 누를 때 흔들리면 타이머를 써 보세요. 자동은 손을 떼고 인형만 움직이면 돼요.'),
+        h('span', { class: 'label' }, '타이머'), h('div', { class: 'row' }, chip('바로 찍기', 0, 0), chip('3초 뒤', 3, 0), chip('5초 뒤', 5, 0)),
+        h('span', { class: 'label' }, '자동으로 계속 찍기'), h('div', { class: 'row' }, chip('2초마다', 0, 2), chip('3초마다', 0, 3), chip('5초마다', 0, 5)),
+        h('div', { class: 'acts' }, h('button', { class: 'btn primary', type: 'button', onclick: m.close }, '닫기')));
+    });
+  }
+  function shutterPress() {
+    if (autoOn || cdT) { const was = autoOn; stopTimer(); if (was) toast('자동 촬영을 멈췄어요', 1200); return; }
+    const s = shot();
+    if ((!s.delay && !s.auto) || !Cam.stream) { capture(); return; }
+    if (previewing) stopPreview();
+    autoOn = !!s.auto; countdown();
+  }
+  function countdown() {
+    let n = shot().auto || shot().delay;
+    const tick = () => {
+      if (n <= 0) { cdEl.hidden = true; cdT = null; paintShutter(); capture().then(() => { if (autoOn) countdown(); }); return; }
+      cdEl.hidden = false; cdEl.textContent = n; cdEl.classList.toggle('soft', autoOn); beep(n === 1 ? 1320 : 880); n--;
+      cdT = setTimeout(tick, 1000); paintShutter();
+    };
+    tick();
+  }
+  function stopTimer() { clearTimeout(cdT); cdT = null; autoOn = false; if (cdEl) cdEl.hidden = true; if (shutterEl) paintShutter(); }
+  function beep(f) { AE.init(); const c = AE.ctx; if (!c) return; const o = c.createOscillator(), g = c.createGain(); o.frequency.value = f; g.gain.setValueAtTime(.12, c.currentTime); g.gain.exponentialRampToValueAtTime(.001, c.currentTime + .12); o.connect(g).connect(AE.buses.ui); o.start(); o.stop(c.currentTime + .14); }
+
+  /* ----- 카메라 고정 — 컷마다 밝기·초점·색이 바뀌어 깜빡이지 않게 지금 값으로 묶어요 (되는 기기만) ----- */
+  async function toggleLock() {
+    const tr = Cam.stream && Cam.stream.getVideoTracks()[0];
+    if (!tr || !tr.getCapabilities) { toast('카메라가 켜져 있을 때 쓸 수 있어요'); return; }
+    const cap = tr.getCapabilities(), cur = tr.getSettings(), want = !locked, adv = {};
+    for (const [mode, val] of [['exposureMode', ['exposureTime', 'iso']], ['focusMode', ['focusDistance']], ['whiteBalanceMode', ['colorTemperature']]]) {
+      const modes = cap[mode] || [];
+      if (!want) { if (modes.includes('continuous')) adv[mode] = 'continuous'; continue; }
+      const vals = val.filter(k => cur[k] != null && cap[k]);
+      if (modes.includes('manual') && vals.length) { adv[mode] = 'manual'; for (const k of vals) adv[k] = cur[k]; }
+      else if (modes.includes('single-shot')) adv[mode] = 'single-shot';
+      else if (modes.includes('manual')) adv[mode] = 'manual';
+    }
+    if (!Object.keys(adv).length) { toast(want ? '이 기기 카메라는 고정 기능이 없어요. 불빛이 바뀌지 않는 곳에서 찍어 주세요' : '카메라 고정을 풀었어요', 3200); locked = false; lockBtn.classList.remove('on'); return; }
+    try { await tr.applyConstraints({ advanced: [adv] }); locked = want; lockBtn.classList.toggle('on', locked); toast(locked ? '카메라를 고정했어요. 밝기·초점이 이제 안 바뀌어요' : '카메라 고정을 풀었어요', 2200); }
+    catch (e) { toast('카메라를 고정하지 못했어요'); }
+  }
 
   /* ----- 촬영 ----- */
   async function capture() {
@@ -2088,6 +2232,10 @@ STEP_MOD.shoot = (() => {
     popEl.append(h('b', { style: { fontSize: '13px' } }, `${sel + 1}번 컷`),
       ib('rewind', '여기부터 다시 찍기', 'btn sm accent', { onclick: async () => { if (!await confirmBox('여기부터 다시 찍을까요?', `${sel + 1}번 컷부터 끝까지 ${sc.frames.length - sel}개 컷이 지워지고, 그 자리부터 이어서 찍어요.`, '지우고 다시 찍기', true)) return; sc.frames.splice(sel); insertAt = null; sel = null; changed(); buildStrip(true); } }),
       ib('insert', '뒤에 끼워 찍기', 'btn sm', { onclick: () => { insertAt = sel + 1; if (insertAt >= sc.frames.length) insertAt = null; sel = null; buildStrip(); } }),
+      ib('copy', '복사', 'btn sm', { 'aria-label': '이 컷을 바로 뒤에 하나 더', onclick: () => { sc.frames.splice(sel + 1, 0, { ...f, id: uid() }); sel++; changed(); buildStrip(); toast('컷을 하나 더 넣었어요', 1100); } }),
+      sel < sc.frames.length - 1 ? ib('pingpong', '거꾸로 이어 붙이기', 'btn sm', { 'aria-label': '여기부터 끝까지를 거꾸로 이어 붙이기', onclick: () => {
+        const back = sc.frames.slice(sel, -1).reverse().map(x => ({ ...x, id: uid() })); sc.frames.push(...back); sel = null; insertAt = null; changed(); buildStrip(true);
+        toast(`컷 ${back.length}개를 거꾸로 붙였어요. 갔다가 돌아와요`, 1800); } }) : '',
       ib('trash', '', 'btn sm icon', { 'aria-label': '이 컷 지우기', onclick: () => { sc.frames.splice(sel, 1); if (insertAt != null && insertAt > sel) insertAt--; sel = null; changed(); buildStrip(); } }),
       h('div', { class: 'seg', 'aria-label': '이 컷을 보여 줄 프레임 수' }, ...[1, 2, 3, 4, 6].map(n => h('button', { type: 'button', class: f.hold === n ? 'on' : '', onclick: () => { f.hold = n; changed(); buildStrip(); } }, '×' + n))),
       ib('x', '', 'btn sm icon ghost', { 'aria-label': '닫기', onclick: () => { sel = null; buildStrip(); } }));
@@ -2258,6 +2406,7 @@ function trimModal(after) {
           h('div', { class: 'row' },
             ib('up', '앞으로', 'btn sm', { disabled: i === 0, onclick: () => { [P.scenes[i - 1], P.scenes[i]] = [P.scenes[i], P.scenes[i - 1]]; refresh(); } }),
             ib('down', '뒤로', 'btn sm', { disabled: i === P.scenes.length - 1, onclick: () => { [P.scenes[i + 1], P.scenes[i]] = [P.scenes[i], P.scenes[i + 1]]; refresh(); } }),
+            ib('pingpong', '거꾸로', 'btn sm', { 'aria-label': '장면을 거꾸로 돌리기', onclick: () => { s.frames.reverse(); [s.trimIn, s.trimOut] = [s.trimOut, s.trimIn]; refresh(); toast('장면을 거꾸로 돌렸어요', 1200); } }),
             ib('copy', '복제', 'btn sm', { onclick: () => { const c = { ...newScene(s.name + ' (복사)'), frames: s.frames.map(f => ({ ...f, id: uid() })), trimIn: s.trimIn, trimOut: s.trimOut, bgm: s.bgm }; P.scenes.splice(i + 1, 0, c); refresh(); } }),
             P.scenes.length > 1 ? ib('trash', '지우기', 'btn sm', { onclick: async () => { if (!await confirmBox('장면을 지울까요?', `“${s.name}” 장면과 그 안의 효과·소리가 함께 지워져요.`, '지우기', true)) return; P.scenes.splice(i, 1); for (const k of ['fx', 'sfx', 'voices', 'narrs']) P[k] = P[k].filter(it => it.sid !== s.id); refresh(); } }) : '',
             ib('cam', '다시 촬영', 'btn sm accent', { onclick: () => { m.close(); S.curScene = s.id; goStep('shoot'); } })),
@@ -2693,20 +2842,20 @@ function scriptEditor(onSave) {
     draw();
   }, { wide: true, close: false });
 }
-async function saveFile(blob, filename) {
+async function saveFile(blob, filename, what = '영상 파일') {
   try {
     if (window.claude && typeof window.claude.use === 'function') {
       const dl = await window.claude.use('downloads');
-      if (dl) { await dl.save({ filename, data: blob }); toast('영상 파일을 저장했어요'); return true; }
+      if (dl) { await dl.save({ filename, data: blob }); toast(`${what}을 저장했어요`); return true; }
     }
   } catch (e) { if (e && e.code === 'declined') { toast('저장을 취소했어요'); return false; } }
-  try { const a = h('a', { href: URL.createObjectURL(blob), download: filename }); document.body.append(a); a.click(); a.remove(); toast('영상 파일을 내려받았어요'); return true; }
+  try { const a = h('a', { href: URL.createObjectURL(blob), download: filename }); document.body.append(a); a.click(); a.remove(); toast(`${what}을 내려받았어요`); return true; }
   catch (e) { toast('이 화면에서는 파일로 저장할 수 없어요'); return false; }
 }
 async function exportVideo() {
   if (!TL().total) return;
   if (!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream) { toast('이 브라우저는 영상 파일 만들기를 지원하지 않아요. 크롬에서 열어 주세요.'); return; }
-  const types = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm', 'video/mp4'];
+  const types = ['video/mp4;codecs=avc1.42E01E,mp4a.40.2', 'video/mp4;codecs=avc1,mp4a.40.2', 'video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
   const mime = types.find(t => MediaRecorder.isTypeSupported(t)); if (!mime) { toast('이 브라우저는 영상 파일 만들기를 지원하지 않아요'); return; }
   const ext = mime.includes('mp4') ? 'mp4' : 'webm';
   AE.init(); await Player.preload();
@@ -2729,8 +2878,12 @@ async function exportVideo() {
       const blob = new Blob(chunks, { type: mime.split(';')[0] });
       const fname = (P.title || '나의 별주부전').replace(/[\\/:*?"<>|]/g, '') + '.' + ext;
       prevBox.innerHTML = ''; const v = h('video', { src: URL.createObjectURL(blob), controls: true, playsinline: true, style: { width: '100%', height: '100%', display: 'block' } }); prevBox.append(v);
-      bar.remove(); txt.textContent = `완성! ${fname} (${(blob.size / 1048576).toFixed(1)}MB)`;
-      acts.innerHTML = ''; acts.append(h('button', { class: 'btn', onclick: m.close }, '닫기'), ib('download', '파일로 저장', 'btn primary', { onclick: () => saveFile(blob, fname) }));
+      bar.remove(); txt.textContent = `완성! ${fname} (${(blob.size / 1048576).toFixed(1)}MB)` + (ext === 'webm' ? ' · 이 브라우저는 webm으로만 만들 수 있어요. 아이폰에서는 안 열릴 수 있어요' : '');
+      const file = new File([blob], fname, { type: blob.type });
+      const canShare = !!(navigator.canShare && navigator.canShare({ files: [file] }));
+      acts.innerHTML = ''; acts.append(h('button', { class: 'btn', onclick: m.close }, '닫기'),
+        canShare ? ib('upload', '보내기 · 사진에 저장', 'btn', { onclick: () => navigator.share({ files: [file], title: P.title }).catch(() => { }) }) : '',
+        ib('download', '파일로 저장', 'btn primary', { onclick: () => saveFile(blob, fname) }));
     };
     Player.attach(cv, { onTick: t => { const el = $('#expBar'); if (el) el.style.width = (t / TL().total * 100) + '%'; } });
     Player.t = 0; Player.onEnd = () => setTimeout(() => { try { mr.stop(); } catch (e) { } }, 250);

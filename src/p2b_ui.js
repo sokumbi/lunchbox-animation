@@ -2,6 +2,9 @@
    런치박스 UI 부품 — 계산기 액정(도트 글자) · 7세그먼트 숫자 · 추가 아이콘
    ========================================================= */
 Object.assign(IC, {
+  timer: '<circle cx="12" cy="13.5" r="7.5"/><path d="M12 9.5v4l2.5 2M9.5 2.5h5M12 2.5v3.5"/>',
+  camlock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/><circle cx="12" cy="16" r="1.6" fill="currentColor"/>',
+  pingpong: '<path d="M4 8h13l-3-3M20 16H7l3 3"/>',
   bubbles: '<circle cx="9" cy="15" r="4"/><circle cx="16" cy="8" r="3"/><circle cx="17.5" cy="17" r="2"/>',
   hearts: '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="currentColor"/>',
   boom: '<path d="M12 2.5l2 5 5-2-2 5 5 1.5-5 2 2 5-5-2-2 5-2-5-5 2 2-5-5-2 5-1.5-2-5 5 2z"/>',

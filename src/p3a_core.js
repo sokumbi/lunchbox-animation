@@ -247,9 +247,8 @@ class Timeline {
    ========================================================= */
 let saveT = null;
 function scheduleSave() { clearTimeout(saveT); const el = $('#savedState'); if (el) el.textContent = '저장 중…'; saveT = setTimeout(saveProject, 1200); }
-async function saveProject() {
-  if (!P) return false;
-  const dump = {
+function projectDump() {
+  return {
     id: P.id, title: P.title, storyId: P.storyId, created: P.created, updated: P.updated, fps: P.fps, hold: P.hold,
     synopsis: P.synopsis || '', lastStep: P.lastStep || 'shoot', scriptMode: P.scriptMode, script: P.script, narrText: P.narrText, mix: P.mix, duck: P.duck, fade: P.fade, subs: P.subs, done: P.done,
     fx: P.fx, sfx: P.sfx,
@@ -257,9 +256,52 @@ async function saveProject() {
     voices: P.voices.map(v => ({ ...v, buf: undefined })), narrs: P.narrs.map(v => ({ ...v, buf: undefined })),
     thumb: (P.scenes.find(s => s.frames.length) || { frames: [] }).frames[0]?.blob || null
   };
+}
+async function saveProject() {
+  if (!P) return false;
+  const dump = projectDump();
   try { await DB.put(dump); const el = $('#savedState'); if (el) el.textContent = '자동 저장됨 ' + new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }); return true; }
   catch (e) { const el = $('#savedState'); if (el) el.textContent = '이 화면에서는 자동 저장이 안 돼요'; return false; }
 }
+/* 작품 파일 — 작품 하나를 파일 하나(.lunchbox.json)로. 사진·소리는 글자(base64)로 바꿔 넣어요. 다른 기기로 옮기거나 백업할 때 써요 */
+const FILE_KIND = 'lunchbox-animation';
+async function packBlobs(o) {
+  if (o instanceof Blob) return { __blob: o.type, data: await new Promise(r => { const fr = new FileReader(); fr.onload = () => r(String(fr.result).split(',')[1] || ''); fr.readAsDataURL(o); }) };
+  if (Array.isArray(o)) { const out = []; for (const x of o) out.push(await packBlobs(x)); return out; }
+  if (o && typeof o === 'object') { const out = {}; for (const k in o) if (o[k] !== undefined) out[k] = await packBlobs(o[k]); return out; }
+  return o;
+}
+function unpackBlobs(o) {
+  if (Array.isArray(o)) return o.map(unpackBlobs);
+  if (o && typeof o === 'object') {
+    if ('__blob' in o) { const b = atob(o.data), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return new Blob([u], { type: o.__blob }); }
+    const out = {}; for (const k in o) out[k] = unpackBlobs(o[k]); return out;
+  }
+  return o;
+}
+/* d: DB에 저장된 모양. 파일을 다 만든 뒤 창에서 "보내기/저장"을 눌러요 (폰은 누르는 순간에만 공유 창이 열려요) */
+async function exportProjectFile(d) {
+  toast('작품 파일을 만드는 중…', 1500);
+  const { trashed, ...rest } = d;
+  const blob = new Blob([JSON.stringify({ kind: FILE_KIND, v: 1, saved: Date.now(), project: await packBlobs(rest) })], { type: 'application/json' });
+  const fname = (d.title || '나의 작품').replace(/[\\/:*?"<>|]/g, '') + '.lunchbox.json';
+  const file = new File([blob], fname, { type: 'application/json' });
+  const canShare = !!(navigator.canShare && navigator.canShare({ files: [file] }));
+  modal((b, m) => b.append(h('h2', {}, '작품 파일이 준비됐어요'),
+    h('p', { class: 'hint', style: { margin: 0 } }, `${fname} (${(blob.size / 1048576).toFixed(1)}MB) · 다른 기기의 런치박스에서 “내 작품함 → 파일 불러오기”로 열 수 있어요.`),
+    h('div', { class: 'acts' }, h('button', { class: 'btn', type: 'button', onclick: m.close }, '닫기'),
+      canShare ? ib('upload', '보내기', 'btn', { onclick: () => navigator.share({ files: [file], title: d.title }).catch(() => { }) }) : '',
+      ib('download', '파일로 저장', 'btn primary', { onclick: () => { saveFile(blob, fname, '작품 파일'); m.close(); } }))));
+}
+async function importProjectFile(file) {
+  let o = null; try { o = JSON.parse(await file.text()); } catch (e) { }
+  if (!o || o.kind !== FILE_KIND || !o.project || !Array.isArray(o.project.scenes)) { toast('런치박스 작품 파일이 아니에요'); return null; }
+  const d = unpackBlobs(o.project); delete d.trashed;
+  const all = await DB.all().catch(() => []);
+  if (all.some(x => x.id === d.id)) { d.id = uid(); d.title = (d.title || '작품') + ' (가져옴)'; }
+  d.updated = Date.now(); await DB.put(d); return d;
+}
+
 function loadImg(blob) { const url = URL.createObjectURL(blob); const img = new Image(); img.src = url; return { url, img }; }
 async function decodeBlob(blob) { AE.init(); const ab = await blob.arrayBuffer(); return await new Promise((res, rej) => AE.ctx.decodeAudioData(ab, res, rej)); }
 async function openProject(d) {

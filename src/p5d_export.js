@@ -1,17 +1,17 @@
-async function saveFile(blob, filename) {
+async function saveFile(blob, filename, what = '영상 파일') {
   try {
     if (window.claude && typeof window.claude.use === 'function') {
       const dl = await window.claude.use('downloads');
-      if (dl) { await dl.save({ filename, data: blob }); toast('영상 파일을 저장했어요'); return true; }
+      if (dl) { await dl.save({ filename, data: blob }); toast(`${what}을 저장했어요`); return true; }
     }
   } catch (e) { if (e && e.code === 'declined') { toast('저장을 취소했어요'); return false; } }
-  try { const a = h('a', { href: URL.createObjectURL(blob), download: filename }); document.body.append(a); a.click(); a.remove(); toast('영상 파일을 내려받았어요'); return true; }
+  try { const a = h('a', { href: URL.createObjectURL(blob), download: filename }); document.body.append(a); a.click(); a.remove(); toast(`${what}을 내려받았어요`); return true; }
   catch (e) { toast('이 화면에서는 파일로 저장할 수 없어요'); return false; }
 }
 async function exportVideo() {
   if (!TL().total) return;
   if (!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream) { toast('이 브라우저는 영상 파일 만들기를 지원하지 않아요. 크롬에서 열어 주세요.'); return; }
-  const types = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm', 'video/mp4'];
+  const types = ['video/mp4;codecs=avc1.42E01E,mp4a.40.2', 'video/mp4;codecs=avc1,mp4a.40.2', 'video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
   const mime = types.find(t => MediaRecorder.isTypeSupported(t)); if (!mime) { toast('이 브라우저는 영상 파일 만들기를 지원하지 않아요'); return; }
   const ext = mime.includes('mp4') ? 'mp4' : 'webm';
   AE.init(); await Player.preload();
@@ -34,8 +34,12 @@ async function exportVideo() {
       const blob = new Blob(chunks, { type: mime.split(';')[0] });
       const fname = (P.title || '나의 별주부전').replace(/[\\/:*?"<>|]/g, '') + '.' + ext;
       prevBox.innerHTML = ''; const v = h('video', { src: URL.createObjectURL(blob), controls: true, playsinline: true, style: { width: '100%', height: '100%', display: 'block' } }); prevBox.append(v);
-      bar.remove(); txt.textContent = `완성! ${fname} (${(blob.size / 1048576).toFixed(1)}MB)`;
-      acts.innerHTML = ''; acts.append(h('button', { class: 'btn', onclick: m.close }, '닫기'), ib('download', '파일로 저장', 'btn primary', { onclick: () => saveFile(blob, fname) }));
+      bar.remove(); txt.textContent = `완성! ${fname} (${(blob.size / 1048576).toFixed(1)}MB)` + (ext === 'webm' ? ' · 이 브라우저는 webm으로만 만들 수 있어요. 아이폰에서는 안 열릴 수 있어요' : '');
+      const file = new File([blob], fname, { type: blob.type });
+      const canShare = !!(navigator.canShare && navigator.canShare({ files: [file] }));
+      acts.innerHTML = ''; acts.append(h('button', { class: 'btn', onclick: m.close }, '닫기'),
+        canShare ? ib('upload', '보내기 · 사진에 저장', 'btn', { onclick: () => navigator.share({ files: [file], title: P.title }).catch(() => { }) }) : '',
+        ib('download', '파일로 저장', 'btn primary', { onclick: () => saveFile(blob, fname) }));
     };
     Player.attach(cv, { onTick: t => { const el = $('#expBar'); if (el) el.style.width = (t / TL().total * 100) + '%'; } });
     Player.t = 0; Player.onEnd = () => setTimeout(() => { try { mr.stop(); } catch (e) { } }, 250);

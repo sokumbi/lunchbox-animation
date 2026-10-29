@@ -76,7 +76,8 @@ function sketchModal(s, onChange) {
 
 STEP_MOD.shoot = (() => {
   let raf = 0, onion = true, grid = false, sel = null, insertAt = null, previewing = false, pvStart = 0;
-  let root, cv, ctx, flashEl, badge, sketchEl, list, headEl, popEl, nocamEl, pvBtn, onionBtn, gridBtn, holdBtn, counterEl;
+  let cdT = null, autoOn = false, locked = false;   // 타이머 · 자동 촬영 · 카메라 고정
+  let root, cv, ctx, flashEl, badge, sketchEl, cdEl, timerBtn, lockBtn, shutterEl, list, headEl, popEl, nocamEl, pvBtn, onionBtn, gridBtn, holdBtn, counterEl;
   const scene = () => { let s = P.scenes.find(s => s.id === S.curScene); if (!s) { s = P.scenes[P.scenes.length - 1]; S.curScene = s.id; } return s; };
 
   function mount({ main }) {
@@ -90,8 +91,11 @@ STEP_MOD.shoot = (() => {
     nocamEl = h('div', { class: 'nocam', hidden: true });
     sketchEl = h('button', { class: 'mon-sketch', type: 'button', hidden: true, 'aria-label': '장면 스케치 크게 보기', onclick: () => sketchModal(scene(), buildStrip) });
     gridBtn = h('button', { type: 'button', 'aria-label': '격자', html: icon('grid'), onclick: () => { grid = !grid; gridBtn.classList.toggle('on', grid); } });
-    const tools = h('div', { class: 'mon-tools' }, gridBtn, h('button', { type: 'button', 'aria-label': '앞·뒤 카메라 바꾸기', html: icon('switchCam'), onclick: switchCam }));
-    const mon = monitorEl([flashEl, badge, sketchEl, nocamEl, popEl, tools]); cv = mon.cv; ctx = cv.getContext('2d');
+    timerBtn = h('button', { type: 'button', 'aria-label': '타이머 · 자동 촬영', onclick: timerSheet });
+    lockBtn = h('button', { type: 'button', 'aria-label': '카메라 고정 (밝기·초점·색)', html: icon('camlock'), onclick: toggleLock });
+    const tools = h('div', { class: 'mon-tools' }, timerBtn, lockBtn, gridBtn, h('button', { type: 'button', 'aria-label': '앞·뒤 카메라 바꾸기', html: icon('switchCam'), onclick: switchCam }));
+    cdEl = h('div', { class: 'countdown', hidden: true });
+    const mon = monitorEl([flashEl, badge, sketchEl, cdEl, nocamEl, popEl, tools]); cv = mon.cv; ctx = cv.getContext('2d');
     const area = h('div', { class: 'cam-area' }, mon.mon);
     // 오른쪽: 조작판
     counterEl = h('div', { class: 'counter' });
@@ -103,18 +107,18 @@ STEP_MOD.shoot = (() => {
       counterEl,
       h('div', { class: 'cpad' },
         key('되돌리기', { ic: 'undo', onclick: undoLast }), pvBtn,
-        h('button', { class: 'key shutter', type: 'button', 'aria-label': '촬영', onclick: capture, html: icon('cam', 'ki') + '<span class="kl">찰칵</span>' }),
+        shutterEl = h('button', { class: 'key shutter', type: 'button', 'aria-label': '촬영', onclick: shutterPress }),
         onionBtn, key('장면 끝', { ic: 'grid', onclick: endScene })),
       holdBtn);
     const panel = h('div', { class: 'cpanel well' }, plate);
     root.append(h('div', { class: 'shoot' }, strip, area, panel));
-    paintHold(); buildStrip(true);
+    paintHold(); paintShutter(); paintTimer(); buildStrip(true);
     startCamera();
     addEventListener('keydown', onKey);
     loop();
   }
-  function unmount() { cancelAnimationFrame(raf); Cam.stop(); removeEventListener('keydown', onKey); previewing = false; }
-  function onKey(e) { if (e.target.closest('input,textarea,select')) return; if (e.code === 'Space' || e.code === 'VolumeUp') { e.preventDefault(); capture(); } }
+  function unmount() { stopTimer(); locked = false; cancelAnimationFrame(raf); Cam.stop(); removeEventListener('keydown', onKey); previewing = false; }
+  function onKey(e) { if (e.target.closest('input,textarea,select')) return; if (e.code === 'Space' || e.code === 'VolumeUp') { e.preventDefault(); shutterPress(); } }
   function paintHold() { holdBtn.innerHTML = `<b>×${P.hold}</b><span class="kl">장씩</span>`; holdBtn.title = `한 번 누르면 ${P.hold}프레임씩 찍어요`; }
   function paintCounter() { const sc = scene(); const sec = sc.frames.reduce((a, f) => a + f.hold, 0) / P.fps; counterEl.innerHTML = `<span>컷 · ${sec.toFixed(1)}초</span>` + seg7(String(Math.min(999, sc.frames.length)).padStart(3, '0')); }
 
@@ -126,6 +130,7 @@ STEP_MOD.shoot = (() => {
   async function switchCam() {
     if (Cam.failed) { startCamera(); return; }
     if (!(await Cam.next())) toast('바꿀 수 있는 다른 카메라가 없어요');
+    else { locked = false; lockBtn.classList.remove('on'); }
   }
   function showNoCam() {
     nocamEl.hidden = false; nocamEl.innerHTML = '';
@@ -171,6 +176,62 @@ STEP_MOD.shoot = (() => {
   function paintShadowOff() { ctx.shadowColor = 'transparent'; }
   function togglePreview() { if (previewing) stopPreview(); else { if (!scene().frames.length) { toast('먼저 몇 컷을 찍어 보세요'); return; } previewing = true; pvStart = performance.now(); pvBtn.innerHTML = icon('stop', 'ki') + '<span class="kl">멈춤</span>'; } }
   function stopPreview() { previewing = false; pvBtn.innerHTML = icon('play', 'ki') + '<span class="kl">재생</span>'; }
+
+  /* ----- 타이머 · 자동 촬영 ----- */
+  /* S.shot = { delay: 찰칵 뒤 몇 초 뒤에 찍을지, auto: 몇 초마다 계속 찍을지 } — 둘 중 하나만 써요 */
+  const shot = () => S.shot || (S.shot = { delay: 0, auto: 0 });
+  function paintTimer() {
+    const s = shot(), t = s.auto ? s.auto + '초마다' : s.delay ? s.delay + '초' : '';
+    timerBtn.innerHTML = icon('timer') + (t ? `<i class="tb">${t}</i>` : ''); timerBtn.classList.toggle('on', !!t);
+  }
+  function paintShutter() { shutterEl.classList.toggle('running', autoOn || !!cdT); shutterEl.innerHTML = icon(autoOn || cdT ? 'stop' : 'cam', 'ki') + `<span class="kl">${autoOn ? '멈춤' : cdT ? '취소' : '찰칵'}</span>`; }
+  function timerSheet() {
+    modal((b, m) => {
+      const pick = (delay, auto) => { stopTimer(); Object.assign(shot(), { delay, auto }); paintTimer(); m.close(); toast(auto ? `찰칵을 누르면 ${auto}초마다 계속 찍어요. 한 번 더 누르면 멈춰요` : delay ? `찰칵을 누르고 ${delay}초 뒤에 찍어요` : '찰칵을 누르면 바로 찍어요', 2600); };
+      const s = shot(), chip = (label, d, a) => h('button', { class: 'chip' + (s.delay === d && s.auto === a ? ' on' : ''), type: 'button', onclick: () => pick(d, a) }, label);
+      b.append(h('h2', {}, '찰칵 방법'),
+        h('p', { class: 'hint', style: { margin: 0 } }, '폰을 누를 때 흔들리면 타이머를 써 보세요. 자동은 손을 떼고 인형만 움직이면 돼요.'),
+        h('span', { class: 'label' }, '타이머'), h('div', { class: 'row' }, chip('바로 찍기', 0, 0), chip('3초 뒤', 3, 0), chip('5초 뒤', 5, 0)),
+        h('span', { class: 'label' }, '자동으로 계속 찍기'), h('div', { class: 'row' }, chip('2초마다', 0, 2), chip('3초마다', 0, 3), chip('5초마다', 0, 5)),
+        h('div', { class: 'acts' }, h('button', { class: 'btn primary', type: 'button', onclick: m.close }, '닫기')));
+    });
+  }
+  function shutterPress() {
+    if (autoOn || cdT) { const was = autoOn; stopTimer(); if (was) toast('자동 촬영을 멈췄어요', 1200); return; }
+    const s = shot();
+    if ((!s.delay && !s.auto) || !Cam.stream) { capture(); return; }
+    if (previewing) stopPreview();
+    autoOn = !!s.auto; countdown();
+  }
+  function countdown() {
+    let n = shot().auto || shot().delay;
+    const tick = () => {
+      if (n <= 0) { cdEl.hidden = true; cdT = null; paintShutter(); capture().then(() => { if (autoOn) countdown(); }); return; }
+      cdEl.hidden = false; cdEl.textContent = n; cdEl.classList.toggle('soft', autoOn); beep(n === 1 ? 1320 : 880); n--;
+      cdT = setTimeout(tick, 1000); paintShutter();
+    };
+    tick();
+  }
+  function stopTimer() { clearTimeout(cdT); cdT = null; autoOn = false; if (cdEl) cdEl.hidden = true; if (shutterEl) paintShutter(); }
+  function beep(f) { AE.init(); const c = AE.ctx; if (!c) return; const o = c.createOscillator(), g = c.createGain(); o.frequency.value = f; g.gain.setValueAtTime(.12, c.currentTime); g.gain.exponentialRampToValueAtTime(.001, c.currentTime + .12); o.connect(g).connect(AE.buses.ui); o.start(); o.stop(c.currentTime + .14); }
+
+  /* ----- 카메라 고정 — 컷마다 밝기·초점·색이 바뀌어 깜빡이지 않게 지금 값으로 묶어요 (되는 기기만) ----- */
+  async function toggleLock() {
+    const tr = Cam.stream && Cam.stream.getVideoTracks()[0];
+    if (!tr || !tr.getCapabilities) { toast('카메라가 켜져 있을 때 쓸 수 있어요'); return; }
+    const cap = tr.getCapabilities(), cur = tr.getSettings(), want = !locked, adv = {};
+    for (const [mode, val] of [['exposureMode', ['exposureTime', 'iso']], ['focusMode', ['focusDistance']], ['whiteBalanceMode', ['colorTemperature']]]) {
+      const modes = cap[mode] || [];
+      if (!want) { if (modes.includes('continuous')) adv[mode] = 'continuous'; continue; }
+      const vals = val.filter(k => cur[k] != null && cap[k]);
+      if (modes.includes('manual') && vals.length) { adv[mode] = 'manual'; for (const k of vals) adv[k] = cur[k]; }
+      else if (modes.includes('single-shot')) adv[mode] = 'single-shot';
+      else if (modes.includes('manual')) adv[mode] = 'manual';
+    }
+    if (!Object.keys(adv).length) { toast(want ? '이 기기 카메라는 고정 기능이 없어요. 불빛이 바뀌지 않는 곳에서 찍어 주세요' : '카메라 고정을 풀었어요', 3200); locked = false; lockBtn.classList.remove('on'); return; }
+    try { await tr.applyConstraints({ advanced: [adv] }); locked = want; lockBtn.classList.toggle('on', locked); toast(locked ? '카메라를 고정했어요. 밝기·초점이 이제 안 바뀌어요' : '카메라 고정을 풀었어요', 2200); }
+    catch (e) { toast('카메라를 고정하지 못했어요'); }
+  }
 
   /* ----- 촬영 ----- */
   async function capture() {
@@ -218,6 +279,10 @@ STEP_MOD.shoot = (() => {
     popEl.append(h('b', { style: { fontSize: '13px' } }, `${sel + 1}번 컷`),
       ib('rewind', '여기부터 다시 찍기', 'btn sm accent', { onclick: async () => { if (!await confirmBox('여기부터 다시 찍을까요?', `${sel + 1}번 컷부터 끝까지 ${sc.frames.length - sel}개 컷이 지워지고, 그 자리부터 이어서 찍어요.`, '지우고 다시 찍기', true)) return; sc.frames.splice(sel); insertAt = null; sel = null; changed(); buildStrip(true); } }),
       ib('insert', '뒤에 끼워 찍기', 'btn sm', { onclick: () => { insertAt = sel + 1; if (insertAt >= sc.frames.length) insertAt = null; sel = null; buildStrip(); } }),
+      ib('copy', '복사', 'btn sm', { 'aria-label': '이 컷을 바로 뒤에 하나 더', onclick: () => { sc.frames.splice(sel + 1, 0, { ...f, id: uid() }); sel++; changed(); buildStrip(); toast('컷을 하나 더 넣었어요', 1100); } }),
+      sel < sc.frames.length - 1 ? ib('pingpong', '거꾸로 이어 붙이기', 'btn sm', { 'aria-label': '여기부터 끝까지를 거꾸로 이어 붙이기', onclick: () => {
+        const back = sc.frames.slice(sel, -1).reverse().map(x => ({ ...x, id: uid() })); sc.frames.push(...back); sel = null; insertAt = null; changed(); buildStrip(true);
+        toast(`컷 ${back.length}개를 거꾸로 붙였어요. 갔다가 돌아와요`, 1800); } }) : '',
       ib('trash', '', 'btn sm icon', { 'aria-label': '이 컷 지우기', onclick: () => { sc.frames.splice(sel, 1); if (insertAt != null && insertAt > sel) insertAt--; sel = null; changed(); buildStrip(); } }),
       h('div', { class: 'seg', 'aria-label': '이 컷을 보여 줄 프레임 수' }, ...[1, 2, 3, 4, 6].map(n => h('button', { type: 'button', class: f.hold === n ? 'on' : '', onclick: () => { f.hold = n; changed(); buildStrip(); } }, '×' + n))),
       ib('x', '', 'btn sm icon ghost', { 'aria-label': '닫기', onclick: () => { sel = null; buildStrip(); } }));

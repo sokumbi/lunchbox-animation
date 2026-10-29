@@ -78,6 +78,7 @@ function trimModal(after) {
           h('div', { class: 'row' },
             ib('up', '앞으로', 'btn sm', { disabled: i === 0, onclick: () => { [P.scenes[i - 1], P.scenes[i]] = [P.scenes[i], P.scenes[i - 1]]; refresh(); } }),
             ib('down', '뒤로', 'btn sm', { disabled: i === P.scenes.length - 1, onclick: () => { [P.scenes[i + 1], P.scenes[i]] = [P.scenes[i], P.scenes[i + 1]]; refresh(); } }),
+            ib('pingpong', '거꾸로', 'btn sm', { 'aria-label': '장면을 거꾸로 돌리기', onclick: () => { s.frames.reverse(); [s.trimIn, s.trimOut] = [s.trimOut, s.trimIn]; refresh(); toast('장면을 거꾸로 돌렸어요', 1200); } }),
             ib('copy', '복제', 'btn sm', { onclick: () => { const c = { ...newScene(s.name + ' (복사)'), frames: s.frames.map(f => ({ ...f, id: uid() })), trimIn: s.trimIn, trimOut: s.trimOut, bgm: s.bgm }; P.scenes.splice(i + 1, 0, c); refresh(); } }),
             P.scenes.length > 1 ? ib('trash', '지우기', 'btn sm', { onclick: async () => { if (!await confirmBox('장면을 지울까요?', `“${s.name}” 장면과 그 안의 효과·소리가 함께 지워져요.`, '지우기', true)) return; P.scenes.splice(i, 1); for (const k of ['fx', 'sfx', 'voices', 'narrs']) P[k] = P[k].filter(it => it.sid !== s.id); refresh(); } }) : '',
             ib('cam', '다시 촬영', 'btn sm accent', { onclick: () => { m.close(); S.curScene = s.id; goStep('shoot'); } })),
