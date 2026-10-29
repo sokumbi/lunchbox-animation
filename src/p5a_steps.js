@@ -115,26 +115,32 @@ function sceneMenu(sc, t, after) {
       h('div', { class: 'acts' }, h('button', { class: 'btn primary', type: 'button', onclick: m.close }, '닫기')));
   });
 }
+/* 오른쪽 줄 도구 키 — 도구 판(sheet)이 열려 있으면 켜진 모양 */
+function railTool(label, ic, onclick, cls = '') { return key(label, { ic, cls: 'rt ' + cls, onclick }); }
+function paintRail(RR, on) { for (const k of RR.querySelectorAll('.rt')) k.classList.toggle('on', k.dataset.tab === on); }
 function cutKey(ui) { return key('자르기', { ic: 'scissors', onclick: () => trimModal(() => ui && ui.tl.render()) }); }
 
 /* =========================================================
    편집 (영상) — 왼쪽: 완성 · 사운드 · 재생 / 오른쪽: 영상 효과 / 아래: 타임라인 + 자르기
    ========================================================= */
 STEP_MOD.edit = (() => {
-  let ui, bar, M;
+  let ui, bar, M, sheet, RR;
   const SEL = () => S.sel && S.sel.kind === 'fx' ? P.fx.find(e => e.id === S.sel.id) : null;
   function mount(r) {
     M = r.M;
-    r.L.append(key('사운드', { ic: 'back', cls: 'row', aria: '사운드로 돌아가기', onclick: () => goStep('sound') }));
+    r.L.append(key('사운드', { ic: 'back', aria: '사운드로 돌아가기', onclick: () => goStep('sound') }));
     if (needFrames(r.M)) { r.L.append(transportEl().box); return; }
+    sheet = r.sheet; RR = r.RR;
+    const fxBtn = railTool('효과', 'sparkle', () => sheet.isOpen ? sheet.close() : sheet.open()); fxBtn.dataset.tab = 'fx';
+    sheet.onToggle = o => paintRail(RR, o ? 'fx' : null);
     bar = h('div', { class: 'sel-bar', hidden: true });
     ui = mountPlayerStage(r, { tracks: [TRACK.fx({ onSelect: () => { buildBar(); Player.draw(); } }), TRACK.voice()], onTick: drawSel, onScene: (sc, t) => sceneMenu(sc, t, () => goStep('edit')) });
     setupStagePointer(ui.st.cv);
     const grid = h('div', { class: 'kgrid' });
     for (const f of FX) { const k = fxKey(f.name, FX_IC[f.id] || 'sparkle', TC.fx, () => previewFx(f.id), () => addFx(f.id, .5, .45)); paletteDrag(k, f, ui.st.cv); grid.append(k); }
     r.R.append(h('div', { class: 'rhead' }, h('h3', {}, '영상 효과'), h('span', { class: 'hint' }, '한 번: 미리 보기 · 두 번: 넣기')), grid, bar);
-    r.B.append(cutKey(ui));
-    buildBar();
+    RR.append(fxBtn, cutKey(ui));
+    sheet.open(); buildBar();
   }
   let pvRaf = 0;
   function previewFx(type) {
@@ -180,7 +186,7 @@ STEP_MOD.edit = (() => {
     const c = Player.ctx; c.save(); c.setLineDash([10, 8]); c.lineWidth = 3; c.strokeStyle = TC.fx; c.beginPath(); c.arc(e.x * W, e.y * H, 90 * e.s, 0, 7); c.stroke(); c.restore();
   }
   function buildBar() {
-    if (!bar) return; bar.innerHTML = ''; const e = SEL(); bar.hidden = !e; if (!e) return;
+    if (!bar) return; bar.innerHTML = ''; const e = SEL(); bar.hidden = !e; if (!e) return; if (sheet && !sheet.isOpen) sheet.open();
     bar.append(h('b', {}, FX.find(f => f.id === e.type).name),
       h('span', { class: 'label' }, '크기'), h('input', { type: 'range', min: .4, max: 2.5, step: .05, value: e.s, 'aria-label': '크기', oninput: ev => { e.s = +ev.target.value; Player.draw(); }, onchange: changed }),
       h('span', { class: 'label' }, '시간'), h('input', { type: 'range', min: .5, max: 8, step: .1, value: e.dur, 'aria-label': '보이는 시간', oninput: ev => { e.dur = +ev.target.value; Player.draw(); }, onchange: () => { changed(); ui.tl.render(); } }),
@@ -197,26 +203,33 @@ STEP_MOD.edit = (() => {
    사운드 — 오른쪽이 효과음 / 배경음악 / 나레이션 키로 바뀌어요 (완성 키는 숨겨요)
    ========================================================= */
 STEP_MOD.sound = (() => {
-  let ui, R, bar, guide, rec = null, recBtn, M;
+  let ui, R, bar, guide, rec = null, recBtn, M, sheet, RR;
   const SEL = () => S.sel && S.sel.kind === 'sfx' ? P.sfx.find(x => x.id === S.sel.id) : S.sel && S.sel.kind === 'narr' ? P.narrs.find(x => x.id === S.sel.id) : null;
   function mount(r) {
     R = r.R; M = r.M;
-    r.L.append(key('대사 녹음', { ic: 'back', cls: 'row', aria: '대사 녹음으로 돌아가기', onclick: () => goStep('voice') }));
+    r.L.append(key('대사 녹음', { ic: 'back', aria: '대사 녹음으로 돌아가기', onclick: () => goStep('voice') }));
     if (needFrames(r.M)) { r.L.append(transportEl().box); return; }
+    sheet = r.sheet; RR = r.RR;
+    // 오른쪽 줄: 효과음 · 배경음악 · 내레이션 — 누르면 그 도구 판이 열려요 (열린 걸 또 누르면 닫혀요)
+    for (const [k, l, ic] of [['sfx', '효과음', 'speaker'], ['bgm', '배경음악', 'music'], ['narr', '내레이션', 'mic']]) {
+      const b = railTool(l, ic, () => { if (sheet.isOpen && S.soundTab === k) { sheet.close(); return; } if (S.soundTab !== k) S.sel = null; S.soundTab = k; AE.stopPreview(); build(); buildBar(); ui.tl.render(); sheet.open(); }); b.dataset.tab = k; RR.append(b);
+    }
+    sheet.onToggle = o => paintRail(RR, o ? S.soundTab : null);
     AE.init(); Promise.all(SFX.map(s => AE.getSfx(s.id))).then(() => ui && ui.tl.render());
     bar = h('div', { class: 'sel-bar', hidden: true }); guide = h('div', { class: 'guide', hidden: true });
-    ui = mountPlayerStage(r, { overlay: [guide], sceneDim: true, onScene: (sc, t) => sceneMenu(sc, t, () => goStep('sound')), tracks: [TRACK.sfx({ onSelect: buildBar }), TRACK.bgm({ onSelect: () => { S.soundTab = 'bgm'; build(); } }), TRACK.narr({ onSelect: buildBar })],
+    ui = mountPlayerStage(r, { overlay: [guide], sceneDim: true, onScene: (sc, t) => sceneMenu(sc, t, () => goStep('sound')), tracks: [TRACK.sfx({ onSelect: buildBar }), TRACK.bgm({ onSelect: () => { S.soundTab = 'bgm'; build(); sheet.open(); } }), TRACK.narr({ onSelect: buildBar })],
       onTick: t => { if (S.soundTab === 'bgm') { const sc = sceneAt(t); if (sc && sc.id !== curBgmScene) build(); } } });
-    r.B.append(cutKey(ui));
+    RR.append(h('div', { class: 'gap' }), cutKey(ui));
     S.soundTab = S.soundTab || 'sfx';
-    build(); buildBar();
+    build(); sheet.open(); buildBar();
   }
   let curBgmScene = null;
   function unmount() { if (rec && rec.active) rec.stop(); Mic.release(); AE.stopPreview(); }
   function build() {
     R.innerHTML = '';
     const tabs = [['sfx', '효과음'], ['bgm', '배경음악'], ['narr', '내레이션']];
-    R.append(h('div', { class: 'ktabs' }, ...tabs.map(([k, l]) => key(l, { cls: S.soundTab === k ? 'dark' : 'dim', onclick: () => { S.soundTab = k; AE.stopPreview(); build(); } }))));
+    R.append(h('div', { class: 'rhead' }, h('h3', {}, tabs.find(t => t[0] === S.soundTab)[1])));
+    if (sheet && sheet.isOpen) paintRail(RR, S.soundTab);
     if (S.soundTab === 'sfx') {
       const grid = h('div', { class: 'kgrid' });
       for (const s of SFX) { const k = fxKey(s.name, SFX_IC[s.id] || 'speaker', TC.sfx, () => { AE.init(); AE.playPreview('sfx', s.id); }, () => addSfx(s.id)); k.title = s.desc; grid.append(k); }
@@ -246,6 +259,7 @@ STEP_MOD.sound = (() => {
   }
   function buildBar() {
     if (!bar) return; bar.innerHTML = ''; const it = SEL(); bar.hidden = !it; if (!it) return;
+    if (sheet && !sheet.isOpen) { S.soundTab = S.sel.kind === 'narr' ? 'narr' : 'sfx'; build(); sheet.open(); bar.hidden = false; }
     if (S.sel.kind === 'sfx') {
       const s = it;
       bar.append(h('b', {}, SFX.find(x => x.id === s.snd).name),
@@ -279,12 +293,23 @@ STEP_MOD.sound = (() => {
    대사 녹음
    ========================================================= */
 STEP_MOD.voice = (() => {
-  let ui, R, cur = null, rec = null, guide, recBtn;
+  /* 대사 녹음 — 대사는 화면 위 자막, 왼쪽 줄: 앞·뒤 대사 · 재생 / 오른쪽 줄: 듣기 · 큰 빨간 마이크 · 지우기 · 파일 · 고치기 */
+  let ui, R, cur = null, rec = null, guide, recBtn, sheet, pill, prevK, nextK, listenK, delK, micWarned = false;
+  const lines = () => P.script || [];
+  const voiceOf = l => l && P.voices.find(v => v.lineId === l.id);
   function mount(r) {
-    R = r.R;
+    R = r.R; sheet = r.sheet;
     if (needFrames(r.M)) { r.L.append(transportEl().box); return; }
-    guide = h('div', { class: 'guide', hidden: true });
-    ui = mountPlayerStage(r, { overlay: [guide], tracks: [TRACK.voice({ onSelect: v => { const l = (P.script || []).find(l => l.id === v.lineId); if (l) { cur = l; build(); } } })] });
+    guide = h('div', { class: 'guide', hidden: true }); pill = h('div', { class: 'stage-pill' });
+    prevK = key('앞 대사', { ic: 'back', onclick: () => go(-1) }); nextK = key('뒤 대사', { ic: 'next', onclick: () => go(1) });
+    r.L.append(prevK, nextK);
+    ui = mountPlayerStage(r, { overlay: [guide, pill], tracks: [TRACK.voice({ onSelect: v => { const l = lines().find(l => l.id === v.lineId); if (l) { cur = l; build(); } } })] });
+    recBtn = key('녹음', { ic: 'mic', cls: 'rec', onclick: toggleRec });
+    listenK = key('듣기', { ic: 'speaker', onclick: () => { const v = voiceOf(cur); if (v) { Player.seek(absT(v)); Player.play({ until: absT(v) + v.dur + .2 }); } else toast('아직 녹음하지 않았어요'); } });
+    delK = key('지우기', { ic: 'trash', onclick: () => { const v = voiceOf(cur); if (!v) return; P.voices = P.voices.filter(x => x !== v); changed(); ui.tl.render(); build(); } });
+    r.RR.append(listenK, h('div', { class: 'gap' }), recBtn, h('div', { class: 'gap' }),
+      key('파일', { ic: 'upload', onclick: () => cur && uploadAudio('voices', cur, () => { ui.tl.render(); build(); }, Mic.failed) }),
+      key('고치기', { ic: 'edit', onclick: () => goStep('script') }));
     if (!(P.script && P.script.length) && P.storyId === 'byeoljubu' && !P.scriptMode) choose(); else build();
   }
   function unmount() { if (rec && rec.active) rec.stop(); Mic.release(); }
@@ -297,36 +322,36 @@ STEP_MOD.voice = (() => {
     }, { close: false });
   }
   function showGuide() { if (!cur) { guide.hidden = true; return; } guide.hidden = false; guide.innerHTML = ''; guide.append(h('small', {}, cur.who), cur.text); }
+  function go(d) {
+    const ls = lines(), i = ls.indexOf(cur); cur = ls[clamp(i + d, 0, ls.length - 1)]; if (!cur) return;
+    const vv = voiceOf(cur); if (vv) Player.seek(absT(vv)); else { const s2 = P.scenes.find(s => s.id === cur.scene); const rr = s2 && TL().map[s2.id]; rr && Player.seek(rr.t0); }
+    build();
+  }
   function build() {
-    R.innerHTML = ''; const lines = P.script || [];
-    if (!cur || !lines.includes(cur)) cur = lines.find(l => !P.voices.some(v => v.lineId === l.id)) || lines[0] || null;
+    const ls = lines();
+    if (!cur || !ls.includes(cur)) cur = ls.find(l => !voiceOf(l)) || ls[0] || null;
     showGuide();
-    const done = lines.filter(l => P.voices.some(v => v.lineId === l.id)).length;
-    R.append(h('div', { class: 'rhead' }, h('h3', {}, '대사 녹음'), h('span', { class: 'hint' }, `${done}/${lines.length}줄 녹음`)));
     if (!cur) {
-      R.append(h('p', { class: 'hint', style: { margin: 0 } }, '녹음할 대사가 아직 없어요. 시나리오 단계에서 대사 가이드를 먼저 써 주세요.'), key('시나리오로 가기', { ic: 'book', cls: 'orange row', onclick: () => goStep('script') }));
+      pill.textContent = '녹음할 대사가 없어요';
+      R.innerHTML = ''; R.append(h('div', { class: 'rhead' }, h('h3', {}, '대사 녹음')), h('p', { class: 'hint', style: { margin: 0 } }, '녹음할 대사가 아직 없어요. 시나리오 단계에서 대사 가이드를 먼저 써 주세요.'), key('시나리오로 가기', { ic: 'book', cls: 'orange row', onclick: () => goStep('script') }));
+      sheet.el.classList.add('auto'); sheet.open();
+      for (const k of [prevK, nextK, listenK, delK, recBtn]) k.disabled = true;
       return;
     }
-    const i = lines.indexOf(cur), v = P.voices.find(v => v.lineId === cur.id);
-    const sc = P.scenes.find(s => s.id === cur.scene);
-    const go = d => { cur = lines[clamp(i + d, 0, lines.length - 1)]; const vv = P.voices.find(x => x.lineId === cur.id); if (vv) Player.seek(absT(vv)); else { const s2 = P.scenes.find(s => s.id === cur.scene); const rr = s2 && TL().map[s2.id]; rr && Player.seek(rr.t0); } build(); };
-    recBtn = key(rec && rec.active ? '멈추기' : v ? '다시 녹음' : '녹음', { ic: rec && rec.active ? 'stop' : 'mic', cls: 'orange recbtn' + (rec && rec.active ? ' recording' : ''), onclick: toggleRec });
-    R.append(
-      h('div', { class: 'vline' }, h('span', { class: 'who' }, `${i + 1}. ${cur.who || '?'}${sc ? ' · ' + sc.name : ''}${v ? ' · 녹음됨 ✓' : ''}`), h('span', { class: 'tx' }, cur.text)),
-      h('div', { class: 'recpad' }, key('앞 대사', { ic: 'back', disabled: i === 0, onclick: () => go(-1) }), recBtn, key('뒤 대사', { ic: 'next', onclick: () => go(1) })),
-      h('div', { class: 'minirow' },
-        key('듣기', { ic: 'speaker', onclick: () => { if (v) { Player.seek(absT(v)); Player.play({ until: absT(v) + v.dur + .2 }); } else toast('아직 녹음하지 않았어요'); } }),
-        key('지우기', { ic: 'trash', onclick: () => { if (!v) return; P.voices = P.voices.filter(x => x !== v); changed(); ui.tl.render(); build(); } }),
-        key('파일', { ic: 'upload', onclick: () => uploadAudio('voices', cur, () => { ui.tl.render(); build(); }, Mic.failed) }),
-        key('고치기', { ic: 'edit', onclick: () => goStep('script') })),
-      Mic.failed ? h('div', { class: 'notice' }, '마이크를 바로 쓸 수 없어요. 파일 키로 폰 녹음 앱을 쓰거나 녹음 파일을 넣어 주세요.') : '');
-    if (i === lines.length - 1) $$('.recpad .key', R).pop().disabled = true;
+    sheet.close();
+    const i = ls.indexOf(cur), v = voiceOf(cur), sc = P.scenes.find(s => s.id === cur.scene), done = ls.filter(l => voiceOf(l)).length;
+    pill.textContent = `대사 ${i + 1} / ${ls.length} · ${cur.who || '?'}${sc ? ' · ' + sc.name : ''} · ${v ? '녹음됨 ✓' : `녹음 ${done}/${ls.length}`}`;
+    const on = rec && rec.active;
+    prevK.disabled = i === 0 || on; nextK.disabled = i === ls.length - 1 || on; listenK.disabled = !v || on; delK.disabled = !v || on; recBtn.disabled = false;
+    recBtn.innerHTML = icon(on ? 'stop' : 'mic', 'ki') + `<span class="kl">${on ? '멈추기' : v ? '다시 녹음' : '녹음'}</span>`;
+    recBtn.classList.toggle('recording', !!on);
+    if (Mic.failed && !micWarned) { micWarned = true; toast('마이크를 바로 쓸 수 없어요. 오른쪽 “파일” 키로 폰 녹음 앱을 쓰거나 녹음 파일을 넣어 주세요', 4200, true); }
   }
   function setState(s) { if (s === 'rec' || s === 'idle' || s === 'fail') build(); }
   async function toggleRec() {
     if (rec && rec.active) { rec.stop(); return; }
     if (!cur) return;
-    rec = recordFlow({ kind: 'voices', wrap: ui.st.wrap, line: cur, onState: setState, onDone: () => { ui.tl.render(); const lines = P.script || []; const i = lines.indexOf(cur); const nx = lines.slice(i + 1).find(l => !P.voices.some(v => v.lineId === l.id)); if (nx) { cur = nx; build(); toast('녹음했어요! 다음 대사로 넘어갔어요', 1600); } else { build(); pulseNext('대사를 다 녹음했어요! 왼쪽 위 주황색 “다음” 키를 눌러 사운드로 가요'); } } });
+    rec = recordFlow({ kind: 'voices', wrap: ui.st.wrap, line: cur, onState: setState, onDone: () => { ui.tl.render(); const lines = P.script || []; const i = lines.indexOf(cur); const nx = lines.slice(i + 1).find(l => !P.voices.some(v => v.lineId === l.id)); if (nx) { cur = nx; build(); toast('녹음했어요! 다음 대사로 넘어갔어요', 1600); } else { build(); pulseNext('대사를 다 녹음했어요! 화면 오른쪽 위 주황색 “다음”을 눌러 사운드로 가요'); } } });
     recBtn.disabled = true; await rec.start(); if (recBtn) recBtn.disabled = false;
   }
   return { mount, unmount };
@@ -337,7 +362,7 @@ STEP_MOD.voice = (() => {
    ========================================================= */
 STEP_MOD.final = (() => {
   function mount(r) {
-    r.L.append(key('편집', { ic: 'back', cls: 'row', aria: '편집으로 돌아가기', onclick: () => goStep('edit') }));
+    r.L.append(key('편집', { ic: 'back', aria: '편집으로 돌아가기', onclick: () => goStep('edit') }));
     if (needFrames(r.M)) { r.L.append(transportEl().box); return; }
     const ui = mountPlayerStage(r, { tracks: [TRACK.fx(), TRACK.voice(), TRACK.sfx()], onScene: (sc, t) => sceneMenu(sc, t, () => goStep('final')) });
     const frames = P.scenes.reduce((a, s) => a + s.frames.length, 0);
@@ -348,10 +373,13 @@ STEP_MOD.final = (() => {
       h('div', { class: 'check' },
         stat(P.scenes.length, '장면', 'shoot'), stat(frames, '컷', 'shoot'), stat(P.voices.length, '대사', 'voice'), stat(P.sfx.length, '효과음', 'sound'),
         stat(bgmN, '음악', 'sound'), stat(P.narrs.length, '내레이션', 'sound'), stat(P.fx.length, '효과', 'edit'), stat(P.fps, '빠르기', 'edit')),
-      h('div', { class: 'minirow' },
-        key('작품함 저장', { ic: 'save', cls: 'dark wide', onclick: async () => { P.done.final = true; const ok = await saveProject(); toast(ok ? '내 작품함에 저장했어요' : '이 화면에서는 작품함 저장이 안 돼요. 영상 파일로 저장해 주세요.'); } }),
-        key('처음부터 보기', { ic: 'play', cls: 'wide', onclick: () => { Player.seek(0); Player.play(); } })));
-    r.B.append(key('영상 파일', { ic: 'download', cls: 'orange', onclick: exportVideo }));
+      h('div', { class: 'hint' }, '숫자를 누르면 그 단계로 고치러 가요.'));
+    const sheet = r.sheet, sum = railTool('한눈에', 'grid', () => sheet.isOpen ? sheet.close() : sheet.open()); sum.dataset.tab = 'sum';
+    sheet.onToggle = o => paintRail(r.RR, o ? 'sum' : null);
+    r.RR.append(key('영상 파일', { ic: 'download', cls: 'orange', onclick: exportVideo }), sum,
+      key('처음부터', { ic: 'play', onclick: () => { sheet.close(); Player.seek(0); Player.play(); } }),
+      key('작품함', { ic: 'save', onclick: async () => { P.done.final = true; const ok = await saveProject(); toast(ok ? '내 작품함에 저장했어요' : '이 화면에서는 작품함 저장이 안 돼요. 영상 파일로 저장해 주세요.'); } }));
+    sheet.open();
   }
   return { mount, unmount() { } };
 })();

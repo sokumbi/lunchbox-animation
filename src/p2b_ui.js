@@ -51,15 +51,9 @@ function lcdDots(text, px = 16) {
 }
 const LCD = {
   els: new Set(),
-  make(text, cls = '') {
-    const box = h('div', { class: 'lcd ' + cls, role: 'img', 'aria-label': text });
-    const cv = h('canvas'); box.append(h('div', { class: 'lcd-glass' }, cv));
-    box.__text = text; box.__cv = cv;
-    this.els.add(box);
-    requestAnimationFrame(() => this.paint(box));
-    return box;
-  },
-  set(box, text) { if (!box || box.__text === text) return; box.__text = text; box.setAttribute('aria-label', text); this.paint(box); },
+  /* 스튜디오형 화면에서는 도트 액정 대신 평범한 제목 글자로 보여요 (paint는 예전 액정용으로 남겨 둬요) */
+  make(text, cls = '') { const box = h('div', { class: 'lcd-t ' + cls }, text); box.__text = text; return box; },
+  set(box, text) { if (!box || box.__text === text) return; box.__text = text; box.textContent = text; },
   paint(box) {
     const cv = box.__cv; if (!cv || !cv.isConnected) return;
     const w = cv.clientWidth, hh = cv.clientHeight; if (!w || !hh) return;

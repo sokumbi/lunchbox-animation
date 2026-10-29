@@ -13,7 +13,7 @@ STEP_MOD.script = (() => {
       h('input', { class: 'input grow', value: P.title, maxlength: 40, style: { maxWidth: '320px', padding: '7px 10px' }, oninput: e => { P.title = e.target.value; changed(); } }),
       h('div', { class: 'spacer' }),
       orig ? key('원작 보기', { ic: 'play', cls: 'row', onclick: () => { leaveStep(); introReturn = 'script'; startIntro(); } }) : '',
-      nextKey('script', 'row'));
+      nextKey('script', 'pill'));
     // 왼쪽: 줄거리 + 장면
     const scenes = h('div', { class: 'scroll' });
     P.scenes.forEach((s, i) => scenes.append(h('div', { class: 'sc-card', style: { padding: '6px', gridTemplateColumns: '24px auto minmax(0,1fr) auto' } },

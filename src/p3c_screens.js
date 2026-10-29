@@ -106,14 +106,18 @@ function dropOverlay(ov) { if (!ov) return; ov.style.transition = 'opacity .35s'
 function openLibrary() {
   show('library'); stopIntro();
   const top = $('#libTop'); top.innerHTML = '';
-  top.append(key('', { ic: 'home', cls: 'home dim', aria: '처음으로', onclick: () => showProcess('home') }),
+  top.append(key('', { ic: 'home', cls: 'home', aria: '처음으로', onclick: () => showProcess('home') }),
+    h('div', { class: 'brand' }, h('i', { html: icon('film') }), BRAND.app),
     LCD.make('어떤 이야기로 만들까요?'),
     key('내 작품함', { ic: 'film', cls: 'works', onclick: openWorks }),
-    h('button', { class: 'key dark newst', type: 'button', onclick: newStoryPrompt, html: `<i>${icon('plus')}</i><span class="kl">새로운 이야기</span>` }));
+    h('button', { class: 'key newst', type: 'button', onclick: newStoryPrompt, html: `<i>${icon('plus')}</i><span class="kl">새로운 이야기</span>` }));
   const g = $('#taleGrid'); g.innerHTML = '';
+  // 이야기 카드 — 내용은 그대로(별주부전만 켜짐), 같은 크기의 그림 카드
   TALES.forEach(t => {
-    const el = h(t.on ? 'button' : 'div', { class: 'cas' + (t.on ? ' on' : ''), type: t.on ? 'button' : null, 'aria-disabled': t.on ? null : 'true', title: t.on ? t.sub : '준비 중' },
-      h('span', { class: 'lab' }, h('b', {}, t.title)), h('span', { class: 'tape' }, h('i'), t.on ? '' : h('span', { class: 'lock', html: icon('lock') }), h('i')));
+    const el = h(t.on ? 'button' : 'div', { class: 'cas' + (t.on ? ' on' : ''), type: t.on ? 'button' : null, 'aria-disabled': t.on ? null : 'true', title: t.on ? t.sub : '준비 중',
+      style: { '--art': `radial-gradient(circle at 75% 25%, ${t.c}, color-mix(in srgb, ${t.c} 55%, #1E1C1A))` } },
+      h('span', { class: 'art', html: icon('book') }), h('span', { class: 'bd', html: t.on ? '시작' : icon('lock') + '준비 중' }), h('span', { class: 'tt' }, t.title));
+    el.style.setProperty('--art', `radial-gradient(circle at 75% 25%, ${t.c}, color-mix(in srgb, ${t.c} 55%, #1E1C1A))`);
     if (t.on) el.onclick = () => { AE.init(); startIntro(); };
     g.append(el);
   });
@@ -275,19 +279,23 @@ function goStep(id) {
   const layout = curMod.layout || 'std';
   if (layout === 'shoot') { curMod.mount({ main: body }); return; }
   if (layout === 'doc') { const main = h('div', { class: 'doc' }); body.append(main); curMod.mount({ main }); return; }
-  const L = h('div', { class: 'L' }, h('div', { class: 'navrow' }, navKey(), undoKey()), nextKey(id)), M = h('div', { class: 'M' }), R = h('div', { class: 'R well' });
+  // 왼쪽 줄(단계·되돌리기·재생) | 가운데 화면(+다음 알약, 도구 판) | 오른쪽 줄(도구) / 아래 타임라인
+  const L = h('div', { class: 'L' }, h('div', { class: 'navrow' }, navKey(), undoKey())), M = h('div', { class: 'M' }, nextKey(id, 'pill')), RR = h('div', { class: 'RR' });
+  const R = h('div', { class: 'R' }), sheetEl = h('div', { class: 'sheet', hidden: true }, h('button', { class: 'shx', type: 'button', 'aria-label': '도구 판 닫기', html: icon('x'), onclick: () => sheet.close() }), R);
+  const sheet = { el: sheetEl, open() { sheetEl.hidden = false; sheet.onToggle && sheet.onToggle(true); }, close() { sheetEl.hidden = true; sheet.onToggle && sheet.onToggle(false); }, get isOpen() { return !sheetEl.hidden; } };
+  M.append(sheetEl);
   const tlw = h('div', { class: 'tlw well' }), B = h('div', { class: 'B' }, tlw);
-  body.append(h('div', { class: 'lay' }, L, M, R, B));
-  curMod.mount({ L, M, R, B, tlw });
+  body.append(h('div', { class: 'lay' }, L, M, RR, B));
+  curMod.mount({ L, M, R, RR, B, tlw, sheet });
 }
 const STEP_ORDER = ['script', 'shoot', 'voice', 'sound', 'edit', 'final'];
 /* 화면마다 한 번, 무엇을 하면 되는지 짧게 알려 줘요 */
 const GUIDE = {
-  script: '장면을 나누고 대사를 써요. 다 되면 주황색 “다음” 키!',
-  shoot: '찰칵을 누를 때마다 한 컷씩 찍혀요. 다 찍으면 필름 아래 주황색 “다음” 키!',
-  voice: '녹음을 누르면 3·2·1 뒤에 녹음돼요. 다 하면 왼쪽 위 주황색 “다음” 키!',
-  sound: '소리 키를 한 번 누르면 들어 보고, 한 번 더 누르면 들어가요. 다 하면 “다음” 키!',
-  edit: '효과 키를 한 번 누르면 미리 보고, 한 번 더 누르면 들어가요. 다 하면 “다음” 키!',
+  script: '장면을 나누고 대사를 써요. 다 되면 오른쪽 위 주황색 “다음”!',
+  shoot: '빨간 찰칵을 누를 때마다 한 컷씩 찍혀요. 다 찍으면 오른쪽 위 주황색 “다음”!',
+  voice: '빨간 마이크를 누르면 3·2·1 뒤에 녹음돼요. 다 하면 오른쪽 위 주황색 “다음”!',
+  sound: '소리 키를 한 번 누르면 들어 보고, 한 번 더 누르면 들어가요. 다 하면 오른쪽 위 “다음”!',
+  edit: '효과 키를 한 번 누르면 미리 보고, 한 번 더 누르면 들어가요. 다 하면 오른쪽 위 “다음”!',
   final: '제목을 확인하고 저장해요'
 };
 const guided = {};

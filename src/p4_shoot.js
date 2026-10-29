@@ -82,36 +82,29 @@ STEP_MOD.shoot = (() => {
 
   function mount({ main }) {
     root = main;
-    // 왼쪽: 필름 (찍은 컷이 쌓여요)
-    headEl = key('', { cls: 'scn row', onclick: sceneSheet, aria: '장면 목록' });
-    list = h('div', { class: 'list' });
-    const strip = h('div', { class: 'fstrip well' }, h('div', { class: 'head' }, navKey(), headEl), h('div', { class: 'film' }, list), nextKey('shoot'));
-    // 가운데: 모니터
+    // 가운데: 카메라 화면 (높이 전체) + 위에 겹치는 것들 + 아래 필름 띠
     flashEl = h('div', { class: 'flash' }); badge = h('div', { class: 'stage-badge' }); popEl = h('div', { class: 'frame-pop', hidden: true });
     nocamEl = h('div', { class: 'nocam', hidden: true });
     sketchEl = h('button', { class: 'mon-sketch', type: 'button', hidden: true, 'aria-label': '장면 스케치 크게 보기', onclick: () => sketchModal(scene(), buildStrip) });
-    gridBtn = h('button', { type: 'button', 'aria-label': '격자', html: icon('grid'), onclick: () => { grid = !grid; gridBtn.classList.toggle('on', grid); } });
-    timerBtn = h('button', { type: 'button', 'aria-label': '타이머 · 자동 촬영', onclick: timerSheet });
-    lockBtn = h('button', { type: 'button', 'aria-label': '카메라 고정 (밝기·초점·색)', html: icon('camlock'), onclick: toggleLock });
-    const tools = h('div', { class: 'mon-tools' }, timerBtn, lockBtn, gridBtn, h('button', { type: 'button', 'aria-label': '앞·뒤 카메라 바꾸기', html: icon('switchCam'), onclick: switchCam }));
     cdEl = h('div', { class: 'countdown', hidden: true });
-    const mon = monitorEl([flashEl, badge, sketchEl, cdEl, nocamEl, popEl, tools]); cv = mon.cv; ctx = cv.getContext('2d');
-    const area = h('div', { class: 'cam-area' }, mon.mon);
-    // 오른쪽: 조작판
-    counterEl = h('div', { class: 'counter' });
-    onionBtn = key('겹쳐보기', { ic: 'onion', cls: onion ? 'on' : '', onclick: () => { onion = !onion; onionBtn.classList.toggle('on', onion); toast(onion ? '앞 컷 겹쳐 보기 켬' : '앞 컷 겹쳐 보기 끔', 1100); } });
+    headEl = key('', { cls: 'scn', onclick: sceneSheet, aria: '장면 목록' });
+    list = h('div', { class: 'list' }); counterEl = h('div', { class: 'cnt' });
+    const fbar = h('div', { class: 'fbar' }, headEl, list, counterEl, key('장면 끝', { ic: 'check', cls: 'endk', onclick: endScene }));
+    const mon = monitorEl([flashEl, badge, sketchEl, cdEl, nocamEl, popEl, fbar]); cv = mon.cv; ctx = cv.getContext('2d');
+    const area = h('div', { class: 'cam-area' }, mon.mon, nextKey('shoot', 'pill'));
+    // 왼쪽 줄: 단계 · 되돌리기 · 겹쳐보기(+진하기) · 격자
+    onionBtn = key('겹쳐보기', { ic: 'onion', cls: onion ? 'on' : '', onclick: () => { onion = !onion; onionBtn.classList.toggle('on', onion); onionA.disabled = !onion; toast(onion ? '앞 컷 겹쳐 보기 켬' : '앞 컷 겹쳐 보기 끔', 1100); } });
+    const onionA = h('input', { class: 'onion-a', type: 'range', min: .15, max: .8, step: .05, value: S.onionA || .42, 'aria-label': '겹쳐 보기 진하기', oninput: e => { S.onionA = +e.target.value; } });
+    gridBtn = key('격자', { ic: 'grid', onclick: () => { grid = !grid; gridBtn.classList.toggle('on', grid); } });
+    const left = h('div', { class: 'rail' }, navKey(), key('되돌리기', { ic: 'undo', aria: '마지막 컷 지우기', onclick: undoLast }), onionBtn, onionA, gridBtn);
+    // 오른쪽 줄: 카메라 바꾸기 · 타이머 · 고정 · 큰 빨간 찰칵 · 재생 · ×N · 장면 끝
+    timerBtn = key('타이머', { ic: 'timer', aria: '타이머 · 자동 촬영', onclick: timerSheet });
+    lockBtn = key('고정', { ic: 'camlock', aria: '카메라 고정 (밝기·초점·색)', onclick: toggleLock });
     pvBtn = key('재생', { ic: 'play', onclick: togglePreview });
     holdBtn = key('', { cls: 'hold3', aria: '한 번에 찍는 프레임 수 바꾸기', onclick: () => { P.hold = P.hold % 4 + 1; paintHold(); changed(); toast(`한 번 누르면 ${P.hold}프레임씩 찍어요`, 1200); } });
-    const plate = h('div', { class: 'cplate' },
-      ...[['8px', '8px'], ['8px', 'auto'], ['auto', '8px'], ['auto', 'auto']].map(([t, l]) => h('i', { class: 'screw', style: { top: t === 'auto' ? 'auto' : t, bottom: t === 'auto' ? '8px' : 'auto', left: l === 'auto' ? 'auto' : l, right: l === 'auto' ? '8px' : 'auto' } })),
-      counterEl,
-      h('div', { class: 'cpad' },
-        key('되돌리기', { ic: 'undo', onclick: undoLast }), pvBtn,
-        shutterEl = h('button', { class: 'key shutter', type: 'button', 'aria-label': '촬영', onclick: shutterPress }),
-        onionBtn, key('장면 끝', { ic: 'grid', onclick: endScene })),
-      holdBtn);
-    const panel = h('div', { class: 'cpanel well' }, plate);
-    root.append(h('div', { class: 'shoot' }, strip, area, panel));
+    shutterEl = h('button', { class: 'key shutter', type: 'button', 'aria-label': '촬영', onclick: shutterPress });
+    const right = h('div', { class: 'rail' }, key('카메라', { ic: 'switchCam', aria: '앞·뒤 카메라 바꾸기', onclick: switchCam }), timerBtn, lockBtn, shutterEl, pvBtn, holdBtn);
+    root.append(h('div', { class: 'shoot' }, left, area, right));
     paintHold(); paintShutter(); paintTimer(); buildStrip(true);
     startCamera();
     addEventListener('keydown', onKey);
@@ -119,8 +112,8 @@ STEP_MOD.shoot = (() => {
   }
   function unmount() { stopTimer(); locked = false; cancelAnimationFrame(raf); Cam.stop(); removeEventListener('keydown', onKey); previewing = false; }
   function onKey(e) { if (e.target.closest('input,textarea,select')) return; if (e.code === 'Space' || e.code === 'VolumeUp') { e.preventDefault(); shutterPress(); } }
-  function paintHold() { holdBtn.innerHTML = `<b>×${P.hold}</b><span class="kl">장씩</span>`; holdBtn.title = `한 번 누르면 ${P.hold}프레임씩 찍어요`; }
-  function paintCounter() { const sc = scene(); const sec = sc.frames.reduce((a, f) => a + f.hold, 0) / P.fps; counterEl.innerHTML = `<span>컷 · ${sec.toFixed(1)}초</span>` + seg7(String(Math.min(999, sc.frames.length)).padStart(3, '0')); }
+  function paintHold() { holdBtn.innerHTML = `<span class="ki">×${P.hold}</span><span class="kl">장씩</span>`; holdBtn.title = `한 번 누르면 ${P.hold}프레임씩 찍어요`; }
+  function paintCounter() { const sc = scene(); const sec = sc.frames.reduce((a, f) => a + f.hold, 0) / P.fps; counterEl.textContent = `${sc.frames.length}컷 · ${sec.toFixed(1)}초`; }
 
   async function startCamera() {
     nocamEl.hidden = true;
@@ -164,8 +157,9 @@ STEP_MOD.shoot = (() => {
     else if (sc.frames.length) { const f = sc.frames[(insertAt ?? sc.frames.length) - 1]; f && drawCover(ctx, f.img); }
     if (onion && Cam.stream) {
       const base = insertAt ?? sc.frames.length, p1 = sc.frames[base - 1], p2 = sc.frames[base - 2];
-      if (p2) { ctx.globalAlpha = .22; drawCover(ctx, p2.img); }
-      if (p1) { ctx.globalAlpha = .42; drawCover(ctx, p1.img); }
+      const oa = S.onionA || .42;
+      if (p2) { ctx.globalAlpha = oa * .5; drawCover(ctx, p2.img); }
+      if (p1) { ctx.globalAlpha = oa; drawCover(ctx, p1.img); }
       ctx.globalAlpha = 1;
     }
     if (grid) { ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 1.5; ctx.beginPath(); for (const x of [W / 3, W * 2 / 3]) { ctx.moveTo(x, 0); ctx.lineTo(x, H); } for (const y of [H / 3, H * 2 / 3]) { ctx.moveTo(0, y); ctx.lineTo(W, y); } ctx.stroke(); }
@@ -182,7 +176,7 @@ STEP_MOD.shoot = (() => {
   const shot = () => S.shot || (S.shot = { delay: 0, auto: 0 });
   function paintTimer() {
     const s = shot(), t = s.auto ? s.auto + '초마다' : s.delay ? s.delay + '초' : '';
-    timerBtn.innerHTML = icon('timer') + (t ? `<i class="tb">${t}</i>` : ''); timerBtn.classList.toggle('on', !!t);
+    timerBtn.innerHTML = icon('timer', 'ki') + `<span class="kl">${t || '타이머'}</span>`; timerBtn.classList.toggle('on', !!t);
   }
   function paintShutter() { shutterEl.classList.toggle('running', autoOn || !!cdT); shutterEl.innerHTML = icon(autoOn || cdT ? 'stop' : 'cam', 'ki') + `<span class="kl">${autoOn ? '멈춤' : cdT ? '취소' : '찰칵'}</span>`; }
   function timerSheet() {
@@ -260,15 +254,15 @@ STEP_MOD.shoot = (() => {
   /* ----- 왼쪽 컷 줄 ----- */
   function buildStrip(scrollEnd) {
     const sc = scene(), fr = sc.frames.reduce((a, f) => a + f.hold, 0);
-    headEl.innerHTML = `<span class="kl">${sc.name.replace(/</g, '&lt;')}</span><small>${(fr / P.fps).toFixed(1)}초 ▾</small>`;
+    headEl.innerHTML = `<span class="kl">${sc.name.replace(/</g, '&lt;')}</span><small>▾</small>`;
     list.innerHTML = '';
-    if (!sc.frames.length) list.append(h('div', { class: 'strip-empty' }, '찰칵! 을 누르면 여기에 컷이 쌓여요'));
+    if (!sc.frames.length) list.append(h('div', { class: 'strip-empty' }, '빨간 찰칵을 누르면 여기에 컷이 쌓여요'));
     sc.frames.forEach((f, i) => {
       if (insertAt === i) list.append(h('span', { class: 'ins-mark' }));
       list.append(h('button', { class: 'fr' + (sel === i ? ' sel' : '') + (i === sc.frames.length - 1 ? ' last' : ''), type: 'button', 'aria-label': `${i + 1}번 컷`, onclick: () => { sel = sel === i ? null : i; buildStrip(); } },
         h('img', { src: f.url, alt: '' }), h('b', {}, String(i + 1).padStart(3, '0')), h('em', {}, '×' + f.hold)));
     });
-    if (scrollEnd) requestAnimationFrame(() => list.scrollTop = list.scrollHeight);
+    if (scrollEnd) requestAnimationFrame(() => list.scrollLeft = list.scrollWidth);
     sketchEl.hidden = !sc.sketch; if (sc.sketch) sketchEl.style.backgroundImage = `url(${sc.sketch.url})`;
     paintCounter(); buildPop();
   }

@@ -14,7 +14,7 @@ fs.mkdirSync(path.join(__dirname, 'shots'), { recursive: true });
   const clipCheck = async (p, tag) => {
     const r = await p.evaluate(() => {
       const bad = [];
-      const inList = el => { const sp = el.parentElement && el.parentElement.closest('.list,.film'); if (!sp) return false; const a = el.getBoundingClientRect(), r = sp.getBoundingClientRect(); return a.bottom < r.top + 2 || a.top > r.bottom - 2 || a.top < r.top - 2; };
+      const inList = el => { const sp = el.parentElement && el.parentElement.closest('.list,.film'); if (!sp) return false; const a = el.getBoundingClientRect(), r = sp.getBoundingClientRect(); return a.bottom < r.top + 2 || a.top > r.bottom - 2 || a.top < r.top - 2 || a.right > r.right + 2 || a.left < r.left - 2; };
       const app = document.getElementById('app');
       for (const el of app.querySelectorAll('*')) {
         if (el.closest('[hidden]') || !el.offsetParent && el.tagName !== 'BODY') continue;
@@ -54,7 +54,7 @@ fs.mkdirSync(path.join(__dirname, 'shots'), { recursive: true });
     for (let i = 0; i < 6; i++) { await p.locator('.shutter').click(); await p.waitForTimeout(250); }
     await sh('04_shoot'); await clipCheck(p, name + ' shoot');
     await p.locator('.fr').nth(1).click(); await p.waitForTimeout(200); await sh('04b_shootpop'); await p.locator('.frame-pop [aria-label="닫기"]').click();
-    await p.locator('.cpad .key', { hasText: '장면 끝' }).click(); await p.waitForTimeout(600); await sh('04c_endscene'); await clipCheck(p, name + ' endscene');
+    await p.locator('.shoot .key', { hasText: '장면 끝' }).click(); await p.waitForTimeout(600); await sh('04c_endscene'); await clipCheck(p, name + ' endscene');
     await p.locator('.modal >> text=다음 장면 찍기').click(); await p.waitForTimeout(500); out.push(name + ' scenes ' + await p.evaluate(() => P.scenes.map(s => s.name + ':' + s.frames.length).join(',')));
     for (let i = 0; i < 3; i++) { await p.locator('.shutter').click(); await p.waitForTimeout(250); }
     for (const st of ['script', 'voice', 'sound', 'edit', 'final']) {
@@ -64,13 +64,13 @@ fs.mkdirSync(path.join(__dirname, 'shots'), { recursive: true });
       await sh('05_' + st); await clipCheck(p, name + ' ' + st);
       if (st === 'sound') {
         await p.locator('.fxk').nth(1).click(); await p.waitForTimeout(200); await p.locator('.fxk').nth(1).click(); await p.waitForTimeout(300); await sh('05_sound_sfx'); out.push(name + ' sfx count ' + await p.evaluate(() => P.sfx.length));
-        for (const t of ['배경음악', '내레이션']) { await p.locator('.ktabs .key', { hasText: t }).click(); await p.waitForTimeout(500); await sh('05_sound_' + t); await clipCheck(p, name + ' sound ' + t); }
+        for (const t of ['배경음악', '내레이션']) { await p.locator('.RR .key', { hasText: t }).click(); await p.waitForTimeout(500); await sh('05_sound_' + t); await clipCheck(p, name + ' sound ' + t); }
       }
     }
     await p.evaluate(() => goStep('edit')); await p.waitForTimeout(500);
     const before = await p.evaluate(() => P.fx.length); await p.locator('.navrow .undo').click(); await p.waitForTimeout(500); out.push(name + ' undo fx ' + before + '->' + await p.evaluate(() => P.fx.length));
     await p.locator('.tl-scene').first().click(); await p.waitForTimeout(400); await sh('06b_scenemenu'); await p.locator('.modal >> text=닫기').click(); await p.waitForTimeout(300);
-    await p.locator('.B .key', { hasText: '자르기' }).click(); await p.waitForTimeout(400); await sh('06_trim'); await p.locator('.modal >> text=다 했어요').click();
+    await p.locator('.RR .key', { hasText: '자르기' }).click(); await p.waitForTimeout(400); await sh('06_trim'); await p.locator('.modal >> text=다 했어요').click();
     await p.locator('.navkey').first().click(); await p.waitForTimeout(500); await sh('07_nav'); await clipCheck(p, name + ' nav');
     await p.locator('.step-go', { hasText: '촬영' }).click(); await p.waitForTimeout(800); out.push(name + ' nav -> ' + await p.evaluate(() => S.step));
     await p.locator('.navkey').first().click(); await p.waitForTimeout(400); await p.locator('.step-go', { hasText: '완성' }).click(); await p.waitForTimeout(800); out.push(name + ' nav -> ' + await p.evaluate(() => S.step));
