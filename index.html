@@ -369,6 +369,16 @@ input[type=range]{accent-color:var(--orange);width:100%}
 .sbtn small{font-size:clamp(8px,2.6cqh,10px);color:var(--mute);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .sbtn.on{background:var(--c-bgm);color:#fff;box-shadow:0 2px 0 #2F6B40}
 .sbtn.on small{color:#E2F2E6}
+.nextkey{flex-direction:column;gap:0;line-height:1.1}
+.nextkey .nk-a{display:flex;align-items:center;gap:2px}
+.nextkey .nk-a .kl{font-family:var(--display);font-weight:900}
+.nextkey .nk-b{font-size:clamp(9px,3cqh,12.5px);font-weight:700;opacity:.92;white-space:nowrap}
+.nextkey.row{flex-direction:row;gap:8px;padding:0 12px}
+.nextkey.row .nk-b::before{content:"· "}
+.fstrip > .nextkey{flex:none;height:clamp(40px,15cqh,64px);padding:2px}
+.doc .nextkey{height:auto;min-height:40px}
+.nextkey.pulse{animation:nkpulse 1s ease-in-out 4}
+@keyframes nkpulse{50%{transform:scale(1.07);box-shadow:0 0 0 6px #CF5D2A55,0 3px 0 var(--orange-side)}}
 .lay .L .key.big,.soundwell{flex:none;height:clamp(40px,15cqh,82px)}
 .lay .L .key.big .ki{width:clamp(18px,6.6cqh,30px);height:clamp(18px,6.6cqh,30px)}
 .lay .L .key.big .kl{font-family:var(--display);font-weight:900;font-size:clamp(13px,5cqh,22px)}
@@ -1918,7 +1928,7 @@ function goStep(id) {
   const layout = curMod.layout || 'std';
   if (layout === 'shoot') { curMod.mount({ main: body }); return; }
   if (layout === 'doc') { const main = h('div', { class: 'doc' }); body.append(main); curMod.mount({ main }); return; }
-  const L = h('div', { class: 'L' }, h('div', { class: 'navrow' }, navKey(), undoKey())), M = h('div', { class: 'M' }), R = h('div', { class: 'R well' });
+  const L = h('div', { class: 'L' }, h('div', { class: 'navrow' }, navKey(), undoKey()), nextKey(id)), M = h('div', { class: 'M' }), R = h('div', { class: 'R well' });
   const tlw = h('div', { class: 'tlw well' }), B = h('div', { class: 'B' }, tlw);
   body.append(h('div', { class: 'lay' }, L, M, R, B));
   curMod.mount({ L, M, R, B, tlw });
@@ -1926,11 +1936,11 @@ function goStep(id) {
 const STEP_ORDER = ['script', 'shoot', 'voice', 'sound', 'edit', 'final'];
 /* 화면마다 한 번, 무엇을 하면 되는지 짧게 알려 줘요 */
 const GUIDE = {
-  script: '장면을 나누고 대사를 써요. 다 되면 “촬영하러 가기”!',
-  shoot: '찰칵을 누를 때마다 한 컷씩 찍혀요. 인형을 조금씩 움직여 보세요',
-  voice: '녹음을 누르면 3·2·1 뒤에 영상이 나오면서 녹음돼요',
-  sound: '소리 키를 한 번 누르면 들어 보고, 한 번 더 누르면 지금 시간에 들어가요',
-  edit: '효과 키를 한 번 누르면 미리 보고, 한 번 더 누르면 들어가요. 다 했으면 완성!',
+  script: '장면을 나누고 대사를 써요. 다 되면 주황색 “다음” 키!',
+  shoot: '찰칵을 누를 때마다 한 컷씩 찍혀요. 다 찍으면 필름 아래 주황색 “다음” 키!',
+  voice: '녹음을 누르면 3·2·1 뒤에 녹음돼요. 다 하면 왼쪽 위 주황색 “다음” 키!',
+  sound: '소리 키를 한 번 누르면 들어 보고, 한 번 더 누르면 들어가요. 다 하면 “다음” 키!',
+  edit: '효과 키를 한 번 누르면 미리 보고, 한 번 더 누르면 들어가요. 다 하면 “다음” 키!',
   final: '제목을 확인하고 저장해요'
 };
 const guided = {};
@@ -1949,6 +1959,14 @@ function needFrames(M) {
   M.append(st.mon);
   return true;
 }
+/* 다음 단계 키 — 모든 단계에서 같은 모양·같은 자리(왼쪽 위 단계 키 바로 아래, 촬영은 필름 아래, 시나리오는 오른쪽 위) */
+function nextKey(cur, extraCls = '') {
+  const t = nextTarget(); if (!t) return '';
+  return key('', { cls: 'orange big nextkey ' + extraCls, aria: `다음 단계: ${t.label}`, onclick: () => nextStep(cur),
+    html: `<span class="nk-a"><span class="kl">다음</span>${icon('next', 'ki')}</span><small class="nk-b">${t.label}</small>` });
+}
+/* 할 일을 다 했을 때 다음 키를 반짝여서 알려 줘요 */
+function pulseNext(msg) { const el = $('.nextkey'); if (!el) return; el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); if (msg) toast(msg, 3200, true); }
 function nextButton() { return null; }
 function nextBtn() { return document.createComment('next'); }
 /* =========================================================
@@ -2038,7 +2056,7 @@ STEP_MOD.shoot = (() => {
     // 왼쪽: 필름 (찍은 컷이 쌓여요)
     headEl = key('', { cls: 'scn row', onclick: sceneSheet, aria: '장면 목록' });
     list = h('div', { class: 'list' });
-    const strip = h('div', { class: 'fstrip well' }, h('div', { class: 'head' }, navKey(), headEl), h('div', { class: 'film' }, list));
+    const strip = h('div', { class: 'fstrip well' }, h('div', { class: 'head' }, navKey(), headEl), h('div', { class: 'film' }, list), nextKey('shoot'));
     // 가운데: 모니터
     flashEl = h('div', { class: 'flash' }); badge = h('div', { class: 'stage-badge' }); popEl = h('div', { class: 'frame-pop', hidden: true });
     nocamEl = h('div', { class: 'nocam', hidden: true });
@@ -2453,8 +2471,7 @@ STEP_MOD.edit = (() => {
   const SEL = () => S.sel && S.sel.kind === 'fx' ? P.fx.find(e => e.id === S.sel.id) : null;
   function mount(r) {
     M = r.M;
-    r.L.append(key('완성', { ic: 'check', cls: 'orange big', onclick: () => { P.done.edit = true; changed(); goStep('final'); } }),
-      key('사운드', { ic: 'speaker', cls: 'row', onclick: () => goStep('sound') }));
+    r.L.append(key('사운드', { ic: 'back', cls: 'row', aria: '사운드로 돌아가기', onclick: () => goStep('sound') }));
     if (needFrames(r.M)) { r.L.append(transportEl().box); return; }
     bar = h('div', { class: 'sel-bar', hidden: true });
     ui = mountPlayerStage(r, { tracks: [TRACK.fx({ onSelect: () => { buildBar(); Player.draw(); } }), TRACK.voice()], onTick: drawSel, onScene: (sc, t) => sceneMenu(sc, t, () => goStep('edit')) });
@@ -2530,8 +2547,7 @@ STEP_MOD.sound = (() => {
   const SEL = () => S.sel && S.sel.kind === 'sfx' ? P.sfx.find(x => x.id === S.sel.id) : S.sel && S.sel.kind === 'narr' ? P.narrs.find(x => x.id === S.sel.id) : null;
   function mount(r) {
     R = r.R; M = r.M;
-    r.L.append(h('div', { class: 'well soundwell' }, '사운드', h('br'), '넣는 중'),
-      key('영상 편집', { ic: 'back', cls: 'orange row', onclick: () => { P.done.sound = true; changed(); goStep('edit'); } }));
+    r.L.append(key('대사 녹음', { ic: 'back', cls: 'row', aria: '대사 녹음으로 돌아가기', onclick: () => goStep('voice') }));
     if (needFrames(r.M)) { r.L.append(transportEl().box); return; }
     AE.init(); Promise.all(SFX.map(s => AE.getSfx(s.id))).then(() => ui && ui.tl.render());
     bar = h('div', { class: 'sel-bar', hidden: true }); guide = h('div', { class: 'guide', hidden: true });
@@ -2615,7 +2631,6 @@ STEP_MOD.voice = (() => {
     if (needFrames(r.M)) { r.L.append(transportEl().box); return; }
     guide = h('div', { class: 'guide', hidden: true });
     ui = mountPlayerStage(r, { overlay: [guide], tracks: [TRACK.voice({ onSelect: v => { const l = (P.script || []).find(l => l.id === v.lineId); if (l) { cur = l; build(); } } })] });
-    r.B.append(key('사운드', { ic: 'next', cls: 'orange', onclick: () => nextStep('voice') }));
     if (!(P.script && P.script.length) && P.storyId === 'byeoljubu' && !P.scriptMode) choose(); else build();
   }
   function unmount() { if (rec && rec.active) rec.stop(); Mic.release(); }
@@ -2644,7 +2659,7 @@ STEP_MOD.voice = (() => {
     recBtn = key(rec && rec.active ? '멈추기' : v ? '다시 녹음' : '녹음', { ic: rec && rec.active ? 'stop' : 'mic', cls: 'orange recbtn' + (rec && rec.active ? ' recording' : ''), onclick: toggleRec });
     R.append(
       h('div', { class: 'vline' }, h('span', { class: 'who' }, `${i + 1}. ${cur.who || '?'}${sc ? ' · ' + sc.name : ''}${v ? ' · 녹음됨 ✓' : ''}`), h('span', { class: 'tx' }, cur.text)),
-      h('div', { class: 'recpad' }, key('이전', { ic: 'back', disabled: i === 0, onclick: () => go(-1) }), recBtn, key('다음', { ic: 'next', onclick: () => go(1) })),
+      h('div', { class: 'recpad' }, key('앞 대사', { ic: 'back', disabled: i === 0, onclick: () => go(-1) }), recBtn, key('뒤 대사', { ic: 'next', onclick: () => go(1) })),
       h('div', { class: 'minirow' },
         key('듣기', { ic: 'speaker', onclick: () => { if (v) { Player.seek(absT(v)); Player.play({ until: absT(v) + v.dur + .2 }); } else toast('아직 녹음하지 않았어요'); } }),
         key('지우기', { ic: 'trash', onclick: () => { if (!v) return; P.voices = P.voices.filter(x => x !== v); changed(); ui.tl.render(); build(); } }),
@@ -2657,7 +2672,7 @@ STEP_MOD.voice = (() => {
   async function toggleRec() {
     if (rec && rec.active) { rec.stop(); return; }
     if (!cur) return;
-    rec = recordFlow({ kind: 'voices', wrap: ui.st.wrap, line: cur, onState: setState, onDone: () => { ui.tl.render(); const lines = P.script || []; const i = lines.indexOf(cur); const nx = lines.slice(i + 1).find(l => !P.voices.some(v => v.lineId === l.id)); if (nx) cur = nx; build(); toast('녹음했어요! 다음 대사로 넘어갔어요', 1600); } });
+    rec = recordFlow({ kind: 'voices', wrap: ui.st.wrap, line: cur, onState: setState, onDone: () => { ui.tl.render(); const lines = P.script || []; const i = lines.indexOf(cur); const nx = lines.slice(i + 1).find(l => !P.voices.some(v => v.lineId === l.id)); if (nx) { cur = nx; build(); toast('녹음했어요! 다음 대사로 넘어갔어요', 1600); } else { build(); pulseNext('대사를 다 녹음했어요! 왼쪽 위 주황색 “다음” 키를 눌러 사운드로 가요'); } } });
     recBtn.disabled = true; await rec.start(); if (recBtn) recBtn.disabled = false;
   }
   return { mount, unmount };
@@ -2668,7 +2683,7 @@ STEP_MOD.voice = (() => {
    ========================================================= */
 STEP_MOD.final = (() => {
   function mount(r) {
-    r.L.append(key('편집', { ic: 'back', cls: 'row', onclick: () => goStep('edit') }));
+    r.L.append(key('편집', { ic: 'back', cls: 'row', aria: '편집으로 돌아가기', onclick: () => goStep('edit') }));
     if (needFrames(r.M)) { r.L.append(transportEl().box); return; }
     const ui = mountPlayerStage(r, { tracks: [TRACK.fx(), TRACK.voice(), TRACK.sfx()], onScene: (sc, t) => sceneMenu(sc, t, () => goStep('final')) });
     const frames = P.scenes.reduce((a, s) => a + s.frames.length, 0);
@@ -2701,7 +2716,7 @@ STEP_MOD.script = (() => {
       h('input', { class: 'input grow', value: P.title, maxlength: 40, style: { maxWidth: '320px', padding: '7px 10px' }, oninput: e => { P.title = e.target.value; changed(); } }),
       h('div', { class: 'spacer' }),
       orig ? key('원작 보기', { ic: 'play', cls: 'row', onclick: () => { leaveStep(); introReturn = 'script'; startIntro(); } }) : '',
-      key('촬영하러 가기', { ic: 'next', cls: 'orange row', onclick: () => nextStep('script') }));
+      nextKey('script', 'row'));
     // 왼쪽: 줄거리 + 장면
     const scenes = h('div', { class: 'scroll' });
     P.scenes.forEach((s, i) => scenes.append(h('div', { class: 'sc-card', style: { padding: '6px', gridTemplateColumns: '24px auto minmax(0,1fr) auto' } },

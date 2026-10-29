@@ -125,8 +125,7 @@ STEP_MOD.edit = (() => {
   const SEL = () => S.sel && S.sel.kind === 'fx' ? P.fx.find(e => e.id === S.sel.id) : null;
   function mount(r) {
     M = r.M;
-    r.L.append(key('완성', { ic: 'check', cls: 'orange big', onclick: () => { P.done.edit = true; changed(); goStep('final'); } }),
-      key('사운드', { ic: 'speaker', cls: 'row', onclick: () => goStep('sound') }));
+    r.L.append(key('사운드', { ic: 'back', cls: 'row', aria: '사운드로 돌아가기', onclick: () => goStep('sound') }));
     if (needFrames(r.M)) { r.L.append(transportEl().box); return; }
     bar = h('div', { class: 'sel-bar', hidden: true });
     ui = mountPlayerStage(r, { tracks: [TRACK.fx({ onSelect: () => { buildBar(); Player.draw(); } }), TRACK.voice()], onTick: drawSel, onScene: (sc, t) => sceneMenu(sc, t, () => goStep('edit')) });
@@ -202,8 +201,7 @@ STEP_MOD.sound = (() => {
   const SEL = () => S.sel && S.sel.kind === 'sfx' ? P.sfx.find(x => x.id === S.sel.id) : S.sel && S.sel.kind === 'narr' ? P.narrs.find(x => x.id === S.sel.id) : null;
   function mount(r) {
     R = r.R; M = r.M;
-    r.L.append(h('div', { class: 'well soundwell' }, '사운드', h('br'), '넣는 중'),
-      key('영상 편집', { ic: 'back', cls: 'orange row', onclick: () => { P.done.sound = true; changed(); goStep('edit'); } }));
+    r.L.append(key('대사 녹음', { ic: 'back', cls: 'row', aria: '대사 녹음으로 돌아가기', onclick: () => goStep('voice') }));
     if (needFrames(r.M)) { r.L.append(transportEl().box); return; }
     AE.init(); Promise.all(SFX.map(s => AE.getSfx(s.id))).then(() => ui && ui.tl.render());
     bar = h('div', { class: 'sel-bar', hidden: true }); guide = h('div', { class: 'guide', hidden: true });
@@ -287,7 +285,6 @@ STEP_MOD.voice = (() => {
     if (needFrames(r.M)) { r.L.append(transportEl().box); return; }
     guide = h('div', { class: 'guide', hidden: true });
     ui = mountPlayerStage(r, { overlay: [guide], tracks: [TRACK.voice({ onSelect: v => { const l = (P.script || []).find(l => l.id === v.lineId); if (l) { cur = l; build(); } } })] });
-    r.B.append(key('사운드', { ic: 'next', cls: 'orange', onclick: () => nextStep('voice') }));
     if (!(P.script && P.script.length) && P.storyId === 'byeoljubu' && !P.scriptMode) choose(); else build();
   }
   function unmount() { if (rec && rec.active) rec.stop(); Mic.release(); }
@@ -316,7 +313,7 @@ STEP_MOD.voice = (() => {
     recBtn = key(rec && rec.active ? '멈추기' : v ? '다시 녹음' : '녹음', { ic: rec && rec.active ? 'stop' : 'mic', cls: 'orange recbtn' + (rec && rec.active ? ' recording' : ''), onclick: toggleRec });
     R.append(
       h('div', { class: 'vline' }, h('span', { class: 'who' }, `${i + 1}. ${cur.who || '?'}${sc ? ' · ' + sc.name : ''}${v ? ' · 녹음됨 ✓' : ''}`), h('span', { class: 'tx' }, cur.text)),
-      h('div', { class: 'recpad' }, key('이전', { ic: 'back', disabled: i === 0, onclick: () => go(-1) }), recBtn, key('다음', { ic: 'next', onclick: () => go(1) })),
+      h('div', { class: 'recpad' }, key('앞 대사', { ic: 'back', disabled: i === 0, onclick: () => go(-1) }), recBtn, key('뒤 대사', { ic: 'next', onclick: () => go(1) })),
       h('div', { class: 'minirow' },
         key('듣기', { ic: 'speaker', onclick: () => { if (v) { Player.seek(absT(v)); Player.play({ until: absT(v) + v.dur + .2 }); } else toast('아직 녹음하지 않았어요'); } }),
         key('지우기', { ic: 'trash', onclick: () => { if (!v) return; P.voices = P.voices.filter(x => x !== v); changed(); ui.tl.render(); build(); } }),
@@ -329,7 +326,7 @@ STEP_MOD.voice = (() => {
   async function toggleRec() {
     if (rec && rec.active) { rec.stop(); return; }
     if (!cur) return;
-    rec = recordFlow({ kind: 'voices', wrap: ui.st.wrap, line: cur, onState: setState, onDone: () => { ui.tl.render(); const lines = P.script || []; const i = lines.indexOf(cur); const nx = lines.slice(i + 1).find(l => !P.voices.some(v => v.lineId === l.id)); if (nx) cur = nx; build(); toast('녹음했어요! 다음 대사로 넘어갔어요', 1600); } });
+    rec = recordFlow({ kind: 'voices', wrap: ui.st.wrap, line: cur, onState: setState, onDone: () => { ui.tl.render(); const lines = P.script || []; const i = lines.indexOf(cur); const nx = lines.slice(i + 1).find(l => !P.voices.some(v => v.lineId === l.id)); if (nx) { cur = nx; build(); toast('녹음했어요! 다음 대사로 넘어갔어요', 1600); } else { build(); pulseNext('대사를 다 녹음했어요! 왼쪽 위 주황색 “다음” 키를 눌러 사운드로 가요'); } } });
     recBtn.disabled = true; await rec.start(); if (recBtn) recBtn.disabled = false;
   }
   return { mount, unmount };
@@ -340,7 +337,7 @@ STEP_MOD.voice = (() => {
    ========================================================= */
 STEP_MOD.final = (() => {
   function mount(r) {
-    r.L.append(key('편집', { ic: 'back', cls: 'row', onclick: () => goStep('edit') }));
+    r.L.append(key('편집', { ic: 'back', cls: 'row', aria: '편집으로 돌아가기', onclick: () => goStep('edit') }));
     if (needFrames(r.M)) { r.L.append(transportEl().box); return; }
     const ui = mountPlayerStage(r, { tracks: [TRACK.fx(), TRACK.voice(), TRACK.sfx()], onScene: (sc, t) => sceneMenu(sc, t, () => goStep('final')) });
     const frames = P.scenes.reduce((a, s) => a + s.frames.length, 0);

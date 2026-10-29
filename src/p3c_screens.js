@@ -275,7 +275,7 @@ function goStep(id) {
   const layout = curMod.layout || 'std';
   if (layout === 'shoot') { curMod.mount({ main: body }); return; }
   if (layout === 'doc') { const main = h('div', { class: 'doc' }); body.append(main); curMod.mount({ main }); return; }
-  const L = h('div', { class: 'L' }, h('div', { class: 'navrow' }, navKey(), undoKey())), M = h('div', { class: 'M' }), R = h('div', { class: 'R well' });
+  const L = h('div', { class: 'L' }, h('div', { class: 'navrow' }, navKey(), undoKey()), nextKey(id)), M = h('div', { class: 'M' }), R = h('div', { class: 'R well' });
   const tlw = h('div', { class: 'tlw well' }), B = h('div', { class: 'B' }, tlw);
   body.append(h('div', { class: 'lay' }, L, M, R, B));
   curMod.mount({ L, M, R, B, tlw });
@@ -283,11 +283,11 @@ function goStep(id) {
 const STEP_ORDER = ['script', 'shoot', 'voice', 'sound', 'edit', 'final'];
 /* 화면마다 한 번, 무엇을 하면 되는지 짧게 알려 줘요 */
 const GUIDE = {
-  script: '장면을 나누고 대사를 써요. 다 되면 “촬영하러 가기”!',
-  shoot: '찰칵을 누를 때마다 한 컷씩 찍혀요. 인형을 조금씩 움직여 보세요',
-  voice: '녹음을 누르면 3·2·1 뒤에 영상이 나오면서 녹음돼요',
-  sound: '소리 키를 한 번 누르면 들어 보고, 한 번 더 누르면 지금 시간에 들어가요',
-  edit: '효과 키를 한 번 누르면 미리 보고, 한 번 더 누르면 들어가요. 다 했으면 완성!',
+  script: '장면을 나누고 대사를 써요. 다 되면 주황색 “다음” 키!',
+  shoot: '찰칵을 누를 때마다 한 컷씩 찍혀요. 다 찍으면 필름 아래 주황색 “다음” 키!',
+  voice: '녹음을 누르면 3·2·1 뒤에 녹음돼요. 다 하면 왼쪽 위 주황색 “다음” 키!',
+  sound: '소리 키를 한 번 누르면 들어 보고, 한 번 더 누르면 들어가요. 다 하면 “다음” 키!',
+  edit: '효과 키를 한 번 누르면 미리 보고, 한 번 더 누르면 들어가요. 다 하면 “다음” 키!',
   final: '제목을 확인하고 저장해요'
 };
 const guided = {};
@@ -306,5 +306,13 @@ function needFrames(M) {
   M.append(st.mon);
   return true;
 }
+/* 다음 단계 키 — 모든 단계에서 같은 모양·같은 자리(왼쪽 위 단계 키 바로 아래, 촬영은 필름 아래, 시나리오는 오른쪽 위) */
+function nextKey(cur, extraCls = '') {
+  const t = nextTarget(); if (!t) return '';
+  return key('', { cls: 'orange big nextkey ' + extraCls, aria: `다음 단계: ${t.label}`, onclick: () => nextStep(cur),
+    html: `<span class="nk-a"><span class="kl">다음</span>${icon('next', 'ki')}</span><small class="nk-b">${t.label}</small>` });
+}
+/* 할 일을 다 했을 때 다음 키를 반짝여서 알려 줘요 */
+function pulseNext(msg) { const el = $('.nextkey'); if (!el) return; el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); if (msg) toast(msg, 3200, true); }
 function nextButton() { return null; }
 function nextBtn() { return document.createComment('next'); }

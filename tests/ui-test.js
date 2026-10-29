@@ -14,16 +14,17 @@ fs.mkdirSync(path.join(__dirname, 'shots'), { recursive: true });
   const clipCheck = async (p, tag) => {
     const r = await p.evaluate(() => {
       const bad = [];
+      const inList = el => { const sp = el.parentElement && el.parentElement.closest('.list,.film'); if (!sp) return false; const a = el.getBoundingClientRect(), r = sp.getBoundingClientRect(); return a.bottom < r.top + 2 || a.top > r.bottom - 2 || a.top < r.top - 2; };
       const app = document.getElementById('app');
       for (const el of app.querySelectorAll('*')) {
         if (el.closest('[hidden]') || !el.offsetParent && el.tagName !== 'BODY') continue;
-        if (el.matches('button,.key,.btn') && el.offsetWidth) { const r = el.getBoundingClientRect(); if (r.bottom > window.innerHeight + 1 || r.right > window.innerWidth + 1 || r.top < -1) bad.push('OFF ' + (el.getAttribute('aria-label') || el.textContent.trim().slice(0, 14))); }
+        if (el.matches('button,.key,.btn') && el.offsetWidth && !inList(el)) { const r = el.getBoundingClientRect(); if (r.bottom > window.innerHeight + 1 || r.right > window.innerWidth + 1 || r.top < -1) bad.push('OFF ' + (el.getAttribute('aria-label') || el.textContent.trim().slice(0, 14))); }
         const cs = getComputedStyle(el);
         if (/(auto|scroll)/.test(cs.overflowY) && el.scrollHeight > el.clientHeight + 2 && !/scroll|list|modal/.test(el.className)) bad.push('SCROLL ' + el.className);
       }
       // 버튼끼리 겹침 (4px 넘게 겹치면 표시, 스크롤 목록 안에서 가려진 것은 빼요)
       const top = document.querySelector('#modals .modal-bg:last-child') || app;
-      const inView = el => { const sp = el.parentElement.closest('.list,.scroll,.film'); if (!sp) return true; const a = el.getBoundingClientRect(), r = sp.getBoundingClientRect(); return a.bottom > r.top + 2 && a.top < r.bottom - 2; };
+      const inView = el => { const sp = el.parentElement.closest('.list,.scroll,.film'); if (!sp) return true; const a = el.getBoundingClientRect(), r = sp.getBoundingClientRect(); return a.top >= r.top - 2 && a.bottom <= r.bottom + 2 && a.left >= r.left - 2 && a.right <= r.right + 2; };
       // 선택 막대(.sel-bar)는 일부러 키 위에 띄우는 창이라 빼요
       const btns = [...top.querySelectorAll('button,.key,.btn')].filter(el => el.offsetWidth && !el.closest('[hidden]') && !el.parentElement.closest('button,.key,.btn') && inView(el));
       const bar = top.querySelector('.sel-bar:not([hidden])'), barR = bar && bar.getBoundingClientRect();
@@ -73,6 +74,10 @@ fs.mkdirSync(path.join(__dirname, 'shots'), { recursive: true });
     await p.locator('.navkey').first().click(); await p.waitForTimeout(500); await sh('07_nav'); await clipCheck(p, name + ' nav');
     await p.locator('.step-go', { hasText: '촬영' }).click(); await p.waitForTimeout(800); out.push(name + ' nav -> ' + await p.evaluate(() => S.step));
     await p.locator('.navkey').first().click(); await p.waitForTimeout(400); await p.locator('.step-go', { hasText: '완성' }).click(); await p.waitForTimeout(800); out.push(name + ' nav -> ' + await p.evaluate(() => S.step));
+    // "다음" 키만 눌러 시나리오부터 완성까지 가 봐요
+    await p.evaluate(() => goStep('script')); await p.waitForTimeout(600); const walk = ['script'];
+    for (let i = 0; i < 5; i++) { const nk = p.locator('.nextkey:visible').first(); if (!await nk.count()) { walk.push('(다음 키 없음)'); break; } await nk.click(); await p.waitForTimeout(700); if (await p.locator('.modal .choice').count()) { await p.locator('text=원작 대사 쓰기').click(); await p.waitForTimeout(400); } walk.push(await p.evaluate(() => S.step)); if (i < 4) await sh('08_next_' + walk[walk.length - 1]); }
+    out.push(name + ' next walk: ' + walk.join(' > '));
     await ctx.close();
   }
   await b.close(); server.close();

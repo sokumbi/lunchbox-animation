@@ -85,7 +85,7 @@ STEP_MOD.shoot = (() => {
     // 왼쪽: 필름 (찍은 컷이 쌓여요)
     headEl = key('', { cls: 'scn row', onclick: sceneSheet, aria: '장면 목록' });
     list = h('div', { class: 'list' });
-    const strip = h('div', { class: 'fstrip well' }, h('div', { class: 'head' }, navKey(), headEl), h('div', { class: 'film' }, list));
+    const strip = h('div', { class: 'fstrip well' }, h('div', { class: 'head' }, navKey(), headEl), h('div', { class: 'film' }, list), nextKey('shoot'));
     // 가운데: 모니터
     flashEl = h('div', { class: 'flash' }); badge = h('div', { class: 'stage-badge' }); popEl = h('div', { class: 'frame-pop', hidden: true });
     nocamEl = h('div', { class: 'nocam', hidden: true });
