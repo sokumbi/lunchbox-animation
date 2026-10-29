@@ -49,7 +49,7 @@ function libTop(title, back) {
     LCD.make(title));
   return top;
 }
-function libBody(view) { const g = $('#taleGrid'); g.innerHTML = ''; g.className = 'well tale-grid v-' + view; return g; }
+function libBody(view) { $('#library').classList.toggle('dark', view === 'gallery'); const g = $('#taleGrid'); g.innerHTML = ''; g.className = 'well tale-grid v-' + view; return g; }
 function openLibrary(view = 'home') {
   show('library'); stopIntro();
   if (view === 'tales') return openTales();
