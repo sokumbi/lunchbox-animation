@@ -114,12 +114,6 @@ input[type=range]{accent-color:var(--orange);width:100%}
 .notice{background:var(--gold-soft);color:#7a3212;border-radius:10px;padding:8px 10px;font-size:12px;line-height:1.5}
 
 /* ---------- 1. 시작: 닫힌 런치박스 ---------- */
-#splash{align-items:center;justify-content:center;cursor:pointer;gap:clamp(4px,2cqh,14px);text-align:center}
-#splash .lbox{width:min(70cqw,104cqh);height:auto;overflow:visible;animation:rise .9s cubic-bezier(.2,1,.3,1) both}
-#splash h1{font-size:clamp(18px,5.4cqh,30px);letter-spacing:.08em;color:var(--ink2);animation:fade .8s .6s both}
-#splash .touch{font-size:clamp(11px,3.4cqh,14px);color:var(--mute);animation:blink 1.6s 1.4s infinite both}
-#splash.open .lbox{transition:transform .55s cubic-bezier(.7,0,.3,1),opacity .5s;transform:scale(1.9) translateY(4%);opacity:0}
-#splash.open h1,#splash.open .touch{transition:opacity .3s;opacity:0}
 
 /* ---------- 2. 제작 과정 ---------- */
 #process .tray{cursor:pointer}
@@ -169,12 +163,6 @@ input[type=range]{accent-color:var(--orange);width:100%}
 .cas.on:active{transform:translateY(1px);box-shadow:0 1px 0 var(--side)}
 
 /* ---------- 4. 원작 영상 ---------- */
-#intro{background:#000;align-items:center;justify-content:center}
-#intro .frame{position:relative;height:100%;max-width:100%;aspect-ratio:16/9}
-#intro canvas,#intro video{width:100%;height:100%;display:block;object-fit:contain;background:#000}
-#intro .cap{position:absolute;left:50%;bottom:6%;transform:translateX(-50%);width:86%;text-align:center;font-family:var(--display);font-weight:800;font-size:clamp(15px,2.4cqw,26px);line-height:1.35;color:#fff;text-shadow:0 2px 0 #0008,0 0 16px #000a;pointer-events:none}
-#intro .bar{position:absolute;left:0;bottom:0;height:4px;background:var(--orange);width:0}
-#intro .ctrl{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));right:max(12px,env(safe-area-inset-right,0px));display:flex;gap:8px}
 
 /* ---------- 5. 스튜디오 ---------- */
 #studio .tray{padding:clamp(8px,3cqh,14px) clamp(10px,1.8cqw,16px)}
@@ -453,34 +441,9 @@ input[type=range]{accent-color:var(--orange);width:100%}
 </style>
 
 <div id="app">
-<section id="splash" class="screen" aria-label="시작 화면">
-  <div id="splashArt"></div>
-  <h1 id="splashName"></h1>
-  <div class="touch">화면을 터치해서 열어요</div>
-</section>
+<section id="library" class="screen" hidden aria-label="내 영화"></section>
 
-<section id="process" class="screen" hidden aria-label="애니메이션 제작 과정"></section>
-
-<section id="library" class="screen" hidden aria-label="이야기 고르기">
-  <div class="tray">
-    <div class="lib-top" id="libTop"></div>
-    <div class="well tale-grid" id="taleGrid"></div>
-  </div>
-</section>
-
-<section id="intro" class="screen" hidden aria-label="원작 애니메이션">
-  <div class="frame" id="introFrame">
-    <canvas id="introCanvas" width="1280" height="720"></canvas>
-    <div class="cap" id="introCap"></div>
-    <div class="bar" id="introBar"></div>
-  </div>
-  <div class="ctrl">
-    <button class="btn sm" id="introVoice" type="button"></button>
-    <button class="btn sm accent" id="introSkip" type="button"></button>
-  </div>
-</section>
-
-<section id="studio" class="screen" hidden aria-label="애니메이션 스튜디오">
+<section id="studio" class="screen" hidden aria-label="편집">
   <div class="tray"><div id="stBody"></div></div>
 </section>
 <div id="modals"></div>

@@ -66,4 +66,3 @@ function parseScript(text) {
   }
   return out;
 }
-function originalScript() { return ORIGINAL_SCRIPT.map(l => ({ id: uid(), who: l.who, text: l.text, scene: P.scenes[l.scene] ? P.scenes[l.scene].id : null })); }

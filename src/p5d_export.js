@@ -16,7 +16,8 @@ async function exportVideo() {
   const ext = mime.includes('mp4') ? 'mp4' : 'webm';
   AE.init(); await Player.preload();
   const prev = { canvas: Player.canvas, opts: Player.opts, onTick: Player.onTick };
-  const [cw, ch] = ({ sd: [854, 480], hd: [1280, 720], fhd: [1920, 1080] })[(P.look || {}).q] || [1280, 720];   // 설정 › 품질
+  const long = ({ sd: 854, hd: 1280, fhd: 1920 })[(P.look || {}).q] || 1280, ev = v => Math.round(v / 2) * 2;   // 설정 › 품질 (긴 변)
+  const [cw, ch] = W >= H ? [long, ev(long * H / W)] : [ev(long * W / H), long];
   const cv = h('canvas', { width: cw, height: ch });
   const stream = cv.captureStream(30); const dest = AE.ctx.createMediaStreamDestination(); AE.master.connect(dest);
   dest.stream.getAudioTracks().forEach(t => stream.addTrack(t));
@@ -33,7 +34,7 @@ async function exportVideo() {
     mr.onstop = () => {
       restore(); if (cancelled) return;
       const blob = new Blob(chunks, { type: mime.split(';')[0] });
-      const fname = (P.title || '나의 별주부전').replace(/[\\/:*?"<>|]/g, '') + '.' + ext;
+      const fname = (P.title || '나의 영화').replace(/[\\/:*?"<>|]/g, '') + '.' + ext;
       prevBox.innerHTML = ''; const v = h('video', { src: URL.createObjectURL(blob), controls: true, playsinline: true, style: { width: '100%', height: '100%', display: 'block' } }); prevBox.append(v);
       bar.remove(); txt.textContent = `완성! ${fname} (${(blob.size / 1048576).toFixed(1)}MB)` + (ext === 'webm' ? ' · 이 브라우저는 webm으로만 만들 수 있어요. 아이폰에서는 안 열릴 수 있어요' : '');
       const file = new File([blob], fname, { type: blob.type });
@@ -51,4 +52,4 @@ async function exportVideo() {
 /* =========================================================
    시작!
    ========================================================= */
-initSplash();
+initApp();

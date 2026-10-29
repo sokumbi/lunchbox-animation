@@ -18,12 +18,12 @@ fs.mkdirSync(path.join(__dirname, 'shots'), { recursive: true });
       const app = document.getElementById('app');
       for (const el of app.querySelectorAll('*')) {
         if (el.closest('[hidden]') || !el.offsetParent && el.tagName !== 'BODY') continue;
-        if (el.matches('button,.key,.btn') && el.offsetWidth && !inList(el)) { const r = el.getBoundingClientRect(); if (r.bottom > window.innerHeight + 1 || r.right > window.innerWidth + 1 || r.top < -1) bad.push('OFF ' + (el.getAttribute('aria-label') || el.textContent.trim().slice(0, 14))); }
+        if (el.matches('button,.key,.btn') && el.offsetWidth && !inList(el) && getComputedStyle(el).visibility !== 'hidden') { const r = el.getBoundingClientRect(); if (r.bottom > window.innerHeight + 1 || r.right > window.innerWidth + 1 || r.top < -1) bad.push('OFF ' + (el.getAttribute('aria-label') || el.textContent.trim().slice(0, 14))); }
         const cs = getComputedStyle(el);
         if (/(auto|scroll)/.test(cs.overflowY) && el.scrollHeight > el.clientHeight + 2 && !/scroll|list|modal|kgrid/.test(el.className)) bad.push('SCROLL ' + el.className);
       }
       // 버튼끼리 겹침 (4px 넘게 겹치면 표시, 스크롤 목록 안에서 가려진 것은 빼요)
-      const top = document.querySelector('#modals .modal-bg:last-child') || app;
+      const top = document.querySelector('#modals .modal-bg:last-child') || document.querySelector('.al-bg') || document.querySelector('.ns-pg:last-child') || document.querySelector('.cm-bg') || app;
       const inView = el => { const sp = el.parentElement.closest('.list,.scroll,.film,.pn-list,.kgrid'); if (!sp) return true; const a = el.getBoundingClientRect(), r = sp.getBoundingClientRect(); return a.top >= r.top - 2 && a.bottom <= r.bottom + 2 && a.left >= r.left - 2 && a.right <= r.right + 2; };
       // 선택 막대(.sel-bar)와 컷 말풍선(.ed-pop)은 일부러 키 위에 띄우는 창이라 빼요
       const btns = [...top.querySelectorAll('button,.key,.btn')].filter(el => el.offsetWidth && getComputedStyle(el).visibility !== 'hidden' && !el.closest('[hidden]') && !el.parentElement.closest('button,.key,.btn') && !el.matches('.tb') && inView(el));
@@ -44,19 +44,21 @@ fs.mkdirSync(path.join(__dirname, 'shots'), { recursive: true });
     const ctx = await b.newContext({ ...dev, permissions: ['camera', 'microphone'] });
     const p = await ctx.newPage(); p.on('pageerror', e => out.push(name + ' ERR ' + e.message)); p.on('console', m => { if (m.type() === 'error') out.push(name + ' CONSOLE ' + m.text()); });
     const sh = async n => p.screenshot({ path: `${__dirname}/shots/${name}_${n}.png` });
-    await p.goto('http://localhost:8765/index.html'); await p.waitForTimeout(1600); await sh('01_splash');
+    await p.goto('http://localhost:8765/index.html'); await p.waitForTimeout(1400);
     const T = async (sel, ms = 400, o = {}) => { await p.locator(sel).first().click(o); await p.waitForTimeout(ms); };
     const ev = f => p.evaluate(f);
-    await T('#splash', 1000); await sh('02_gallery'); await clipCheck(p, name + ' gallery');
-    await T('.gcard.new', 500); await sh('03_kinds'); await clipCheck(p, name + ' kinds');
-    // 팔도 민담 지도: 깜빡이는 곳 누르기 (경주는 이야기 두 편)
-    await T('.kind[data-kind=map]', 500); await sh('03m_map'); await clipCheck(p, name + ' map');
-    await T('.pin[aria-label="경주"]', 300, { force: true }); await sh('03m_pin'); await clipCheck(p, name + ' map pin');
-    out.push(name + ' map pin: ' + await p.locator('.map-side .ms-body h3').textContent() + ' / tabs ' + await p.locator('.ms-tabs .chip').count());
-    await T('#libTop [aria-label="뒤로"]', 300);
-    await T('.kind[data-kind=tales]', 400); await sh('03_library'); await clipCheck(p, name + ' library');
-    await T('.cas.on', 900); await T('#introSkip', 1200);
-    out.push(name + ' editor open ' + await ev(() => ED.open + ' cap=' + ED.cap + ' ' + P.title));
+    await sh('01_gallery'); await clipCheck(p, name + ' gallery');
+    // 새 영화 창: 이름 · 포맷 · 프레임 레이트 · 품질 → 만들기
+    await T('.g-card.new', 600); await sh('02_new'); await clipCheck(p, name + ' new');
+    await T('.ns-tile[aria-label="포맷"]', 500); await sh('02b_fmt'); await clipCheck(p, name + ' new fmt');
+    await T('.ns-row:has-text("와이드스크린")', 500); await T('.ns-row:has-text("와이드스크린")', 10).catch(() => { });
+    await T('.ns-tile[aria-label="포맷"]', 500); await T('.ns-row >> nth=0', 500);
+    await T('.ns-tile[aria-label="프레임 레이트"]', 600); await sh('02c_fps'); await clipCheck(p, name + ' new fps');
+    await p.locator('.ns-rng').fill('8'); await T('.ns-pill.ok', 500);
+    await T('.ns-tile[aria-label="품질"]', 500); await sh('02d_q'); await clipCheck(p, name + ' new q'); await T('.ns-row:has-text("풀 HD")', 500);
+    await p.locator('.ns-name').fill('테스트 영화');
+    await T('.ns-make', 1600);
+    out.push(name + ' editor open ' + await ev(() => ED.open + ' cap=' + ED.cap + ' ' + P.title + ' fmt=' + P.fmt + ' fps=' + P.fps + ' q=' + P.look.q + ' ' + W + 'x' + H));
     await sh('04_capture'); await clipCheck(p, name + ' capture');
     for (let i = 0; i < 4; i++) await T('.cp-shut', 350);
     await T('.cp-r [aria-label="카메라 설정"]', 300); await sh('04c_camset'); await clipCheck(p, name + ' camset'); await T('.cp-r [aria-label="카메라 설정"]', 300);
@@ -75,9 +77,10 @@ fs.mkdirSync(path.join(__dirname, 'shots'), { recursive: true });
     await T('.cp-r [aria-label="편집으로"]', 500);
     out.push(name + ' scenes ' + await ev(() => P.scenes.map(s => s.name + ':' + s.frames.length).join(',')));
     await sh('04d_scene2'); await clipCheck(p, name + ' scene2');
-    await T('.ed-rl [aria-label="이야기"]', 500); await sh('05_story'); await clipCheck(p, name + ' story'); await T('.modal .pn-x', 300);
+    await T('.ed-rl [aria-label="도움말"]', 400); await sh('05_help'); await clipCheck(p, name + ' help'); await T('.modal .btn.primary', 300);
     await T('.ed-rl [aria-label="소리"]', 500); await sh('05_sound_voice'); await clipCheck(p, name + ' sound voice');
-    if (await p.locator('.bs-btn:has-text("원작 대사 넣기")').count()) await T('.bs-btn:has-text("원작 대사 넣기")', 400);
+    await p.locator('.bs-in.who').fill('토끼'); await p.locator('.bs-in:not(.who)').first().fill('안녕!'); await T('.bs-btn:has-text("대사 넣기")', 400);
+    out.push(name + ' script ' + await ev(() => P.script.length));
     await sh('05_sound_lines'); await clipCheck(p, name + ' sound lines');
     await T('.bs-tabs [aria-label="효과음"]', 400); await T('.bt >> nth=1', 300); await sh('05_sound_sfx'); await clipCheck(p, name + ' sound sfx'); await T('.bs-ok', 400);
     out.push(name + ' sfx count ' + await ev(() => P.sfx.length));
@@ -95,20 +98,22 @@ fs.mkdirSync(path.join(__dirname, 'shots'), { recursive: true });
     await T('.bs-tabs [aria-label="전경"]', 300); await T('.pk >> nth=1', 300); await T('.bs-tabs [aria-label="효과"]', 300); await T('.pk >> nth=2', 300); await sh('06d_settings_look'); await clipCheck(p, name + ' settings look'); await T('.bs-ok', 300);
     out.push(name + ' look ' + await ev(() => JSON.stringify(P.look)));
     await T('.ed-rr [aria-label="완성"]', 500); await sh('07_finish'); await clipCheck(p, name + ' finish');
-    // 상영관: 올리기 → 순위 → 감상 → 별점 → 편집기로 돌아오기
-    await T('.fin-b:has-text("상영관")', 900); await sh('09_theater'); await clipCheck(p, name + ' theater');
-    await T('.th-row', 900); await sh('09_watch'); await clipCheck(p, name + ' watch');
-    await T('.tw-give button >> nth=3', 400); await sh('09_rated');
-    await T('.tw-top [aria-label="닫기"]', 700);
-    out.push(name + ' theater rows ' + await p.locator('.th-row').count() + ' / ' + (await p.locator('.th-row .th-s small').first().textContent()));
-    await T('#libTop [aria-label="뒤로"]', 900); out.push(name + ' theater back -> ' + await ev(() => ED.open + ' ' + !!P));
-    await T('.ed-rl [aria-label="내 작품"]', 900); out.push(name + ' gallery cards ' + await p.locator('.gcard:not(.new)').count()); await sh('08_gallery2'); await clipCheck(p, name + ' gallery2');
-    // 민담으로 시작 → 이야기 판이 열린 편집기, 나만의 이야기 → 바로 촬영
-    await T('.gcard.new', 400); await T('.kind[data-kind=map]', 400);
-    await T('.pin[aria-label="단양 도담삼봉"]', 200, { force: true }); await T('.ms-go', 900);
-    out.push(name + ' legend -> ' + await ev(() => !!$('.story-modal') + ' ' + P.title + ' scenes ' + P.scenes.length));
-    await T('.modal .pn-x', 300); if (await p.locator('.cp').count()) await T('.cp-r [aria-label="편집으로"]', 400); await sh('08b_legend'); await T('.ed-rl [aria-label="내 작품"]', 900); await T('.gcard.new', 400);
-    await T('.kind[data-kind=own]', 900); out.push(name + ' own -> ' + await ev(() => ED.open + ' cap=' + ED.cap + ' ' + P.storyId));
+    await T('.modal .pn-x', 300);
+    await T('.ed-rl [aria-label="내 작품"]', 900); out.push(name + ' gallery cards ' + await p.locator('.g-card:not(.new)').count()); await sh('08_gallery2'); await clipCheck(p, name + ' gallery2');
+    // 길게 누르기 메뉴 → 이름 바꾸기 · 삭제(최근 삭제한 항목)
+    await p.locator('.g-card:not(.new)').first().click({ button: 'right' }); await p.waitForTimeout(400); await sh('08c_ctx'); await clipCheck(p, name + ' ctx menu');
+    await T('.cm-i:has-text("이름 바꾸기")', 400); await p.locator('.al-in').fill('바뀐 이름'); await T('.al-acts .ok', 600);
+    out.push(name + ' rename -> ' + await p.locator('.g-card:not(.new) .tt b').first().textContent());
+    await p.locator('.g-card:not(.new)').first().click({ button: 'right' }); await p.waitForTimeout(400); await T('.cm-i.red', 400); await sh('08d_alert'); await T('.al-acts .red', 900);
+    await T('.g-rb[aria-label="최근 삭제한 항목"]', 500); out.push(name + ' trash ' + await p.locator('.g-card').count()); await sh('08e_trash');
+    await T('.g-card', 400); await T('.cm-i:has-text("되살리기")', 700); await T('.g-rb[aria-label="내 영화"]', 500);
+    await T('.g-seg [aria-label="목록으로 보기"]', 400); await sh('08f_list'); await clipCheck(p, name + ' list'); await T('.g-seg [aria-label="그리드로 보기"]', 400);
+    // 세로 영상(9:16) 영화
+    await T('.g-card.new', 600); await T('.ns-tile[aria-label="포맷"]', 500); await T('.ns-row:has-text("세로 영상")', 500); await sh('08g_new_story'); await T('.ns-make', 1600);
+    out.push(name + ' story fmt -> ' + await ev(() => P.fmt + ' ' + W + 'x' + H + ' cap=' + ED.cap));
+    for (let i = 0; i < 2; i++) await T('.cp-shut', 350);
+    await sh('08h_story_cap'); await T('.cp-r [aria-label="편집으로"]', 500); await sh('08i_story_edit'); await clipCheck(p, name + ' story edit');
+    await T('.ed-rl [aria-label="내 작품"]', 900); await sh('08j_back');
     await ctx.close();
   }
   await b.close(); server.close();

@@ -39,7 +39,7 @@ function edSetSel(sid, i) { ED.sel = { sid, i }; S.curScene = sid; const sf = se
 
 /* ---------- 열기 · 닫기 ---------- */
 function openEditor(first) {
-  show('studio'); stopIntro();
+  show('studio');
   Object.assign(ED, { open: true, cap: false, sel: null, sheet: null, pend: null, fxSel: null, popOpen: false, msel: null, paint: null });
   S.sel = null; S.step = 'view'; histInit();   // undo()가 goStep(S.step)으로 화면만 새로 그려요
   const body = $('#stBody'); body.innerHTML = '';
@@ -54,7 +54,7 @@ function openEditor(first) {
   const playB = ib2('play', '재생', edTogglePlay);
   const left = h('div', { class: 'ed-rl' },
     ib2('back', '내 작품', edToGallery), ib2('mic', '소리', () => edSheet('sound')), ib2('plus', '더하기', e => edAddMenu(e.currentTarget)),
-    ib2('book', '이야기', edStory), ib2('gear', '설정', edSettings));
+    ib2('help', '도움말', edHelp), ib2('gear', '설정', edSettings));
   const right = h('div', { class: 'ed-rr' },
     ib2('cam', '촬영', edCapOpen, 'cam'), ib2('undo', '되돌리기', undo), ib2('share', '완성', edFinish), playB);
   const label = h('div', { class: 'ed-label', hidden: true });
@@ -71,8 +71,7 @@ function openEditor(first) {
   edStrip(true);
   addEventListener('keydown', edKey);
   cancelAnimationFrame(ED.raf); edLoop();
-  if (first === 'story') edStory();
-  else if (first === 'sound' || first === 'fx') edSheet(first);
+  if (first === 'sound' || first === 'fx') edSheet(first);
   else if (!edFrames()) edCapOpen();
 }
 function edClose() {
@@ -89,12 +88,10 @@ function goStep(id) {
   if (!ED.open) { openEditor(); return; }
   TLc = null; edFixSel(); edStrip();
   if (id === 'final') edFinish();
-  else if (id === 'script') edStory();
   else if (id === 'voice' || id === 'sound') { if (id === 'voice') ED.tab = 'voice'; if (ED.sheet !== 'sound') edSheet('sound'); }
   else if (id === 'edit') { if (ED.sheet !== 'fx') edSheet('fx'); }
   else if (id === 'shoot' && !ED.cap && !ED.sheet) edCapOpen();
 }
-async function edToGallery() { edClose(); await saveProject(); P = null; TLc = null; openGallery(); }
 function edKey(e) { if (e.target.closest('input,textarea,select')) return; if (ED.cap && (e.code === 'Space' || e.code === 'VolumeUp')) { e.preventDefault(); edShutter(); } else if (!ED.cap && e.code === 'ArrowLeft') edStep(-1); else if (!ED.cap && e.code === 'ArrowRight') edStep(1); }
 
 /* ---------- 편집 화면 그리기 ---------- */
@@ -208,11 +205,11 @@ function edSceneMenu(s) {
 }
 function edNewScene() {
   modal((b, m) => {
-    const used = P.scenes.map(s => s.name), nn = storyInfo(P.storyId).scenes.find(n => !used.includes(n)) || `${P.scenes.length + 1}장면`;
+    const nn = `${P.scenes.length + 1}장면`;
     const ni = h('input', { id: 'newSceneName', value: nn, maxlength: 30 });
     const make = () => { m.close(); const s = newScene(ni.value.trim() || nn); P.scenes.push(s); S.curScene = s.id; ED.sel = null; changed(); edStrip(); edCapOpen(); toast(`“${s.name}” 촬영을 시작해요`, 1400); };
     ni.addEventListener('keydown', e => { if (e.key === 'Enter') make(); });
-    b.append(h('h2', {}, '새 장면'), h('label', { class: 'field' }, h('span', { class: 'label' }, '장면 이름'), ni), storyInfo(P.storyId).scenes.length ? sceneNameChips(ni) : '',
+    b.append(h('h2', {}, '새 장면'), h('label', { class: 'field' }, h('span', { class: 'label' }, '장면 이름'), ni),
       h('div', { class: 'acts' }, h('button', { class: 'btn', type: 'button', onclick: m.close }, '취소'), h('button', { class: 'btn accent', type: 'button', onclick: make }, '만들고 찍기')));
   });
 }
@@ -517,9 +514,13 @@ function edFxDrag(on) {
 function bsVoice(row, foot) {
   const ls = P.script || [], voiceOf = l => P.voices.find(v => v.lineId === l.id), on = ED.rec && ED.rec.active;
   if (!ls.length) {
-    row.append(h('div', { class: 'bs-none' }, '녹음할 대사가 없어요. 이야기(📖)에서 대사를 써요.'));
-    if (P.storyId === 'byeoljubu') foot.append(h('button', { class: 'bs-btn or', type: 'button', onclick: () => { P.script = originalScript(); P.scriptMode = 'original'; changed(); edSheetRefresh(); } }, '원작 대사 넣기'));
-    foot.append(h('button', { class: 'bs-btn', type: 'button', onclick: () => { edSheetClose(); edStory(); } }, '대사 쓰기'));
+    // 대사가 없으면 여기서 바로 한 줄 써요 (누가 · 무슨 말)
+    const who = h('input', { class: 'bs-in who', placeholder: '누가', maxlength: 12, 'aria-label': '말하는 사람' });
+    const txt = h('input', { class: 'bs-in', placeholder: '무슨 말을 할까요?', maxlength: 80, 'aria-label': '대사' });
+    const add = () => { if (!txt.value.trim()) { txt.focus(); return; } P.script = [{ id: uid(), who: who.value.trim(), text: txt.value.trim(), scene: edScene().id }]; P.scriptMode = 'new'; changed(); edSheetRefresh(); };
+    txt.addEventListener('keydown', e => { if (e.key === 'Enter') add(); });
+    row.append(h('div', { class: 'bs-none' }, '녹음할 대사를 먼저 써요'), who, txt);
+    foot.append(h('button', { class: 'bs-btn or', type: 'button', onclick: add }, '대사 넣기'));
     return;
   }
   if (!ED.line || !ls.includes(ED.line)) ED.line = ls.find(l => !voiceOf(l)) || ls[0];
@@ -567,62 +568,25 @@ function bsMix(row) {
     h('label', { class: 'toggle bs-tg' }, h('input', { type: 'checkbox', checked: P.duck, onchange: e => { P.duck = e.target.checked; changed(); } }), '말할 때 음악 작게'));
 }
 
-/* ---------- 이야기(시나리오): 줄거리 · 장면 · 대사 ---------- */
-function edStory() {
+/* ---------- 도움말(?) — 아이콘이 무엇을 하는지 ---------- */
+function edHelp() {
   if (ED.sheet) edSheetClose();
-  const orig = P.storyId === 'byeoljubu', info = storyInfo(P.storyId);
+  const rows = [['cam', '촬영', '카메라 화면을 열어 한 컷씩 찍어요. 찍은 컷은 고른 컷 바로 뒤에 들어가요.'], ['play', '재생', '지금까지 만든 영화를 틀어 봐요.'],
+    ['mic', '소리', '대사 녹음 · 효과음 · 배경음악 · 내레이션을 넣어요.'], ['plus', '더하기', '사진 · 비디오 · 오디오 · 제목 카드 · 효과 · 새 장면'],
+    ['gear', '설정', '빠르기 · 페이드 · 전경 · 효과 · 품질'], ['undo', '되돌리기', '방금 한 일을 취소해요.'], ['share', '완성', '영상 파일로 저장하거나 보내요.']];
   modal((b, m) => {
-    const render = () => {
-      b.innerHTML = '';
-      const top = h('div', { class: 'row nowrap' }, h('h2', { style: { margin: 0 } }, '이야기'),
-        h('input', { class: 'input grow', value: P.title, maxlength: 40, 'aria-label': '영상 제목', oninput: e => { P.title = e.target.value; changed(); } }),
-        orig ? ib('play', '원작 보기', 'btn sm', { onclick: () => { m.close(); edClose(); introReturn = 'script'; startIntro(); } }) : '',
-        h('button', { class: 'pn-x', type: 'button', 'aria-label': '닫기', html: icon('x'), onclick: m.close }));
-      const syn = orig ? h('div', { class: 'card pn-syn' }, ORIGINAL_SYNOPSIS)
-        : h('textarea', { class: 'input', rows: 3, placeholder: '누가, 어디서, 무슨 일이 생기고, 어떻게 끝나나요?', 'aria-label': '줄거리', oninput: e => { P.synopsis = e.target.value; changed(); } }, P.synopsis || '');
-      const scenes = h('div', { class: 'pn-items' });
-      P.scenes.forEach((s, i) => scenes.append(h('div', { class: 'sc-card' },
-        h('span', { class: 'n' }, i + 1),
-        h('button', { class: 'sk-slot' + (s.sketch ? ' has' : ''), type: 'button', style: s.sketch ? { backgroundImage: `url(${s.sketch.url})` } : {}, 'aria-label': s.sketch ? `${i + 1}번 장면 스케치 보기` : `${i + 1}번 장면 스케치 사진 찍기`,
-          onclick: async () => { if (s.sketch) sketchModal(s, render); else if (await takeSketch(s)) render(); }, html: s.sketch ? '' : icon('cam') + '<span>스케치</span>' }),
-        h('div', { class: 'f' },
-          h('input', { class: 'input', value: s.name, maxlength: 30, 'aria-label': `${i + 1}번 장면 이름`, oninput: e => { s.name = e.target.value; changed(); } }),
-          h('input', { class: 'input', value: s.desc || '', placeholder: '이 장면에서 무슨 일이 일어나나요?', 'aria-label': `${i + 1}번 장면 설명`, oninput: e => { s.desc = e.target.value; changed(); } })),
-        ib('cam', '', 'btn sm icon', { 'aria-label': `${i + 1}번 장면 찍기`, onclick: () => { m.close(); S.curScene = s.id; ED.sel = s.frames.length ? { sid: s.id, i: s.frames.length - 1 } : null; edCapOpen(); } }))));
-      P.script = P.script || [];
-      const lines = h('div', { class: 'pn-items' });
-      const up = h('input', { type: 'file', accept: '.txt,.csv,.md,.text,text/plain', hidden: true, onchange: async e => { const f = e.target.files[0]; if (!f) return; const parsed = parseScript(await f.text()); P.script.push(...parsed); P.scriptMode = P.scriptMode || 'new'; changed(); render(); toast(`대사 ${parsed.length}줄을 불러왔어요`); } });
-      if (!P.script.length) lines.append(h('div', { class: 'hint' }, orig ? '“원작 대사”를 누르면 별주부전 대사 12줄이 들어와요.' : '“＋ 대사”를 눌러 녹음할 대사를 써요. 파일(.txt)은 한 줄에 “인물: 대사”로 써요.'));
-      P.script.forEach((r, i) => lines.append(h('div', { class: 'script-row' },
-        h('input', { class: 'input', value: r.who, list: 'whoList3', placeholder: '누가', 'aria-label': `${i + 1}번 대사 인물`, oninput: e => { r.who = e.target.value; changed(); } }),
-        h('input', { class: 'input', value: r.text, placeholder: '무슨 말을 할까요?', 'aria-label': `${i + 1}번 대사 내용`, oninput: e => { r.text = e.target.value; changed(); } }),
-        h('select', { class: 'input', 'aria-label': `${i + 1}번 대사 장면`, onchange: e => { r.scene = e.target.value || null; changed(); } }, h('option', { value: '' }, '장면'), ...P.scenes.map(s => h('option', { value: s.id, selected: r.scene === s.id }, s.name))),
-        ib('trash', '', 'btn sm icon ghost', { 'aria-label': '대사 지우기', onclick: () => { P.script.splice(i, 1); changed(); render(); } }))));
-      b.append(top,
-        h('div', { class: 'pn-cols scroll' },
-          h('div', { class: 'pn-col' }, h('h4', {}, '줄거리'), syn,
-            h('div', { class: 'pn-sub' }, h('h4', {}, `장면 ${P.scenes.length}개`),
-              orig && P.scenes.length < ORIGINAL_SCENES.length ? ib('book', '원작 장면', 'btn sm', { onclick: () => { for (const n of ORIGINAL_SCENES) if (!P.scenes.some(s => s.name === n)) P.scenes.push(newScene(n)); changed(); render(); edStrip(); } }) : '',
-              ib('plus', '장면', 'btn sm', { onclick: () => { P.scenes.push(newScene(info.scenes.find(n => !P.scenes.some(s => s.name === n)) || `${P.scenes.length + 1}장면`)); changed(); render(); edStrip(); } })),
-            scenes),
-          h('div', { class: 'pn-col' },
-            h('div', { class: 'pn-sub' }, h('h4', {}, `대사 ${P.script.length}줄`),
-              ib('upload', '', 'btn sm icon', { 'aria-label': '대사 파일 불러오기', onclick: () => up.click() }),
-              orig ? ib('book', '원작 대사', 'btn sm', { onclick: () => { P.script.push(...originalScript()); P.scriptMode = P.scriptMode || 'original'; changed(); render(); } }) : '',
-              ib('plus', '대사', 'btn sm', { onclick: () => { P.script.push({ id: uid(), who: P.script.length ? P.script[P.script.length - 1].who : '', text: '', scene: edScene().id }); P.scriptMode = P.scriptMode || 'new'; changed(); render(); const ins = $$('.script-row input:nth-child(2)', b).pop(); ins && ins.focus(); } }), up,
-              h('datalist', { id: 'whoList3' }, ...Object.keys(CHAR_COLORS).map(k => h('option', { value: k })))),
-            lines)));
-    };
-    render();
-    m.onclose = () => { if (ED.open) edStrip(false); };
-  }, { wide: true });
-  const box = $('#modals .modal-bg:last-child .modal'); if (box) box.classList.add('story-modal');
+    b.classList.add('wide');
+    b.append(h('h2', {}, '이렇게 만들어요'),
+      h('div', { class: 'help-l' }, ...rows.map(([ic, t, d]) => h('div', { class: 'help-r' }, h('i', { html: icon(ic) }), h('b', {}, t), h('span', {}, d)))),
+      h('p', { class: 'hint' }, '아래 필름에서 컷을 누르면 복사 · 붙여넣기 · 거꾸로 · 지우기 같은 메뉴가 나와요.'),
+      h('div', { class: 'acts' }, h('button', { class: 'btn primary', type: 'button', onclick: m.close }, '알겠어요')));
+  });
 }
 
 /* ---------- 설정(⚙): 아래 판 — 속도 · 페이드 · 전경 · 효과 · 품질 · 재생 · 기타 (p6b_sms.js) ---------- */
 function edSettings() { smsSettings(); }
 
-/* ---------- 완성: 처음부터 보기 · 영상 파일 · 상영관 · 작품 파일 ---------- */
+/* ---------- 완성: 처음부터 보기 · 영상 파일 · 작품 파일 ---------- */
 function edFinish() {
   if (Player.playing) Player.pause();
   if (ED.sheet) edSheetClose();
@@ -636,48 +600,6 @@ function edFinish() {
       h('div', { class: 'fin-grid' },
         big('play', '처음부터 보기', '크게 틀어 봐요', () => { m.close(); playAll(); }),
         big('download', '영상 파일', 'mp4로 저장 · 보내기', () => { m.close(); exportVideo(); }, 'or'),
-        big('trophy', '상영관에 올리기', '친구들의 별점 받기', async () => { m.close(); const first = !P.show; P.done.final = true; P.show = P.show || Date.now(); P.stars = P.stars || []; changed(); await openTheater(); toast(first ? '상영관에 올렸어요! 친구들에게 별점을 받아 보세요' : '상영관이에요', 3000, true); }),
         big('save', '작품 파일', '백업 · 다른 기기로', async () => { m.close(); await saveProject(); const d = await DB.get(P.id).catch(() => null); d ? exportProjectFile(d) : toast('먼저 저장이 되어야 해요'); })));
   }, { wide: true });
-}
-
-/* =========================================================
-   갤러리 — 첫 화면. 새 작품 + 내가 만든 작품 카드 (어두운 바탕)
-   ========================================================= */
-async function openGallery() {
-  show('library'); stopIntro(); $('#library').classList.add('dark');
-  const up = h('input', { type: 'file', accept: '.json,application/json', hidden: true, onchange: async e => { const f = e.target.files[0]; if (!f) return; const d = await importProjectFile(f); if (d) { toast(`“${d.title}”을(를) 불러왔어요`); openGallery(); } } });
-  libTop('내 작품', false).append(up,
-    key('', { ic: 'upload', cls: 'works', aria: '작품 파일 불러오기', title: '작품 파일 불러오기', onclick: () => up.click() }),
-    key('', { ic: 'trash', cls: 'works', aria: '휴지통', title: '휴지통', onclick: openTrash }),
-    key('상영관', { ic: 'trophy', cls: 'works hall', onclick: () => openTheater() }));
-  const g = libBody('gallery');
-  const grid = h('div', { class: 'gal scroll' });
-  grid.append(h('button', { class: 'gcard new', type: 'button', onclick: () => openLibrary(), html: `<span class="pl">${icon('plus')}</span><b>새 작품</b>` }));
-  g.append(grid);
-  const { list } = await loadWorks();
-  for (const d of list) {
-    const sec = d.scenes.reduce((a, s) => a + s.frames.slice(s.trimIn || 0, s.frames.length - (s.trimOut || 0)).reduce((x, f) => x + f.hold, 0), 0) / (d.fps || 12);
-    const th = h('span', { class: 'th' }, h('em', {}, fmt(sec).replace(/\.\d$/, '')));
-    if (d.thumb) th.style.backgroundImage = `url(${URL.createObjectURL(d.thumb)})`;
-    const more = h('button', { class: 'gmore', type: 'button', 'aria-label': `${d.title} 메뉴`, html: icon('more'), onclick: e => { e.stopPropagation(); workMenu(d); } });
-    const card = h('div', { class: 'gcard', role: 'button', tabindex: 0, 'aria-label': `${d.title} 열기`, onclick: async () => { toast('작품을 여는 중…', 1200); await openProject(d); openEditor(); } },
-      th, h('span', { class: 'tt' }, h('b', {}, d.title || '제목 없음'), h('small', {}, new Date(d.updated || d.created || Date.now()).toLocaleDateString('ko-KR') + ' · ' + storyInfo(d.storyId).title + (d.show ? ' · 상영 중' : ''))), more);
-    longPress(card, () => workMenu(d));   // 길게 누르면 메뉴
-    grid.append(card);
-  }
-}
-function workMenu(d) {
-  modal((b, m) => {
-    b.append(h('h2', {}, d.title || '제목 없음'),
-      h('div', { class: 'menu-grid' },
-        h('button', { class: 'btn accent', type: 'button', onclick: async () => { m.close(); await openProject(d); openEditor(); }, html: icon('edit') + '<span>이어서 만들기</span>' }),
-        h('button', { class: 'btn', type: 'button', onclick: async () => { m.close(); await openProject(d); playAll(); }, html: icon('play') + '<span>재생</span>' }),
-        h('button', { class: 'btn', type: 'button', onclick: async () => { m.close(); await openProject(d); exportVideo(); }, html: icon('film') + '<span>동영상 내보내기</span>' }),
-        h('button', { class: 'btn', type: 'button', onclick: () => { m.close(); renameWork(d); }, html: icon('edit') + '<span>이름 바꾸기</span>' }),
-        h('button', { class: 'btn', type: 'button', onclick: async () => { m.close(); const c = { ...d, id: uid(), title: (d.title || '작품') + ' 복사', created: Date.now(), updated: Date.now(), show: 0, stars: [] }; await DB.put(c); toast('작품을 복사했어요'); openGallery(); }, html: icon('copy') + '<span>복사하기</span>' }),
-        h('button', { class: 'btn', type: 'button', onclick: () => { m.close(); exportProjectFile(d); }, html: icon('download') + '<span>작품 파일로 저장</span>' }),
-        h('button', { class: 'btn', type: 'button', onclick: async () => { m.close(); if (await confirmBox('작품을 휴지통에 넣을까요?', `“${d.title}”은(는) 휴지통에 ${TRASH_DAYS}일 동안 있어요. 그동안은 되살릴 수 있어요.`, '휴지통에 넣기', true)) { d.trashed = Date.now(); await DB.put(d); openGallery(); toast('휴지통에 넣었어요'); } }, html: icon('trash') + '<span>지우기</span>' })),
-      h('div', { class: 'acts' }, h('button', { class: 'btn primary', type: 'button', onclick: m.close }, '닫기')));
-  });
 }

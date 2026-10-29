@@ -110,8 +110,8 @@ function smsSheet({ title, tabs = null, tab, render, ok, cancel }) {
 }
 /* 그림 고르기 칸 (작은 그림 + 이름) */
 function pickTile(label, on, onclick, draw) {
-  const cv = h('canvas', { width: 160, height: 90 });
-  if (draw) { const c = cv.getContext('2d'); c.scale(160 / W, 90 / H); c.fillStyle = '#000'; c.fillRect(0, 0, W, H); draw(c); }
+  const tw = 160, th = Math.round(160 * H / W), cv = h('canvas', { width: tw, height: th });
+  if (draw) { const c = cv.getContext('2d'); c.scale(tw / W, th / H); c.fillStyle = '#000'; c.fillRect(0, 0, W, H); draw(c); }
   return h('button', { class: 'pk' + (on ? ' on' : '') + (draw ? '' : ' txt'), type: 'button', 'aria-label': label, onclick }, draw ? cv : '', h('span', {}, label));
 }
 const selImg = () => { const sf = selFrame(); return sf ? sf.f.img : null; };
@@ -356,7 +356,7 @@ function drawCard(ctx, tpl, main, sub, credits) {
   ctx.restore();
 }
 function edCard(kind) {
-  const c = { tpl: 'lunch', main: kind === 'title' ? (P.title || '') : '만든 사람', sub: '아르떼노바 스톱모션', names: '감독 · \n촬영 · \n목소리 · ', sec: 3 };
+  const c = { tpl: 'lunch', main: kind === 'title' ? (P.title || '') : '만든 사람', sub: '', names: '감독 · \n촬영 · \n목소리 · ', sec: 3 };
   ED.paint = ctx => drawCard(ctx, c.tpl, c.main, c.sub, kind === 'credits' ? c.names : null);
   smsSheet({ title: kind === 'title' ? '제목 카드' : '제작진', cancel: () => { ED.paint = null; },
     render: (tab, body, foot, st, paint) => {
@@ -411,13 +411,4 @@ function longPress(el, fn) {
   el.addEventListener('pointermove', e => { if (Math.hypot(e.clientX - x, e.clientY - y) > 10) stop(); });
   el.addEventListener('click', e => { if (fired) { e.stopImmediatePropagation(); e.preventDefault(); fired = false; } }, true);
   el.addEventListener('contextmenu', e => e.preventDefault());
-}
-function renameWork(d) {
-  modal((b, m) => {
-    const inp = h('input', { class: 'input', value: d.title || '', maxlength: 40, 'aria-label': '새 이름' });
-    const go = async () => { d.title = inp.value.trim() || d.title; d.updated = Date.now(); await DB.put(d); m.close(); openGallery(); toast('이름을 바꿨어요', 1200); };
-    inp.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
-    b.append(h('h2', {}, '이름 바꾸기'), inp, h('div', { class: 'acts' }, h('button', { class: 'btn', type: 'button', onclick: m.close }, '취소'), h('button', { class: 'btn primary', type: 'button', onclick: go }, '바꾸기')));
-    setTimeout(() => inp.select(), 50);
-  });
 }

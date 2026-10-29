@@ -6,10 +6,27 @@ let TLc = null;               // 타임라인 계산 캐시
 const S = { step: 'shoot', sel: null, curScene: null, sub: { sound: 'sfx', edit: 'edit' } };
 
 function newScene(name, desc = '') { return { id: uid(), name: name || '새 장면', desc, frames: [], trimIn: 0, trimOut: 0, bgm: null, stage: null }; }
-function newProject(title, sceneName, storyId = 'byeoljubu') {
-  return { id: uid(), storyId, synopsis: '', title, created: Date.now(), updated: Date.now(), fps: 12, hold: 3,
-    scenes: [newScene(sceneName)], fx: [], sfx: [], voices: [], narrs: [], script: null, scriptMode: null, narrText: '',
-    mix: { bgm: .5, sfx: .9, voice: 1, narr: 1 }, duck: true, fade: true, subs: true, done: {} };
+/* 화면 비율(포맷) — 새 영화 창에서 고르고, 무대 크기 W·H가 따라 바뀌어요 */
+const FORMATS = [
+  { id: 'wide', name: '와이드', sub: '16:9 · 유튜브·TV', r: 16 / 9 },
+  { id: 'flat', name: '와이드스크린', sub: '1.85:1', r: 1.85 },
+  { id: 'scope', name: '시네마', sub: '2.39:1 · 영화관', r: 2.39 },
+  { id: 'tv', name: '옛날 TV', sub: '4:3', r: 4 / 3 },
+  { id: 'square', name: '정사각형', sub: '1:1', r: 1 },
+  { id: 'feed', name: '세로 사진', sub: '4:5', r: 4 / 5 },
+  { id: 'story', name: '세로 영상', sub: '9:16 · 쇼츠·릴스', r: 9 / 16 }
+];
+const fmtInfo = id => FORMATS.find(f => f.id === id) || FORMATS[0];
+function setFormat(id) {
+  const r = fmtInfo(id).r, even = v => Math.round(v / 2) * 2;
+  if (r >= 1) { W = 960; H = even(960 / r); } else { H = 960; W = even(960 * r); }
+  const app = document.getElementById('app'); if (app) app.style.setProperty('--ar', String(W / H));
+}
+function newProject(title, o = {}) {
+  return { id: uid(), storyId: 'new', synopsis: '', title, created: Date.now(), updated: Date.now(), fps: o.fps || 5, hold: 1, fmt: o.fmt || 'wide',
+    scenes: [newScene('1장면')], fx: [], sfx: [], voices: [], narrs: [], script: [], scriptMode: 'new', narrText: '',
+    mix: { bgm: .5, sfx: .9, voice: 1, narr: 1 }, duck: true, fade: true, subs: true, done: {},
+    look: { fin: 'none', fout: 'none', fg: 'none', filt: 'none', q: o.q || 'hd', loop: false } };
 }
 function changed() { TLc = null; if (P) { P.updated = Date.now(); histPush(); scheduleSave(); } }
 /* ---------- 되돌리기 (모든 작업 화면 공통) ---------- */
@@ -185,7 +202,7 @@ function scheduleSave() { clearTimeout(saveT); const el = $('#savedState'); if (
 function projectDump() {
   return {
     id: P.id, title: P.title, storyId: P.storyId, created: P.created, updated: P.updated, fps: P.fps, hold: P.hold,
-    synopsis: P.synopsis || '', lastStep: P.lastStep || 'shoot', scriptMode: P.scriptMode, script: P.script, narrText: P.narrText, mix: P.mix, look: P.look || null, duck: P.duck, fade: P.fade, subs: P.subs, done: P.done, show: P.show || 0, stars: P.stars || [],
+    synopsis: P.synopsis || '', lastStep: P.lastStep || 'shoot', scriptMode: P.scriptMode, script: P.script, narrText: P.narrText, mix: P.mix, look: P.look || null, duck: P.duck, fade: P.fade, subs: P.subs, done: P.done, fmt: P.fmt || 'wide',
     fx: P.fx, sfx: P.sfx,
     scenes: P.scenes.map(s => ({ id: s.id, name: s.name, desc: s.desc || '', trimIn: s.trimIn, trimOut: s.trimOut, bgm: s.bgm, stage: s.stage, sketch: s.sketch ? s.sketch.blob : null, frames: s.frames.map(f => ({ id: f.id, hold: f.hold, blob: f.blob })) })),
     voices: P.voices.map(v => ({ ...v, buf: undefined })), narrs: P.narrs.map(v => ({ ...v, buf: undefined })),
@@ -244,6 +261,6 @@ async function openProject(d) {
   p.scenes = d.scenes.map(s => ({ ...s, sketch: s.sketch ? { blob: s.sketch, ...loadImg(s.sketch) } : null, frames: s.frames.map(f => ({ ...f, ...loadImg(f.blob) })) }));
   p.voices = []; p.narrs = [];
   for (const k of ['voices', 'narrs']) for (const v of d[k] || []) { try { p[k].push({ ...v, buf: await decodeBlob(v.blob) }); } catch (e) { } }
-  delete p.thumb; P = p; TLc = null; return p;
+  delete p.thumb; P = p; TLc = null; setFormat(p.fmt); return p;
 }
 
