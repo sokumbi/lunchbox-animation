@@ -16,7 +16,8 @@ async function exportVideo() {
   const ext = mime.includes('mp4') ? 'mp4' : 'webm';
   AE.init(); await Player.preload();
   const prev = { canvas: Player.canvas, opts: Player.opts, onTick: Player.onTick };
-  const cv = h('canvas', { width: 1280, height: 720 });
+  const [cw, ch] = ({ sd: [854, 480], hd: [1280, 720], fhd: [1920, 1080] })[(P.look || {}).q] || [1280, 720];   // 설정 › 품질
+  const cv = h('canvas', { width: cw, height: ch });
   const stream = cv.captureStream(30); const dest = AE.ctx.createMediaStreamDestination(); AE.master.connect(dest);
   dest.stream.getAudioTracks().forEach(t => stream.addTrack(t));
   const mr = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 5e6 }); const chunks = []; mr.ondataavailable = e => e.data.size && chunks.push(e.data);
