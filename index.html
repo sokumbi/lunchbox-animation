@@ -1445,7 +1445,8 @@ const Player = {
   }
 };
 // 렌더된 오디오 버퍼를 프로미스에 붙여 두면 스케줄할 때 바로 꺼내 쓸 수 있어요
-for (const k of ['getSfx', 'getBgm']) { const orig = AE[k].bind(AE); AE[k] = async id => { const p = orig(id); const b = await p; p.__buf = b; return b; }; }
+// (getSfx/getBgm는 async라 부를 때마다 새 프로미스가 나와요. 그래서 캐시에 있는 프로미스(AE.sfx[id]/AE.bgm[id])에 붙여야 재생할 때 찾을 수 있어요)
+for (const [k, cache] of [['getSfx', 'sfx'], ['getBgm', 'bgm']]) { const orig = AE[k].bind(AE); AE[k] = async id => { const b = await orig(id); const p = AE[cache][id]; if (p) p.__buf = b; return b; }; }
 function applyMix() { if (!AE.ctx || !P) return; for (const k of ['bgm', 'sfx', 'voice', 'narr']) AE.buses[k].gain.value = P.mix[k]; }
 
 /* =========================================================
