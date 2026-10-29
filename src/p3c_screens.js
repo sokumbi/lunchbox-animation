@@ -102,35 +102,103 @@ function growFrom(el, label, cb) {
 }
 function dropOverlay(ov) { if (!ov) return; ov.style.transition = 'opacity .35s'; ov.style.opacity = '0'; setTimeout(() => ov.remove(), 380); }
 
-/* ---------- 3. 이야기 고르기 ---------- */
-function openLibrary() {
-  show('library'); stopIntro();
+/* ---------- 3. 이야기 고르기 ----------
+   갈래(전래동화 · 전국 팔도 민담 · 나만의 이야기) → 전래동화 카드 / 팔도 지도 / 바로 촬영.
+   view: 'home' | 'tales' | 'map' — 상영관(p5e_theater)도 같은 화면을 써요 */
+function libTop(title, back) {
   const top = $('#libTop'); top.innerHTML = '';
-  top.append(key('', { ic: 'home', cls: 'home', aria: '처음으로', onclick: () => showProcess('home') }),
+  top.append(back ? key('', { ic: 'back', cls: 'home', aria: '뒤로', onclick: back }) : key('', { ic: 'home', cls: 'home', aria: '처음으로', onclick: () => showProcess('home') }),
     h('div', { class: 'brand' }, h('i', { html: icon('film') }), BRAND.app),
-    LCD.make('어떤 이야기로 만들까요?'),
+    LCD.make(title));
+  return top;
+}
+function libBody(view) { const g = $('#taleGrid'); g.innerHTML = ''; g.className = 'well tale-grid v-' + view; return g; }
+function openLibrary(view = 'home') {
+  show('library'); stopIntro();
+  if (view === 'tales') return openTales();
+  if (view === 'map') return openMap();
+  libTop('어떤 이야기로 만들까요?').append(
     key('내 작품함', { ic: 'film', cls: 'works', onclick: openWorks }),
-    h('button', { class: 'key newst', type: 'button', onclick: newStoryPrompt, html: `<i>${icon('plus')}</i><span class="kl">새로운 이야기</span>` }));
-  const g = $('#taleGrid'); g.innerHTML = '';
-  // 이야기 카드 — 내용은 그대로(별주부전만 켜짐), 같은 크기의 그림 카드
+    key('상영관', { ic: 'trophy', cls: 'works hall', onclick: () => openTheater() }));
+  const g = libBody('home');
+  for (const k of STORY_KINDS) {
+    const el = h('button', { class: 'kind', type: 'button', 'data-kind': k.id, onclick: () => k.id === 'own' ? startOwnStory() : openLibrary(k.id) },
+      h('span', { class: 'kart', html: icon(k.ic) }),
+      h('b', {}, k.name), h('span', { class: 'ks' }, k.sub));
+    el.style.setProperty('--kc', k.c); g.append(el);
+  }
+}
+function openTales() {
+  libTop('전래동화', () => openLibrary()).append(key('내 작품함', { ic: 'film', cls: 'works', onclick: openWorks }));
+  const g = libBody('tales');
+  // 이야기 카드 — 별주부전만 켜짐, 같은 크기의 그림 카드
   TALES.forEach(t => {
-    const el = h(t.on ? 'button' : 'div', { class: 'cas' + (t.on ? ' on' : ''), type: t.on ? 'button' : null, 'aria-disabled': t.on ? null : 'true', title: t.on ? t.sub : '준비 중',
-      style: { '--art': `radial-gradient(circle at 75% 25%, ${t.c}, color-mix(in srgb, ${t.c} 55%, #1E1C1A))` } },
+    const el = h(t.on ? 'button' : 'div', { class: 'cas' + (t.on ? ' on' : ''), type: t.on ? 'button' : null, 'aria-disabled': t.on ? null : 'true', title: t.on ? t.sub : '준비 중' },
       h('span', { class: 'art', html: icon('book') }), h('span', { class: 'bd', html: t.on ? '시작' : icon('lock') + '준비 중' }), h('span', { class: 'tt' }, t.title));
     el.style.setProperty('--art', `radial-gradient(circle at 75% 25%, ${t.c}, color-mix(in srgb, ${t.c} 55%, #1E1C1A))`);
     if (t.on) el.onclick = () => { AE.init(); startIntro(); };
     g.append(el);
   });
 }
-function newStoryPrompt() {
-  modal((b, m) => {
-    const ti = h('input', { id: 'newTitle', value: '', placeholder: '예) 우리 반 고양이의 모험', maxlength: 40 });
-    const go = () => { const title = ti.value.trim() || '나의 이야기'; P = newProject(title, '1장면', 'new'); P.scriptMode = 'new'; P.script = []; TLc = null; scheduleSave(); m.close(); showProcess('new'); };
-    ti.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
-    b.append(h('h2', {}, '새로운 이야기 만들기'),
-      h('label', { class: 'field' }, h('span', { class: 'label' }, '이야기 제목 (나중에 써도 돼요)'), ti),
-      h('div', { class: 'acts' }, h('button', { class: 'btn', type: 'button', onclick: m.close }, '취소'), h('button', { class: 'btn accent', type: 'button', onclick: go }, '시작하기')));
+/* 팔도 지도 — 깜빡이는 곳(장소)을 누르면 오른쪽에 그곳 민담이 나와요 */
+function openMap() {
+  libTop('전국 팔도 민담', () => openLibrary()).append(key('내 작품함', { ic: 'film', cls: 'works', onclick: openWorks }));
+  const g = libBody('map');
+  const places = [];
+  for (const l of LEGENDS) { let p = places.find(p => p.name === l.place); if (!p) places.push(p = { name: l.place, at: l.at, p: l.p, items: [] }); p.items.push(l); }
+  const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  let svg = '<svg viewBox="0 0 640 1000" class="kmap" role="img" aria-label="한반도 팔도 지도">';
+  for (const v of PALDO) svg += `<path class="do" data-do="${v.id}" d="${v.d}" fill="${v.c}"/>`;
+  for (const v of PALDO) { const [x, y] = mapXY(v.at); svg += `<text class="do-n" x="${x.toFixed(0)}" y="${y.toFixed(0)}">${v.name}</text>`; }
+  for (const m of MAP_MARKS) { const [x, y] = mapXY(m.at); svg += (m.dot ? `<circle class="isle" cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" r="4"/>` : '') + `<text class="isle-n" x="${x.toFixed(0)}" y="${(y + (m.dot ? 22 : -14)).toFixed(0)}">${m.name}</text>`; }
+  places.forEach((p, i) => {
+    const [x, y] = mapXY(p.at);
+    svg += `<g class="pin" data-i="${i}" role="button" tabindex="0" aria-label="${esc(p.name)}" transform="translate(${x.toFixed(0)} ${y.toFixed(0)})" style="--d:${(i * .23 % 1.6).toFixed(2)}s">` +
+      `<circle class="hit" r="30"/><circle class="ring" r="13"/><circle class="dot" r="11"/><text class="pin-n" y="-20">${esc(p.name)}</text></g>`;
   });
+  svg += '</svg>';
+  const mapEl = h('div', { class: 'map-wrap', html: svg });
+  const side = h('div', { class: 'map-side' });
+  g.append(mapEl, side);
+  const svgEl = $('svg', mapEl);
+  const pick = (i, which = 0) => {
+    const p = places[i], d = PALDO.find(v => v.id === p.p), l = p.items[which];
+    $$('.pin', svgEl).forEach(el => el.classList.toggle('sel', +el.dataset.i === i));
+    $$('.do', svgEl).forEach(el => el.classList.toggle('dim', el.dataset.do !== p.p));
+    side.innerHTML = '';
+    side.append(h('div', { class: 'ms-head' }, h('span', { class: 'do-chip', style: { background: d.c } }, d.name), h('b', {}, p.name)));
+    if (p.items.length > 1) side.append(h('div', { class: 'row ms-tabs' }, ...p.items.map((it, j) => h('button', { class: 'chip' + (j === which ? ' on' : ''), type: 'button', onclick: () => pick(i, j) }, it.title))));
+    side.append(
+      h('div', { class: 'ms-body scroll' },
+        h('h3', {}, l.title), h('div', { class: 'ms-sub' }, l.sub),
+        h('p', {}, l.syn),
+        h('div', { class: 'ms-sc' }, h('span', { class: 'label' }, `장면 ${l.scenes.length}개`), ...l.scenes.map((n, k) => h('span', { class: 'chip' }, `${k + 1}. ${n}`)))),
+      key('이 이야기로 만들기', { ic: 'next', cls: 'orange row ms-go', onclick: () => startLegend(l) }));
+  };
+  const intro = () => {
+    side.innerHTML = '';
+    side.append(h('div', { class: 'ms-body scroll ms-intro' },
+      h('h3', {}, '우리 고장 옛이야기'),
+      h('p', {}, '지도에서 반짝반짝 깜빡이는 곳을 눌러 보세요. 그 고장에 내려오는 이야기가 나와요.'),
+      h('div', { class: 'ms-sc' }, ...places.map((p, i) => h('button', { class: 'chip', type: 'button', onclick: () => pick(i) }, p.name)))));
+  };
+  svgEl.addEventListener('click', e => { const pin = e.target.closest('.pin'); if (pin) pick(+pin.dataset.i); });
+  svgEl.addEventListener('keydown', e => { const pin = e.target.closest('.pin'); if (pin && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); pick(+pin.dataset.i); } });
+  intro();
+}
+/* 민담으로 시작 — 줄거리·장면을 미리 넣고 시나리오부터 */
+function startLegend(l) {
+  AE.init();
+  P = newProject('나의 ' + l.title, l.scenes[0], l.id);
+  for (const n of l.scenes.slice(1)) P.scenes.push(newScene(n));
+  P.synopsis = l.syn; P.scriptMode = 'new'; P.script = []; TLc = null; scheduleSave();
+  openStudio('script');
+}
+/* 나만의 이야기 — 바로 촬영 (제목·시나리오는 나중에 써도 돼요) */
+function startOwnStory() {
+  AE.init();
+  P = newProject('나만의 이야기', '1장면', 'new'); P.scriptMode = 'new'; P.script = []; TLc = null; scheduleSave();
+  openStudio('shoot');
 }
 /* 지운 작품은 휴지통에 30일 동안 남아요 (d.trashed = 지운 시각) */
 const TRASH_DAYS = 30;
@@ -154,7 +222,7 @@ async function openWorks() {
       const th = h('div', { class: 'th' }); if (d.thumb) th.style.backgroundImage = `url(${URL.createObjectURL(d.thumb)})`;
       const frames = d.scenes.reduce((a, s) => a + s.frames.length, 0);
       box.append(h('div', { class: 'work-i' }, th,
-        h('div', {}, h('b', { style: { fontFamily: 'var(--display)', fontWeight: 800, fontSize: '16px' } }, d.title), h('div', { class: 'hint' }, `${d.storyId === 'new' ? '새 이야기' : '별주부전'} · 장면 ${d.scenes.length}개 · 컷 ${frames}개`)),
+        h('div', {}, h('b', { style: { fontFamily: 'var(--display)', fontWeight: 800, fontSize: '16px' } }, d.title), h('div', { class: 'hint' }, `${storyInfo(d.storyId).title} · 장면 ${d.scenes.length}개 · 컷 ${frames}개`)),
         h('div', { class: 'row' },
           ib('trash', '', 'btn sm icon ghost', { 'aria-label': '작품 지우기', onclick: async () => { if (await confirmBox('작품을 휴지통에 넣을까요?', `“${d.title}”은(는) 휴지통에 ${TRASH_DAYS}일 동안 있어요. 그동안은 되살릴 수 있어요.`, '휴지통에 넣기', true)) { d.trashed = Date.now(); await DB.put(d); m.close(); openWorks(); toast('휴지통에 넣었어요'); } } }),
           ib('download', '', 'btn sm icon', { 'aria-label': '작품 파일로 저장', title: '작품 파일로 저장 (백업 · 다른 기기로 옮기기)', onclick: () => exportProjectFile(d) }),
@@ -225,9 +293,9 @@ function playCutoutIntro(done) {
   introRaf = requestAnimationFrame(loop);
 }
 
-/* ---------- 영상 제목 · 첫 장면 이름 (별주부전) ---------- */
+/* ---------- 장면 이름 고르기 (이야기에 장면 목록이 있을 때) ---------- */
 function sceneNameChips(input) {
-  return h('div', { class: 'row' }, ...ORIGINAL_SCENES.map((n, i) => h('button', { class: 'chip', type: 'button', onclick: () => { input.value = n; input.focus(); } }, `${i + 1}. ${n}`)));
+  return h('div', { class: 'row' }, ...storyInfo(P.storyId).scenes.map((n, i) => h('button', { class: 'chip', type: 'button', onclick: () => { input.value = n; input.focus(); } }, `${i + 1}. ${n}`)));
 }
 function setupProject(step, ov) {
   // 제목·첫 장면은 기본값으로 바로 시작해요 (제목은 시나리오·완성 화면에서 바꿀 수 있어요)

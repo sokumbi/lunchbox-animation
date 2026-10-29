@@ -378,7 +378,8 @@ STEP_MOD.final = (() => {
     sheet.onToggle = o => paintRail(r.RR, o ? 'sum' : null);
     r.RR.append(key('영상 파일', { ic: 'download', cls: 'orange', onclick: exportVideo }), sum,
       key('처음부터', { ic: 'play', onclick: () => { sheet.close(); Player.seek(0); Player.play(); } }),
-      key('작품함', { ic: 'save', onclick: async () => { P.done.final = true; const ok = await saveProject(); toast(ok ? '내 작품함에 저장했어요' : '이 화면에서는 작품함 저장이 안 돼요. 영상 파일로 저장해 주세요.'); } }));
+      key('작품함', { ic: 'save', onclick: async () => { P.done.final = true; const ok = await saveProject(); toast(ok ? '내 작품함에 저장했어요' : '이 화면에서는 작품함 저장이 안 돼요. 영상 파일로 저장해 주세요.'); } }),
+      key('상영관', { ic: 'trophy', aria: '상영관에 올리고 별점 받기', onclick: async () => { const first = !P.show; P.done.final = true; P.show = P.show || Date.now(); P.stars = P.stars || []; changed(); await openTheater(); toast(first ? '상영관에 올렸어요! 친구들에게 별점을 받아 보세요' : '상영관이에요', 3000, true); } }));
     sheet.open();
   }
   return { mount, unmount() { } };

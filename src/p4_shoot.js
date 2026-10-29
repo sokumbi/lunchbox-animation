@@ -289,7 +289,7 @@ STEP_MOD.shoot = (() => {
     insertAt = null; sel = null; await saveProject();
     modal((b, m) => {
       const used = P.scenes.map(s => s.name);
-      const pool = (P.storyId === 'byeoljubu' ? ORIGINAL_SCENES : []).filter(n => !used.includes(n));
+      const pool = storyInfo(P.storyId).scenes.filter(n => !used.includes(n));
       let nextName = P.scenes[P.scenes.indexOf(sc) + 1]?.name || pool[0] || `${P.scenes.length + 1}장면`;
       const chips = h('div', { class: 'row' });
       const paintChips = () => { chips.innerHTML = ''; for (const n of [...new Set([nextName, ...pool])].slice(0, 6)) chips.append(h('button', { class: 'chip' + (n === nextName ? ' on' : ''), type: 'button', onclick: () => { nextName = n; paintChips(); } }, n)); };
@@ -329,9 +329,9 @@ STEP_MOD.shoot = (() => {
   }
   function newScenePrompt() {
     modal((b, m) => {
-      const used = P.scenes.map(s => s.name); const nn = (P.storyId === 'byeoljubu' ? ORIGINAL_SCENES.find(n => !used.includes(n)) : null) || `${P.scenes.length + 1}장면`;
+      const used = P.scenes.map(s => s.name); const nn = storyInfo(P.storyId).scenes.find(n => !used.includes(n)) || `${P.scenes.length + 1}장면`;
       const ni = h('input', { id: 'newSceneName', value: nn, maxlength: 30 });
-      b.append(h('h2', {}, '새 장면'), h('label', { class: 'field' }, h('span', { class: 'label' }, '장면 이름'), ni), P.storyId === 'byeoljubu' ? sceneNameChips(ni) : '',
+      b.append(h('h2', {}, '새 장면'), h('label', { class: 'field' }, h('span', { class: 'label' }, '장면 이름'), ni), storyInfo(P.storyId).scenes.length ? sceneNameChips(ni) : '',
         h('div', { class: 'acts' }, h('button', { class: 'btn', type: 'button', onclick: m.close }, '취소'), h('button', { class: 'btn accent', type: 'button', onclick: () => { m.close(); const s = newScene(ni.value.trim() || nn); P.scenes.push(s); S.curScene = s.id; changed(); buildStrip(true); } }, '만들고 촬영하기')));
     });
   }

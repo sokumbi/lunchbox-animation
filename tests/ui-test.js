@@ -46,7 +46,13 @@ fs.mkdirSync(path.join(__dirname, 'shots'), { recursive: true });
     const sh = async n => p.screenshot({ path: `${__dirname}/shots/${name}_${n}.png` });
     await p.goto('http://localhost:8765/index.html'); await p.waitForTimeout(1600); await sh('01_splash');
     await p.locator('#splash').click(); await p.waitForTimeout(900); await p.locator('#process .tray').click(); await p.waitForTimeout(2300); await sh('02_process'); await clipCheck(p, name + ' process');
-    await p.locator('.proc-item').first().click(); await p.waitForTimeout(1100); await sh('03_library'); await clipCheck(p, name + ' library');
+    await p.locator('.proc-item').first().click(); await p.waitForTimeout(1100); await sh('03_kinds'); await clipCheck(p, name + ' kinds');
+    // 팔도 민담 지도: 깜빡이는 곳 누르기 (경주는 이야기 두 편)
+    await p.locator('.kind[data-kind=map]').click(); await p.waitForTimeout(500); await sh('03m_map'); await clipCheck(p, name + ' map');
+    await p.locator('.pin[aria-label="경주"]').click({ force: true }); await p.waitForTimeout(300); await sh('03m_pin'); await clipCheck(p, name + ' map pin');
+    out.push(name + ' map pin: ' + await p.locator('.map-side .ms-body h3').textContent() + ' / tabs ' + await p.locator('.ms-tabs .chip').count());
+    await p.locator('#libTop [aria-label="뒤로"]').click(); await p.waitForTimeout(300);
+    await p.locator('.kind[data-kind=tales]').click(); await p.waitForTimeout(400); await sh('03_library'); await clipCheck(p, name + ' library');
     await p.locator('.cas.on').click(); await p.waitForTimeout(900); await p.locator('#introSkip').click(); await p.waitForTimeout(1000);
     await sh('03b_process2');
     await p.locator('.proc-item').nth(1).click(); await p.waitForTimeout(900);
@@ -78,6 +84,19 @@ fs.mkdirSync(path.join(__dirname, 'shots'), { recursive: true });
     await p.evaluate(() => goStep('script')); await p.waitForTimeout(600); const walk = ['script'];
     for (let i = 0; i < 5; i++) { const nk = p.locator('.nextkey:visible').first(); if (!await nk.count()) { walk.push('(다음 키 없음)'); break; } await nk.click(); await p.waitForTimeout(700); if (await p.locator('.modal .choice').count()) { await p.locator('text=원작 대사 쓰기').click(); await p.waitForTimeout(400); } walk.push(await p.evaluate(() => S.step)); if (i < 4) await sh('08_next_' + walk[walk.length - 1]); }
     out.push(name + ' next walk: ' + walk.join(' > '));
+    // 상영관: 완성에서 올리기 → 순위 → 감상 → 별점
+    await p.locator('.RR .key', { hasText: '상영관' }).click(); await p.waitForTimeout(900); await sh('09_theater'); await clipCheck(p, name + ' theater');
+    await p.locator('.th-row').first().click(); await p.waitForTimeout(900); await sh('09_watch'); await clipCheck(p, name + ' watch');
+    await p.locator('.tw-give button').nth(3).click(); await p.waitForTimeout(400); await sh('09_rated');
+    await p.locator('.tw-top [aria-label="닫기"]').click(); await p.waitForTimeout(700);
+    out.push(name + ' theater rows ' + await p.locator('.th-row').count() + ' / ' + (await p.locator('.th-row .th-s small').first().textContent()));
+    await p.locator('#libTop [aria-label="뒤로"]').click(); await p.waitForTimeout(900); out.push(name + ' theater back -> ' + await p.evaluate(() => S.step + ' ' + !!P));
+    // 민담으로 시작 → 시나리오(장면 미리 들어감), 나만의 이야기 → 바로 촬영
+    await p.evaluate(() => { leaveStep(); P = null; openLibrary('map'); }); await p.waitForTimeout(400);
+    await p.locator('.pin[aria-label="단양 도담삼봉"]').click({ force: true }); await p.waitForTimeout(200); await p.locator('.ms-go').click(); await p.waitForTimeout(800);
+    out.push(name + ' legend -> ' + await p.evaluate(() => S.step + ' ' + P.title + ' scenes ' + P.scenes.length));
+    await p.evaluate(() => { leaveStep(); P = null; openLibrary(); }); await p.waitForTimeout(400);
+    await p.locator('.kind[data-kind=own]').click(); await p.waitForTimeout(900); out.push(name + ' own -> ' + await p.evaluate(() => S.step + ' ' + P.storyId));
     await ctx.close();
   }
   await b.close(); server.close();
