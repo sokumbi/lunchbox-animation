@@ -23,10 +23,9 @@ function setFormat(id) {
   const app = document.getElementById('app'); if (app) app.style.setProperty('--ar', String(W / H));
 }
 function newProject(title, o = {}) {
-  return { id: uid(), storyId: 'new', synopsis: '', title, created: Date.now(), updated: Date.now(), fps: o.fps || 5, hold: 1, fmt: o.fmt || 'wide',
+  return { id: uid(), storyId: 'new', synopsis: '', title, created: Date.now(), updated: Date.now(), fps: o.fps || 6, hold: 1, fmt: o.fmt || 'wide',
     scenes: [newScene('1장면')], fx: [], sfx: [], voices: [], narrs: [], script: [], scriptMode: 'new', narrText: '',
-    mix: { bgm: .5, sfx: .9, voice: 1, narr: 1 }, duck: true, fade: true, subs: true, done: {},
-    look: { fin: 'none', fout: 'none', fg: 'none', filt: 'none', q: o.q || 'hd', loop: false } };
+    mix: { bgm: .5, sfx: .9, voice: 1, narr: 1 }, duck: true, fade: true, subs: true, done: {}, look: null };
 }
 function changed() { TLc = null; if (P) { P.updated = Date.now(); histPush(); scheduleSave(); } }
 /* ---------- 되돌리기 (모든 작업 화면 공통) ---------- */
@@ -90,8 +89,7 @@ function renderAt(ctx, t, o = {}) {
   ctx.save(); paperShadow(ctx, false);
   ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
   const seg = segAt(t);
-  const lk = P.look;
-  if (seg) { drawCover(ctx, seg.f.img); if (lk) drawFilt(ctx, lk.filt); }
+  if (seg) drawCover(ctx, seg.f.img);
   else { ctx.fillStyle = '#9ba7d2'; ctx.font = '28px Jua, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('아직 촬영한 장면이 없어요', W / 2, H / 2); }
   if (P.fade && tl.total > 0 && o.playing) {
     let a = 0; const F = .3;
@@ -99,7 +97,6 @@ function renderAt(ctx, t, o = {}) {
     if (a > 0) { ctx.fillStyle = `rgba(0,0,0,${a})`; ctx.fillRect(0, 0, W, H); }
   }
   if (o.fx !== false) for (const e of P.fx) { const et = absT(e); if (et != null && t >= et && t <= et + e.dur) drawFx(ctx, e, o.playing ? t - et : Math.max(t - et, Math.min(.45, e.dur / 2))); }
-  if (lk) drawFg(ctx, lk.fg);
   if (o.subs !== false && P.subs) {
     const v = P.voices.find(v => { const vt = absT(v); return v.text && vt != null && t >= vt && t <= vt + Math.max(v.dur || 0, 1.2); });
     if (v) {
@@ -109,7 +106,6 @@ function renderAt(ctx, t, o = {}) {
       ctx.fillStyle = '#fff'; lines.forEach((l, i) => ctx.fillText(l, W / 2, H - 24 - bh + 10 + lh / 2 + i * lh));
     }
   }
-  if (lk && o.playing && tl.total > 0) drawFade(ctx, t, lk, tl.total);
   ctx.restore();
 }
 
@@ -132,9 +128,6 @@ const Player = {
       if (!this.playing) return;
       this.t = this.startT + Math.max(0, AE.ctx.currentTime - this.startCtx);
       const end = this.until ?? TL().total;
-      if (this.t >= end && this.opts.loop && this.until == null && P.look && P.look.loop && TL().total > .1) {   // 반복 재생
-        this.stopAudio(); applyMix(); const a2 = AE.ctx.currentTime + .03; this.schedule(0, a2); this.startT = 0; this.startCtx = a2; this.t = 0;
-      }
       if (this.t >= end) { this.t = Math.min(end, TL().total); this.pause(); this.draw(); this.onEnd && this.onEnd(); return; }
       this.draw(); this.raf = requestAnimationFrame(loop);
     };
@@ -152,22 +145,21 @@ const Player = {
     this.nodes = [];
     if (AE.ctx) { const g = AE.duck.gain; g.cancelScheduledValues(0); g.setValueAtTime(1, AE.ctx.currentTime); }
   },
-  /* o.rate: 빠르기(1이 그대로), o.vfx: 목소리 효과 (p6b_sms.js vfxIn) */
-  startBuf(buf, bus, absStart, t0, at, gain = 1, until = Infinity, o = {}) {
-    const c = AE.ctx, r = o.rate || 1, len = Math.min(buf.duration / r, until - absStart);
+  startBuf(buf, bus, absStart, t0, at, gain = 1, until = Infinity) {
+    const c = AE.ctx, len = Math.min(buf.duration, until - absStart);
     if (absStart + len <= t0 || len <= 0) return;
-    const s = c.createBufferSource(); s.buffer = buf; s.playbackRate.value = r; let node = s;
+    const s = c.createBufferSource(); s.buffer = buf; let node = s;
     if (gain !== 1) { const g = c.createGain(); g.gain.value = gain; s.connect(g); node = g; this.nodes.push(g); }
-    node.connect(o.vfx ? vfxIn(c, o.vfx, bus, this.nodes) : bus);
-    if (absStart >= t0) s.start(at + absStart - t0, 0, len * r); else s.start(at, (t0 - absStart) * r, (len - (t0 - absStart)) * r);
+    node.connect(bus);
+    if (absStart >= t0) s.start(at + absStart - t0, 0, len); else s.start(at, t0 - absStart, len - (t0 - absStart));
     this.nodes.push(s);
   },
   schedule(t0, at) {
     const c = AE.ctx, tl = TL(), endT = this.until ?? tl.total;
-    for (const s of P.sfx) { const st = absT(s), b = AE.sfx[s.snd]; if (st == null || !b || !b.__buf) continue; this.startBuf(b.__buf, AE.buses.sfx, st, t0, at, s.vol ?? 1, endT, s); }
+    for (const s of P.sfx) { const st = absT(s), b = AE.sfx[s.snd]; if (st == null || !b || !b.__buf) continue; this.startBuf(b.__buf, AE.buses.sfx, st, t0, at, s.vol ?? 1, endT); }
     const voices = this.muteVoices ? [] : P.voices; const narrs = P.narrs;
-    for (const v of voices) { if (!v.buf || v.id === this.exclude) continue; const st = absT(v); if (st != null) this.startBuf(v.buf, AE.buses.voice, st, t0, at, v.vol ?? 1, endT, v); }
-    for (const v of narrs) { if (!v.buf || v.id === this.exclude) continue; const st = absT(v); if (st != null) this.startBuf(v.buf, AE.buses.narr, st, t0, at, v.vol ?? 1, endT, v); }
+    for (const v of voices) { if (!v.buf || v.id === this.exclude) continue; const st = absT(v); if (st != null) this.startBuf(v.buf, AE.buses.voice, st, t0, at, v.vol ?? 1, endT); }
+    for (const v of narrs) { if (!v.buf || v.id === this.exclude) continue; const st = absT(v); if (st != null) this.startBuf(v.buf, AE.buses.narr, st, t0, at, v.vol ?? 1, endT); }
     // 배경음악: 같은 음악이 이어지는 장면은 하나로 묶어요
     const segs = [];
     for (const r of tl.ranges) { if (!r.sc.bgm || r.t1 <= r.t0) continue; const last = segs[segs.length - 1]; if (last && last.id === r.sc.bgm && Math.abs(last.b - r.t0) < 1e-6) last.b = r.t1; else segs.push({ id: r.sc.bgm, a: r.t0, b: r.t1 }); }

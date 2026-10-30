@@ -1,5 +1,5 @@
 /* =========================================================
-   촬영 도우미 — 카메라 · 사진 불러오기 · 스토리보드 스케치 · 전체 보기 (화면은 p6_editor)
+   촬영 도우미 — 카메라 · 사진 불러오기 · 전체 보기 (화면은 p6_simple)
    ========================================================= */
 const Cam = {
   stream: null, video: null, devices: [], di: -1, failed: false, reason: '',
@@ -43,35 +43,6 @@ async function fileToFrameBlob(file) {
   if (!img) return null;
   const off = h('canvas', { width: W, height: H }), c = off.getContext('2d'); c.fillStyle = '#000'; c.fillRect(0, 0, W, H); drawCover(c, img);
   return new Promise(r => off.toBlob(r, 'image/jpeg', .88));
-}
-
-/* 스토리보드 스케치 — 장면마다 종이에 그린 그림을 사진으로 한 장 붙여요 ({ blob, url, img }) */
-async function fileToSketch(file) {
-  const img = await new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = URL.createObjectURL(file); });
-  if (!img) return null;
-  const k = Math.min(1, 900 / Math.max(img.naturalWidth, img.naturalHeight));
-  const off = h('canvas', { width: Math.round(img.naturalWidth * k), height: Math.round(img.naturalHeight * k) });
-  off.getContext('2d').drawImage(img, 0, 0, off.width, off.height); URL.revokeObjectURL(img.src);
-  const blob = await new Promise(r => off.toBlob(r, 'image/jpeg', .82));
-  return blob ? { blob, ...loadImg(blob) } : null;
-}
-async function takeSketch(s, { album = false } = {}) {
-  const f = (await pickImages({ capture: !album }))[0]; if (!f) return false;
-  const sk = await fileToSketch(f); if (!sk) { toast('사진을 읽지 못했어요'); return false; }
-  s.sketch = sk; changed(); toast(`“${s.name}” 스케치를 붙였어요`, 1400); return true;
-}
-/* 스케치 크게 보기 — 다시 찍기 · 앨범에서 고르기 · 떼기. 바뀌면 onChange() */
-function sketchModal(s, onChange) {
-  modal((b, m) => {
-    const redo = async album => { if (await takeSketch(s, { album })) { m.close(); onChange && onChange(); } };
-    b.append(h('h2', {}, `${s.name} · 스케치`),
-      s.sketch ? h('img', { class: 'sketch-big', src: s.sketch.url, alt: `${s.name} 스케치` }) : h('p', { class: 'hint' }, '아직 붙인 스케치가 없어요'),
-      h('div', { class: 'acts' },
-        s.sketch ? ib('trash', '떼기', 'btn ghost', { onclick: () => { s.sketch = null; changed(); m.close(); onChange && onChange(); } }) : '',
-        ib('image', '앨범에서', 'btn', { onclick: () => redo(true) }),
-        ib('cam', s.sketch ? '다시 찍기' : '찍기', 'btn', { onclick: () => redo(false) }),
-        h('button', { class: 'btn primary', type: 'button', onclick: m.close }, '닫기')));
-  }, { wide: true });
 }
 
 /* 전체 영상 보기 (어느 단계에서나) */
