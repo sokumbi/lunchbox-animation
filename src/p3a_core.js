@@ -6,7 +6,7 @@ let TLc = null;               // 타임라인 계산 캐시
 const S = { step: 'shoot', sel: null, curScene: null, sub: { sound: 'sfx', edit: 'edit' } };
 
 function newScene(name, desc = '') { return { id: uid(), name: name || '새 장면', desc, frames: [], trimIn: 0, trimOut: 0, bgm: null, stage: null }; }
-/* 화면 비율(포맷) — 새 영화 창에서 고르고, 무대 크기 W·H가 따라 바뀌어요 */
+/* 화면 비율(포맷) — 지금은 항상 16:9('wide')예요. 목록은 예전 작품 파일을 읽을 때를 위해 남겨 뒀어요 */
 const FORMATS = [
   { id: 'wide', name: '와이드', sub: '16:9 · 유튜브·TV', r: 16 / 9 },
   { id: 'flat', name: '와이드스크린', sub: '1.85:1', r: 1.85 },
@@ -253,6 +253,6 @@ async function openProject(d) {
   p.scenes = d.scenes.map(s => ({ ...s, sketch: s.sketch ? { blob: s.sketch, ...loadImg(s.sketch) } : null, frames: s.frames.map(f => ({ ...f, ...loadImg(f.blob) })) }));
   p.voices = []; p.narrs = [];
   for (const k of ['voices', 'narrs']) for (const v of d[k] || []) { try { p[k].push({ ...v, buf: await decodeBlob(v.blob) }); } catch (e) { } }
-  delete p.thumb; P = p; TLc = null; setFormat(p.fmt); return p;
+  delete p.thumb; p.fmt = 'wide'; P = p; TLc = null; setFormat('wide'); return p; // 비율은 항상 16:9
 }
 

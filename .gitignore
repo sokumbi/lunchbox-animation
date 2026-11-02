@@ -13,3 +13,6 @@ app.html
 *.jpg
 design/
 !brand/**
+
+# HyperFrames 영상 프로젝트 (올리지 않음)
+videos/
