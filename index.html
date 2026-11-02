@@ -2150,7 +2150,7 @@ function paneShare(pane) {
     h('p', { class: 'dc-tip' }, `컷 ${nFrames()} · ${fmt(TL().total)}초 · 말 ${P.narrs.length} · 소리 ${P.sfx.length}${sc().bgm ? ' · 음악' : ''}`),
     h('div', { class: 'cp-two' },
       h('button', { class: 'cp-mini', type: 'button', onclick: () => openCard('title'), html: icon('edit') + `<span>제목 카드<small>${P.card && P.card.on ? designOf(P.card.design).name + ' · ' + fontOf(P.card.font).name : '없음'}</small></span>` }),
-      h('button', { class: 'cp-mini', type: 'button', onclick: () => openCard('credits'), html: icon('film') + `<span>엔딩 크레딧<small>${P.credits && P.credits.text.trim() ? designOf(P.credits.design).name + ' · ' + fontOf(P.credits.font).name : '없음'}</small></span>` })),
+      h('button', { class: 'cp-mini', type: 'button', onclick: () => openCard('credits'), html: icon('film') + `<span>크레딧<small>${P.credits && P.credits.text.trim() ? designOf(P.credits.design).name + ' · ' + fontOf(P.credits.font).name : '없음'}</small></span>` })),
     big('download', '영상 파일 만들기', '저장하거나 친구에게 보내요', () => { if (!TL().total) { toast('먼저 촬영에서 컷을 찍어요'); return; } Player.pause(); exportVideo(); }, 'or'),
     big('save', '작품 파일', '다른 폰·태블릿으로 옮겨요', async () => { await saveProject(); const d = await DB.get(P.id).catch(() => null); d ? exportProjectFile(d) : toast('먼저 저장이 되어야 해요'); }));
 }

@@ -78,7 +78,7 @@ fs.mkdirSync(path.join(__dirname, 'shots'), { recursive: true });
     await T('.dc-speed button:has-text("빠르게")', 300); out.push(name + ' fps ' + await ev(() => P.fps));
     await T('.dc-play', 120); out.push(name + ' playing ' + await ev(() => Player.playing)); await sh('05_play'); await p.waitForTimeout(600); await T('.dc-mon canvas', 300, { position: { x: 20, y: 20 } });
     await T('.dc-tabs [aria-label="내보내기"]', 400); await sh('06_share'); await clipCheck(p, name + ' deco share');
-    await T('.cp-mini:has-text("엔딩 크레딧")', 700); await hint(); await p.locator('.cp-in').fill('만든 사람\n홍길동'); await T('.cp-tile[data-id="stage"]', 300); await sh('06b_credits'); await clipCheck(p, name + ' credits page');
+    await T('.cp-mini:has-text("크레딧")', 700); await hint(); await p.locator('.cp-in').fill('만든 사람\n홍길동'); await T('.cp-tile[data-id="stage"]', 300); await sh('06b_credits'); await clipCheck(p, name + ' credits page');
     await T('.cp-go', 800); out.push(name + ' credits -> ' + await ev(() => V.screen + ' ' + V.tool + ' total=' + TL().total.toFixed(1) + ' lead=' + TL().lead + ' tail=' + TL().tail));
     await T('.dc-play', 120); await sh('06c_title_play'); await p.waitForTimeout(500); await T('.dc-mon canvas', 300, { position: { x: 20, y: 20 } });
     await T('.dc-l [aria-label="촬영"]', 600); out.push(name + ' back to shoot ' + await ev(() => V.screen + ' ins=' + V.ins)); await T('.sh-done', 600);
