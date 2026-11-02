@@ -62,6 +62,7 @@ fs.mkdirSync(path.join(__dirname, 'shots'), { recursive: true });
     await T('.sh-fr >> nth=2', 400); await T('.cut-b:has-text("다시 찍기")', 400); await sh('03c_retake'); await T('.shutter', 350);
     out.push(name + ' retake -> ' + await ev(() => V.retake + ' frames=' + nFrames()));
     await T('.sh-l [aria-label="되돌리기"]', 400); out.push(name + ' undo -> ' + await ev(() => nFrames()));
+    await T('.sh-l [aria-label="재생"]', 500); out.push(name + ' preview ' + await ev(() => !!V.pv)); await sh('03d_play'); await clipCheck(p, name + ' shoot play'); await T('.sh-l [aria-label="재생"]', 200); out.push(name + ' preview stop ' + await ev(() => !!V.pv));
     await T('.sh-r [aria-label="타이머"]', 200); out.push(name + ' timer ' + await ev(() => V.timer)); await T('.sh-r [aria-label="타이머"]', 200); await T('.sh-r [aria-label="타이머"]', 200);
     await T('.sh-r [aria-label="사진"]', 10).catch(() => { });
     // 다 찍었어요 → 꾸미기

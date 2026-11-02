@@ -524,6 +524,7 @@ body,#app,.screen{background:#000;color:#fff}
 .sh-fr b{position:absolute;left:0;bottom:0;background:#000a;color:#fff;font-size:clamp(9px,3cqh,11px);font-weight:800;padding:0 5px;border-radius:0 5px 0 0}
 .sh-fr:active{transform:scale(.94)}
 .sh-fr.retake{box-shadow:0 0 0 3px var(--acc)}
+.sh-fr.now{box-shadow:0 0 0 3px #fff}
 .sh-ins{flex:none;width:4px;height:76%;border-radius:2px;background:var(--acc);box-shadow:0 0 8px var(--acc)}
 .sh-none{color:#aaa;font-size:clamp(11px,3.6cqh,14px);font-weight:700;white-space:nowrap;padding:0 6px;text-shadow:0 1px 4px #000c}
 /* 찰칵 · 다 찍었어요 */
@@ -1811,16 +1812,30 @@ function openShoot() {
   const mon = h('div', { class: 'sh-mon' }, cv, flash, cd, nocam, banner, film);
   const onionB = rb('onion', '겹쳐보기', () => { V.onion = !V.onion; onionB.classList.toggle('on', V.onion); }, V.onion ? 'on' : '');
   const gridB = rb('grid', '격자', () => { V.grid = !V.grid; gridB.classList.toggle('on', V.grid); }, V.grid ? 'on' : '');
-  const left = h('div', { class: 'sh-l rail' }, rb('back', '내 작품', toGallery), rb('undo', '되돌리기', undo), onionB, gridB, rb('image', '사진', importPhotos));
+  const playB = rb('play', '재생', shootPv);
+  const left = h('div', { class: 'sh-l rail' }, rb('back', '내 작품', toGallery), rb('undo', '되돌리기', undo), playB, onionB, gridB, rb('image', '사진', importPhotos));
   const timerB = rb('timer', '타이머', () => { V.timer = ({ 0: 3, 3: 5, 5: 0 })[V.timer]; stopTimer(); timerPaint(); });
   const shutterB = h('button', { class: 'shutter', type: 'button', 'aria-label': '찰칵', onclick: shutter }, h('span', { class: 'in' }));
   const doneB = h('button', { class: 'sh-done', type: 'button', 'aria-label': '다 찍었어요', onclick: () => { if (!nFrames()) { toast('먼저 찰칵을 눌러 한 컷이라도 찍어 보세요', 2200); return; } openDeco(); }, html: icon('sparkle') + '<span>다 찍었어요<b>꾸미기 ›</b></span>' });
   const right = h('div', { class: 'sh-r rail' }, rb('switchCam', '카메라', async () => { if (Cam.failed) { camStart(); return; } if (!(await Cam.next())) toast('바꿀 수 있는 다른 카메라가 없어요'); }), timerB, shutterB, doneB);
   body.append(h('div', { class: 'sh' }, left, h('div', { class: 'sh-c' }, mon), right));
-  EL = { cv, ctx: cv.getContext('2d'), flash, cd, nocam, banner, film, timerB, shutterB };
+  EL = { cv, ctx: cv.getContext('2d'), flash, cd, nocam, banner, film, timerB, shutterB, playB };
   addEventListener('keydown', onKey);
   timerPaint(); shootPaint(); camStart();
   cancelAnimationFrame(V.raf); shootLoop();
+}
+/* 재생: 찍은 컷을 카메라 자리에서 무한 반복으로 보여 줘요. 다시 누르거나 찰칵을 누르면 멈춰요 */
+function shootPv() {
+  if (V.pv) { shootPvStop(); return; }
+  if (!nFrames()) { toast('먼저 찰칵을 눌러 한 컷이라도 찍어 보세요', 2200); return; }
+  stopTimer(); V.pv = { t0: performance.now(), idx: -1 };
+  EL.playB.classList.add('on'); EL.playB.innerHTML = icon('pause') + '<span>멈춤</span>'; EL.banner.hidden = true;
+}
+function shootPvStop() {
+  if (!V.pv) return; V.pv = false;
+  if (EL.playB) { EL.playB.classList.remove('on'); EL.playB.innerHTML = icon('play') + '<span>재생</span>'; }
+  if (EL.film) EL.film.querySelectorAll('.sh-fr.now').forEach(e => e.classList.remove('now'));
+  shootPaint();
 }
 /* 찍으면 들어갈 자리 */
 const capAt = () => V.retake != null ? V.retake : (V.ins != null ? V.ins : nFrames());
@@ -1833,7 +1848,7 @@ function shootPaint() {
   const list = h('div', { class: 'sh-list list' });
   fr.forEach((f, i) => {
     if (V.ins === i) list.append(h('i', { class: 'sh-ins' }));
-    list.append(h('button', { class: 'sh-fr' + (V.retake === i ? ' retake' : ''), type: 'button', 'aria-label': `${i + 1}번 컷`, onclick: () => cutPanel(i) }, h('img', { src: f.url, alt: '' }), h('b', {}, String(i + 1))));
+    list.append(h('button', { class: 'sh-fr' + (V.retake === i ? ' retake' : ''), type: 'button', 'aria-label': `${i + 1}번 컷`, onclick: () => { shootPvStop(); cutPanel(i); } }, h('img', { src: f.url, alt: '' }), h('b', {}, String(i + 1))));
   });
   if (V.ins === fr.length) list.append(h('i', { class: 'sh-ins' }));
   if (!fr.length) list.append(h('span', { class: 'sh-none' }, '찰칵을 누르면 여기에 컷이 쌓여요'));
@@ -1860,6 +1875,14 @@ function shootLoop() {
   const ctx = EL.ctx; ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.shadowColor = 'transparent';
   ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
   const fr = sc().frames, at = capAt();
+  if (V.pv && fr.length) {
+    const i = Math.floor((performance.now() - V.pv.t0) / 1000 * P.fps) % fr.length;
+    drawCover(ctx, fr[i].img);
+    if (i !== V.pv.idx) { V.pv.idx = i; const th = EL.film.querySelectorAll('.sh-fr'); th.forEach((e, k) => e.classList.toggle('now', k === i)); const el = th[i]; if (el) el.parentElement.scrollLeft = el.offsetLeft - el.parentElement.clientWidth / 2 + el.offsetWidth / 2; }
+    ctx.fillStyle = '#000a'; ctx.beginPath(); ctx.roundRect(14, 14, 150, 40, 10); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.font = '900 24px system-ui, sans-serif'; ctx.textBaseline = 'middle'; ctx.fillText(`${i + 1} / ${fr.length}`, 28, 35);
+    return;
+  }
   if (Cam.video && Cam.stream && Cam.video.videoWidth) drawCam(ctx, Cam.video);
   else if (fr[at - 1]) drawCover(ctx, fr[at - 1].img);
   if (V.onion && Cam.stream) {
@@ -1871,6 +1894,7 @@ function shootLoop() {
   if (V.grid) { ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 1.5; ctx.beginPath(); for (const x of [W / 3, W * 2 / 3]) { ctx.moveTo(x, 0); ctx.lineTo(x, H); } for (const y of [H / 3, H * 2 / 3]) { ctx.moveTo(0, y); ctx.lineTo(W, y); } ctx.stroke(); }
 }
 function shutter() {
+  if (V.pv) shootPvStop();
   if (V.cdT) { stopTimer(); return; }
   if (!V.timer || !Cam.stream) { capture(); return; }
   let n = V.timer;
