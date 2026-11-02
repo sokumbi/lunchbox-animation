@@ -25,7 +25,8 @@ function setFormat(id) {
 function newProject(title, o = {}) {
   return { id: uid(), storyId: 'new', synopsis: '', title, created: Date.now(), updated: Date.now(), fps: o.fps || 6, hold: 1, fmt: o.fmt || 'wide',
     scenes: [newScene('1장면')], fx: [], sfx: [], voices: [], narrs: [], script: [], scriptMode: 'new', narrText: '',
-    mix: { bgm: .5, sfx: .9, voice: 1, narr: 1 }, duck: true, fade: true, subs: true, done: {}, look: null };
+    mix: { bgm: .5, sfx: .9, voice: 1, narr: 1 }, duck: true, fade: true, subs: true, done: {}, look: null,
+    card: { on: true, design: 'sunset', font: 'jua' }, credits: { text: '', design: 'night', font: 'jua' } };
 }
 function changed() { TLc = null; if (P) { P.updated = Date.now(); histPush(); scheduleSave(); } }
 /* ---------- 되돌리기 (모든 작업 화면 공통) ---------- */
@@ -51,21 +52,24 @@ function undo() {
   if (!P.scenes.find(s => s.id === S.curScene)) S.curScene = P.scenes[P.scenes.length - 1].id;
   goStep(S.step); toast('되돌렸어요', 1100);
 }
+/* 제목 카드는 맨 앞(lead), 엔딩 크레딧은 맨 뒤(tail)에 붙어요 (p6d_extra: CARD_DUR·CREDIT_DUR) */
+const cardLead = () => (P.card && P.card.on && P.title) ? CARD_DUR : 0;
+const cardTail = () => (P.credits && P.credits.text && P.credits.text.trim()) ? CREDIT_DUR : 0;
 function TL() {
   if (TLc) return TLc;
-  const seq = [], ranges = [], map = {}; let t = 0;
+  const seq = [], ranges = [], map = {}; const lead = cardLead(), tail = cardTail(); let t = lead;
   for (const sc of P.scenes) {
     const t0 = t, end = sc.frames.length - sc.trimOut;
     for (let i = sc.trimIn; i < end; i++) { const f = sc.frames[i], d = f.hold / P.fps; seq.push({ sc, f, t0: t, t1: t + d, idx: i }); t += d; }
     const r = { sc, t0, t1: t }; ranges.push(r); map[sc.id] = r;
   }
-  return TLc = { seq, ranges, map, total: t };
+  return TLc = { seq, ranges, map, lead, tail, total: t + tail, body: t };
 }
 function absT(it) { const r = TL().map[it.sid]; return r ? r.t0 + it.off : null; }
 function setAbs(it, t) {
   const tl = TL(); t = clamp(t, 0, Math.max(0, tl.total - .05));
   let r = tl.ranges.find(r => t >= r.t0 && t < r.t1 && r.t1 > r.t0) || tl.ranges.filter(r => r.t1 > r.t0).pop() || tl.ranges[0];
-  if (!r) return; it.sid = r.sc.id; it.off = t - r.t0;
+  if (!r) return; it.sid = r.sc.id; it.off = clamp(t - r.t0, 0, Math.max(0, r.t1 - r.t0 - .05));
 }
 function segAt(t) {
   const s = TL().seq; let lo = 0, hi = s.length - 1;
@@ -89,7 +93,9 @@ function renderAt(ctx, t, o = {}) {
   ctx.save(); paperShadow(ctx, false);
   ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
   const seg = segAt(t);
-  if (seg) drawCover(ctx, seg.f.img);
+  if (tl.lead && t < tl.lead) drawTitleCard(ctx, P.card, P.title, t / tl.lead);
+  else if (tl.tail && t >= tl.body) drawCredits(ctx, P.credits, (t - tl.body) / tl.tail);
+  else if (seg) drawCover(ctx, seg.f.img);
   else { ctx.fillStyle = '#9ba7d2'; ctx.font = '28px Jua, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('아직 촬영한 장면이 없어요', W / 2, H / 2); }
   if (P.fade && tl.total > 0 && o.playing) {
     let a = 0; const F = .3;
@@ -194,7 +200,7 @@ function scheduleSave() { clearTimeout(saveT); const el = $('#savedState'); if (
 function projectDump() {
   return {
     id: P.id, title: P.title, storyId: P.storyId, created: P.created, updated: P.updated, fps: P.fps, hold: P.hold,
-    synopsis: P.synopsis || '', lastStep: P.lastStep || 'shoot', scriptMode: P.scriptMode, script: P.script, narrText: P.narrText, mix: P.mix, look: P.look || null, duck: P.duck, fade: P.fade, subs: P.subs, done: P.done, fmt: P.fmt || 'wide',
+    synopsis: P.synopsis || '', lastStep: P.lastStep || 'shoot', scriptMode: P.scriptMode, script: P.script, narrText: P.narrText, mix: P.mix, look: P.look || null, duck: P.duck, fade: P.fade, subs: P.subs, done: P.done, fmt: P.fmt || 'wide', card: P.card || null, credits: P.credits || null,
     fx: P.fx, sfx: P.sfx,
     scenes: P.scenes.map(s => ({ id: s.id, name: s.name, desc: s.desc || '', trimIn: s.trimIn, trimOut: s.trimOut, bgm: s.bgm, stage: s.stage, sketch: s.sketch ? s.sketch.blob : null, frames: s.frames.map(f => ({ id: f.id, hold: f.hold, blob: f.blob })) })),
     voices: P.voices.map(v => ({ ...v, buf: undefined })), narrs: P.narrs.map(v => ({ ...v, buf: undefined })),
@@ -253,6 +259,7 @@ async function openProject(d) {
   p.scenes = d.scenes.map(s => ({ ...s, sketch: s.sketch ? { blob: s.sketch, ...loadImg(s.sketch) } : null, frames: s.frames.map(f => ({ ...f, ...loadImg(f.blob) })) }));
   p.voices = []; p.narrs = [];
   for (const k of ['voices', 'narrs']) for (const v of d[k] || []) { try { p[k].push({ ...v, buf: await decodeBlob(v.blob) }); } catch (e) { } }
+  p.card = p.card || { on: false, design: 'sunset', font: 'jua' }; p.credits = p.credits || { text: '', design: 'night', font: 'jua' };   // 예전 작품: 제목 카드 꺼 둠
   delete p.thumb; p.fmt = 'wide'; P = p; TLc = null; setFormat('wide'); return p; // 비율은 항상 16:9
 }
 

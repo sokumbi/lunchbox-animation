@@ -40,7 +40,7 @@ function setFps(n) { const k = P.fps / n; for (const key of ['fx', 'sfx', 'voice
 function goStep() { if (V.screen === 'shoot') shootPaint(); else if (V.screen === 'deco') decoPaint(); }
 function leaveStep() { closeScreen(); }
 function closeScreen() {
-  if (!V.screen) return;
+  if (!V.screen) return; shootPvStop && V.pv && shootPvStop();
   cancelAnimationFrame(V.raf); clearTimeout(V.cdT); V.cdT = null; V.pv = false; V.retake = null; V.ins = null;
   if (V.rec && V.rec.active) V.rec.stop(); Mic.release(); Cam.stop();
   Player.pause(); Player.onState = null; if (P) Player.attach(null); AE.stopPreview();
@@ -58,14 +58,15 @@ async function openGallery(o = {}) {
   const root = $('#library'); root.className = 'screen gal-screen'; root.innerHTML = '';
   const up = h('input', { type: 'file', accept: '.json,application/json', hidden: true, onchange: async e => { const f = e.target.files[0]; if (!f) return; const d = await importProjectFile(f); if (d) { toast(`“${d.title}”을(를) 불러왔어요`); openGallery(); } } });
   const tab = (ic, label, id, short = label) => h('button', { class: 'g-rb' + (galTab === id ? ' on' : ''), type: 'button', 'aria-label': label, html: icon(ic) + `<span>${short}</span>`, onclick: () => { galTab = id; openGallery(); } });
-  const rail = h('nav', { class: 'g-rail' }, tab('folder', '내 작품', 'movies'), tab('trash', '휴지통', 'trash'), h('span', { class: 'g-sp' }),
+  const rail = h('nav', { class: 'g-rail' }, tab('folder', '내 작품', 'movies'), tab('book', '전래동화', 'tales'), tab('trash', '휴지통', 'trash'), h('span', { class: 'g-sp' }),
     h('button', { class: 'g-rb', type: 'button', 'aria-label': '작품 파일 불러오기', html: icon('upload') + '<span>불러오기</span>', onclick: () => up.click() }), up);
   const { list, trash } = await loadWorks();
-  const isTrash = galTab === 'trash';
+  const isTrash = galTab === 'trash', isTales = galTab === 'tales';
   const grid = h('div', { class: 'g-grid list' });
-  if (!isTrash) grid.append(h('button', { class: 'g-card new', type: 'button', 'aria-label': '새 작품', onclick: e => newWork(e.currentTarget) }, h('span', { class: 'th', html: icon('plus') }), h('span', { class: 'tt' }, h('b', {}, '새 작품'))));
+  if (isTales) taleGrid(grid);
+  else if (!isTrash) grid.append(h('button', { class: 'g-card new', type: 'button', 'aria-label': '새 작품', onclick: e => newWork(e.currentTarget) }, h('span', { class: 'th', html: icon('plus') }), h('span', { class: 'tt' }, h('b', {}, '새 작품'))));
   else if (!trash.length) grid.append(h('p', { class: 'g-none' }, `지운 작품은 ${TRASH_DAYS}일 동안 여기 있다가 저절로 없어져요.`));
-  for (const d of isTrash ? trash : list) {
+  for (const d of isTales ? [] : isTrash ? trash : list) {
     const th = h('span', { class: 'th' + (d.thumb ? '' : ' empty'), html: d.thumb ? '' : icon('film') });
     if (d.thumb) th.style.backgroundImage = `url(${thumbURL(d)})`;
     const sub = isTrash ? `${Math.max(1, Math.ceil((d.trashed + TRASH_DAYS * 864e5 - Date.now()) / 864e5))}일 뒤에 없어져요` : `${agoText(d.updated || d.created)} · ${mmss(workSec(d))}`;
@@ -79,7 +80,7 @@ async function openGallery(o = {}) {
     card.style.setProperty('--i', Math.min(grid.children.length, 14));
     grid.append(card);
   }
-  root.append(rail, h('div', { class: 'g-main' }, h('div', { class: 'g-top' }, h('b', { class: 'g-h' }, isTrash ? '휴지통' : BRAND.app)), grid));
+  root.append(rail, h('div', { class: 'g-main' }, h('div', { class: 'g-top' }, h('b', { class: 'g-h' }, isTales ? '전래동화' : isTrash ? '휴지통' : BRAND.app)), grid));
   if (o.focus) { const c = $(`.g-card[data-id="${o.focus}"]`, grid); if (c) c.scrollIntoView({ block: 'nearest' }); }
   return grid;
 }
@@ -87,7 +88,7 @@ async function newWork(card) {
   const { list } = await loadWorks();
   let n = list.length + 1, title = `작품 ${n}`; while (list.some(d => d.title === title)) title = `작품 ${++n}`;
   P = newProject(title); setFormat(P.fmt); TLc = null; await saveProject();
-  await zoomFrom(card, ''); openShoot(); zoomDone();
+  await zoomFrom(card, ''); openCard('title'); zoomDone();
 }
 async function openWork(d, card) {
   const pr = openProject(d);
@@ -190,7 +191,7 @@ function openShoot() {
   const flash = h('div', { class: 'flash' }), cd = h('div', { class: 'countdown', hidden: true }), nocam = h('div', { class: 'nocam', hidden: true });
   const banner = h('div', { class: 'sh-banner', hidden: true });
   const film = h('div', { class: 'sh-film' });
-  const mon = h('div', { class: 'sh-mon' }, cv, flash, cd, nocam, banner, film);
+  const mon = h('div', { class: 'sh-mon', onpointerdown: e => { if (EL.pop && !e.target.closest('.sh-fr')) cutPopClose(); } }, cv, flash, cd, nocam, banner, film);
   const onionB = rb('onion', '겹쳐보기', () => { V.onion = !V.onion; onionB.classList.toggle('on', V.onion); }, V.onion ? 'on' : '');
   const gridB = rb('grid', '격자', () => { V.grid = !V.grid; gridB.classList.toggle('on', V.grid); }, V.grid ? 'on' : '');
   const playB = rb('play', '재생', shootPv);
@@ -200,16 +201,17 @@ function openShoot() {
   const doneB = h('button', { class: 'sh-done', type: 'button', 'aria-label': '다 찍었어요', onclick: () => { if (!nFrames()) { toast('먼저 찰칵을 눌러 한 컷이라도 찍어 보세요', 2200); return; } openDeco(); }, html: icon('sparkle') + '<span>다 찍었어요<b>꾸미기 ›</b></span>' });
   const right = h('div', { class: 'sh-r rail' }, rb('switchCam', '카메라', async () => { if (Cam.failed) { camStart(); return; } if (!(await Cam.next())) toast('바꿀 수 있는 다른 카메라가 없어요'); }), timerB, shutterB, doneB);
   body.append(h('div', { class: 'sh' }, left, h('div', { class: 'sh-c' }, mon), right));
-  EL = { cv, ctx: cv.getContext('2d'), flash, cd, nocam, banner, film, timerB, shutterB, playB };
+  EL = { cv, ctx: cv.getContext('2d'), flash, cd, nocam, banner, film, timerB, shutterB, playB, mon, pop: null };
   addEventListener('keydown', onKey);
   timerPaint(); shootPaint(); camStart();
   cancelAnimationFrame(V.raf); shootLoop();
+  hintOnce('shoot', '촬영', [['cam', '빨간 찰칵을 누르면 한 컷이 찍혀요'], ['onion', '조금씩 움직이고 또 찍어요. 앞 컷이 비쳐 보여요'], ['play', '재생으로 잘 움직이는지 봐요'], ['image', '아래 컷을 누르면 다시 찍기·지우기']]);
 }
 /* 재생: 찍은 컷을 카메라 자리에서 무한 반복으로 보여 줘요. 다시 누르거나 찰칵을 누르면 멈춰요 */
 function shootPv() {
   if (V.pv) { shootPvStop(); return; }
   if (!nFrames()) { toast('먼저 찰칵을 눌러 한 컷이라도 찍어 보세요', 2200); return; }
-  stopTimer(); V.pv = { t0: performance.now(), idx: -1 };
+  stopTimer(); cutPopClose(); V.pv = { t0: performance.now(), idx: -1 };
   EL.playB.classList.add('on'); EL.playB.innerHTML = icon('pause') + '<span>멈춤</span>'; EL.banner.hidden = true;
 }
 function shootPvStop() {
@@ -229,7 +231,7 @@ function shootPaint() {
   const list = h('div', { class: 'sh-list list' });
   fr.forEach((f, i) => {
     if (V.ins === i) list.append(h('i', { class: 'sh-ins' }));
-    list.append(h('button', { class: 'sh-fr' + (V.retake === i ? ' retake' : ''), type: 'button', 'aria-label': `${i + 1}번 컷`, onclick: () => { shootPvStop(); cutPanel(i); } }, h('img', { src: f.url, alt: '' }), h('b', {}, String(i + 1))));
+    list.append(h('button', { class: 'sh-fr' + (V.retake === i ? ' retake' : '') + (V.sel === i ? ' sel' : ''), type: 'button', 'aria-label': `${i + 1}번 컷`, onclick: e => { e.stopPropagation(); cutPop(i); } }, h('img', { src: f.url, alt: '' }), h('b', {}, String(i + 1))));
   });
   if (V.ins === fr.length) list.append(h('i', { class: 'sh-ins' }));
   if (!fr.length) list.append(h('span', { class: 'sh-none' }, '찰칵을 누르면 여기에 컷이 쌓여요'));
@@ -275,7 +277,7 @@ function shootLoop() {
   if (V.grid) { ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 1.5; ctx.beginPath(); for (const x of [W / 3, W * 2 / 3]) { ctx.moveTo(x, 0); ctx.lineTo(x, H); } for (const y of [H / 3, H * 2 / 3]) { ctx.moveTo(0, y); ctx.lineTo(W, y); } ctx.stroke(); }
 }
 function shutter() {
-  if (V.pv) shootPvStop();
+  if (V.pv) shootPvStop(); cutPopClose();
   if (V.cdT) { stopTimer(); return; }
   if (!V.timer || !Cam.stream) { capture(); return; }
   let n = V.timer;
@@ -305,22 +307,25 @@ function addFrame(blob) {
 }
 async function importPhotos() { const f = await pickImages({ multiple: true }); for (const x of f) { const b = await fileToFrameBlob(x); b && addFrame(b); } if (f.length) toast(`사진 ${f.length}장을 넣었어요`); }
 /* 컷 창: 큰 그림 + 다시 찍기 · 여기 뒤에 찍기 · 지우기 */
-function cutPanel(i) {
+/* 컷 메뉴: 필름의 컷을 누르면 그 위에 작게 다시 찍기 · 뒤에 찍기 · 지우기. 같은 컷을 다시 누르면 닫혀요 */
+function cutPop(i) {
   const fr = sc().frames; if (!fr[i]) return;
-  modal((b, m) => {
-    const img = h('img', { class: 'cut-img', src: fr[i].url, alt: `${i + 1}번 컷` });
-    const nav = d => { m.close(); cutPanel(clamp(i + d, 0, fr.length - 1)); };
-    const act = (ic, label, fn, cls = '') => h('button', { class: 'cut-b ' + cls, type: 'button', onclick: fn, html: icon(ic) + `<span>${label}</span>` });
-    b.append(h('div', { class: 'cut' },
-      h('div', { class: 'cut-pic' }, h('button', { class: 'cut-nav', type: 'button', 'aria-label': '앞 컷', disabled: i === 0 || null, html: icon('back'), onclick: () => nav(-1) }), img,
-        h('button', { class: 'cut-nav', type: 'button', 'aria-label': '뒤 컷', disabled: i === fr.length - 1 || null, html: icon('next'), onclick: () => nav(1) })),
-      h('div', { class: 'cut-acts' }, h('b', { class: 'cut-t' }, `${i + 1}번 컷 / ${fr.length}`),
-        act('replace', '다시 찍기', () => { m.close(); V.retake = i; V.ins = null; shootPaint(); toast(`${i + 1}번 컷을 다시 찍어요. 찰칵을 누르세요`, 2200); }),
-        act('insert', '여기 뒤에 찍기', () => { m.close(); V.ins = i + 1; V.retake = null; shootPaint(); }),
-        act('trash', '지우기', () => { m.close(); delFrames(i, 1); if (V.retake === i) V.retake = null; if (V.ins != null && V.ins > i) V.ins--; changed(); shootPaint(); toast('컷을 지웠어요. 되돌리기로 살릴 수 있어요', 1800); }, 'red'),
-        h('button', { class: 'btn', type: 'button', onclick: m.close }, '닫기'))));
-  }, { wide: true });
+  if (V.sel === i) { cutPopClose(); return; }
+  cutPopClose(); V.sel = i; shootPvStop();
+  const th = EL.film.querySelectorAll('.sh-fr')[i]; if (!th) return; th.classList.add('sel');
+  const act = (ic, label, fn, cls = '') => h('button', { class: cls, type: 'button', 'aria-label': label, onclick: e => { e.stopPropagation(); fn(); }, html: icon(ic) + `<span>${label}</span>` });
+  const pop = h('div', { class: 'sh-pop', onpointerdown: e => e.stopPropagation() },
+    act('replace', '다시 찍기', () => { cutPopClose(); V.retake = i; V.ins = null; shootPaint(); toast(`${i + 1}번 컷을 다시 찍어요. 찰칵을 누르세요`, 2000); }),
+    act('insert', '뒤에 찍기', () => { cutPopClose(); V.ins = i + 1; V.retake = null; shootPaint(); }),
+    act('trash', '지우기', () => { cutPopClose(); delFrames(i, 1); if (V.retake === i) V.retake = null; if (V.ins != null && V.ins > i) V.ins--; changed(); shootPaint(); toast('컷을 지웠어요. 되돌리기로 살릴 수 있어요', 1800); }, 'red'),
+    h('i', { class: 'sh-pop-tip' }));
+  EL.mon.append(pop); EL.pop = pop;
+  const mr = EL.mon.getBoundingClientRect(), tr = th.getBoundingClientRect(), half = pop.offsetWidth / 2 + 6;
+  const cx = clamp(tr.left + tr.width / 2 - mr.left, half, mr.width - half);
+  pop.style.left = cx + 'px'; pop.style.bottom = (mr.bottom - tr.top + 8) + 'px';
+  pop.lastChild.style.left = clamp(tr.left + tr.width / 2 - mr.left - (cx - pop.offsetWidth / 2), 14, pop.offsetWidth - 14) + 'px';
 }
+function cutPopClose() { V.sel = null; if (EL.pop) { EL.pop.remove(); EL.pop = null; } if (EL.film) EL.film.querySelectorAll('.sh-fr.sel').forEach(e => e.classList.remove('sel')); }
 
 /* =========================================================
    3. 꾸미기 · 보여주기 — 영상 + 말하기 · 소리 · 배경음악 · 내보내기
@@ -345,6 +350,7 @@ function openDeco() {
   Player.t = 0; Player.draw();
   addEventListener('keydown', onKey);
   decoPaint(); requestAnimationFrame(tlPaint);
+  hintOnce('deco', '꾸미기', [['play', '영상을 눌러 보고, 타임라인을 끌어 자리를 골라요'], ['mic', '말하기로 그 자리부터 녹음해요'], ['bell', '소리·배경음악을 넣어요'], ['share', '내보내기에서 크레딧을 쓰고 영상 파일을 만들어요']]);
 }
 function decoPaint() { if (V.screen !== 'deco') return; Player.draw(); decoMarks(); decoTool(); }
 /* 타임라인: 컷 썸네일 줄 + 말·소리·배경음악 줄. 누르거나 끌면 그 자리로 가고, 넣은 것을 누르면 그 자리로 가며 그 도구가 열려요 */
@@ -373,7 +379,10 @@ function tlPaint() {
     tl.film.width = Math.round(r.width * dpr); tl.film.height = Math.round(r.height * dpr);
     const c = tl.film.getContext('2d'), hh = tl.film.height, ww = hh * W / H, n = Math.max(1, Math.ceil(tl.film.width / ww));
     c.fillStyle = '#2c2c2e'; c.fillRect(0, 0, tl.film.width, hh);
-    if (TL().total) for (let i = 0; i < n; i++) { const sg = segAt((i + .5) / n * T), img = sg && sg.f.img; if (!img) continue; c.save(); c.beginPath(); c.rect(i * ww, 0, ww, hh); c.clip(); c.translate(i * ww, 0); c.scale(ww / W, hh / H); drawCover(c, img); c.restore(); }
+    const tlx = TL();
+    if (tlx.total) for (let i = 0; i < n; i++) { const tt = (i + .5) / n * T; c.save(); c.beginPath(); c.rect(i * ww, 0, ww, hh); c.clip(); c.translate(i * ww, 0); c.scale(ww / W, hh / H);
+      if (tlx.lead && tt < tlx.lead) drawTitleCard(c, P.card, P.title, 1); else if (tlx.tail && tt >= tlx.body) drawCredits(c, P.credits, .5); else { const sg = segAt(tt), img = sg && sg.f.img; if (img) drawCover(c, img); }
+      c.restore(); }
     c.fillStyle = '#0006'; for (let i = 1; i < n; i++) c.fillRect(Math.round(i * ww) - 1, 0, 1, hh);
   }
   for (const k in tl.rows) tl.rows[k].innerHTML = '';
@@ -397,7 +406,7 @@ function paneVoice(pane) {
   const recB = h('button', { class: 'rec-big' + (on ? ' run' : ''), type: 'button', 'aria-label': on ? '녹음 멈추기' : '녹음', html: icon(on ? 'stop' : 'mic') + `<span>${on ? '멈추기' : '녹음'}</span>`, onclick: async () => {
     if (V.rec && V.rec.active) { V.rec.stop(); return; }
     if (!TL().total) { toast('먼저 촬영에서 컷을 찍어요'); return; }
-    if (Player.t >= TL().total - .05) Player.seek(0);
+    if (Player.t >= TL().body - .05) Player.seek(TL().lead); if (Player.t < TL().lead) Player.seek(TL().lead);
     V.rec = recordFlow({ kind: 'narrs', wrap: EL.stage, line: null, onState: s => { EL.sub.hidden = s !== 'rec'; if (s === 'rec') EL.sub.textContent = '● 말하는 중… 다 말하면 멈추기를 눌러요'; decoTool(); }, onDone: () => { decoMarks(); decoTool(); toast('말을 넣었어요!', 1400); } });
     await V.rec.start();
   } });
@@ -412,9 +421,11 @@ function paneVoice(pane) {
   if (Mic.failed) pane.append(h('button', { class: 'btn sm', type: 'button', onclick: () => uploadAudio('narrs', null, () => { decoMarks(); decoTool(); }) }, '소리 파일 넣기'));
 }
 /* 소리(효과음): 누르면 지금 자리에 들어가고 바로 들려요. 같은 자리에 이미 있으면 빼요 */
+/* 제목 카드·크레딧 위에 있으면 컷 구간 안으로 옮겨요 */
+function bodyT(t) { const tl = TL(); if (tl.lead && t < tl.lead) return tl.lead; if (tl.tail && t >= tl.body) return Math.max(tl.lead, tl.body - .05); return t; }
 function paneSfx(pane) {
   AE.init(); Promise.all(SFX.map(s => AE.getSfx(s.id))).catch(() => { });
-  const t = Player.t, here = s => P.sfx.find(x => x.snd === s.id && Math.abs(absT(x) - t) < .35);
+  const t = bodyT(Player.t), here = s => P.sfx.find(x => x.snd === s.id && Math.abs(absT(x) - t) < .35);
   const grid = h('div', { class: 'tiles' });
   for (const s of SFX) grid.append(tile(SFX_IC[s.id] || 'speaker', s.name, !!here(s), () => {
     if (!TL().total) { toast('먼저 촬영에서 컷을 찍어요'); return; }
@@ -440,6 +451,9 @@ function paneShare(pane) {
   const big = (ic, label, sub, onclick, cls = '') => h('button', { class: 'share-b ' + cls, type: 'button', onclick, html: `${icon(ic)}<b>${label}</b><small>${sub}</small>` });
   pane.append(h('label', { class: 'dc-title' }, h('span', {}, '작품 이름'), h('input', { class: 'input', value: P.title, maxlength: 40, 'aria-label': '작품 이름', oninput: e => { P.title = e.target.value; changed(); } })),
     h('p', { class: 'dc-tip' }, `컷 ${nFrames()} · ${fmt(TL().total)}초 · 말 ${P.narrs.length} · 소리 ${P.sfx.length}${sc().bgm ? ' · 음악' : ''}`),
+    h('div', { class: 'cp-two' },
+      h('button', { class: 'cp-mini', type: 'button', onclick: () => openCard('title'), html: icon('edit') + `<span>제목 카드<small>${P.card && P.card.on ? designOf(P.card.design).name + ' · ' + fontOf(P.card.font).name : '없음'}</small></span>` }),
+      h('button', { class: 'cp-mini', type: 'button', onclick: () => openCard('credits'), html: icon('film') + `<span>엔딩 크레딧<small>${P.credits && P.credits.text.trim() ? designOf(P.credits.design).name + ' · ' + fontOf(P.credits.font).name : '없음'}</small></span>` })),
     big('download', '영상 파일 만들기', '저장하거나 친구에게 보내요', () => { if (!TL().total) { toast('먼저 촬영에서 컷을 찍어요'); return; } Player.pause(); exportVideo(); }, 'or'),
     big('save', '작품 파일', '다른 폰·태블릿으로 옮겨요', async () => { await saveProject(); const d = await DB.get(P.id).catch(() => null); d ? exportProjectFile(d) : toast('먼저 저장이 되어야 해요'); }));
 }
