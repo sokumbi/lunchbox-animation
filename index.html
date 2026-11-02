@@ -565,14 +565,26 @@ body,#app,.screen{background:#000;color:#fff}
 .dc-play.hide{opacity:0;pointer-events:none}
 .dc-mon .guide{left:4%;right:4%;top:4%;bottom:auto;background:#FF3B30d0;text-align:center;font-size:clamp(11px,3.6cqh,14px)}
 .dc-mon .count{font-size:clamp(60px,36cqh,160px)}
-.dc-bar{flex:none;display:flex;align-items:center;gap:6px;padding:0 4px}
-.dc-track{flex:1;position:relative;height:clamp(26px,9cqh,36px);display:flex;align-items:center}
-.dc-rng{width:100%;margin:0;accent-color:var(--acc);height:100%;position:relative;z-index:1;background:transparent}
-.dc-marks{position:absolute;left:8px;right:8px;top:50%;height:10px;transform:translateY(-50%);pointer-events:none;z-index:0}
-.dc-marks i{position:absolute;top:0;height:100%;border-radius:3px;min-width:6px;transform:translateX(-50%)}
-.dc-marks i.sfx{width:6px;background:var(--acc);box-shadow:0 0 6px var(--acc)}
-.dc-marks i.narr{transform:none;background:#2F9C9A;opacity:.85;margin-left:-3px}
-.dc-time{flex:none;font-size:clamp(11px,3.4cqh,13px);font-weight:700;color:#d1d1d6;font-variant-numeric:tabular-nums;min-width:66px;text-align:right}
+/* 타임라인: 왼쪽 이름 칸 + 오른쪽(컷 썸네일 줄 · 말 · 소리 · 음악) */
+.tml{flex:none;display:grid;grid-template-columns:auto minmax(0,1fr);gap:0 6px;padding:0 6px 0 2px;height:clamp(84px,32cqh,128px);--tmlr:minmax(0,2.1fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)}
+.tml-labels,.tml-body{display:grid;grid-template-rows:var(--tmlr);gap:3px;min-height:0}
+.tml-body{position:relative;touch-action:none;cursor:pointer}
+.tml-time{align-self:center;justify-self:end;font-size:clamp(10px,3.2cqh,12px);font-weight:700;color:#8e8e93;font-variant-numeric:tabular-nums;padding-right:2px}
+.tml-lab{border:0;background:none;font:inherit;display:flex;align-items:center;gap:3px;padding:0 2px;cursor:pointer;font-size:clamp(10px,3.2cqh,12px);font-weight:800;min-height:0}
+.tml-lab svg{width:clamp(13px,4.4cqh,16px);height:clamp(13px,4.4cqh,16px);flex:none}
+.tml-film{width:100%;height:100%;display:block;border-radius:6px;background:var(--panel2);min-height:0}
+.tml-row{position:relative;background:var(--panel);border-radius:6px;min-height:0;overflow:hidden}
+.tml-empty{position:absolute;inset:0;display:flex;align-items:center;padding:0 8px;font-size:clamp(9px,3cqh,11px);color:#6e6e73;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
+.tml-it{position:absolute;top:1px;bottom:1px;border:0;border-radius:999px;color:#fff;font:inherit;font-size:clamp(9px,3cqh,11px);font-weight:800;display:flex;align-items:center;gap:3px;padding:0 7px 0 4px;cursor:pointer;white-space:nowrap;overflow:hidden;box-sizing:border-box;min-width:20px;transition:transform .2s var(--spring)}
+.tml-it svg{width:clamp(11px,3.6cqh,14px);height:clamp(11px,3.6cqh,14px);flex:none}
+.tml-it:active{transform:scale(.94)}
+.tml-row.narr .tml-it{background:#2F9C9A}
+.tml-row.sfx .tml-it{background:var(--acc)}
+.tml-row.bgm .tml-it{background:#4E9A63;justify-content:center}
+.tml-head{position:absolute;top:0;bottom:0;width:2px;background:#fff;transform:translateX(-1px);pointer-events:none;z-index:4;box-shadow:0 0 4px #000}
+.tml-head.l b{transform:translateX(0)}
+.tml-head.r b{transform:translateX(-100%)}
+.tml-head b{position:absolute;top:2px;left:50%;transform:translateX(-50%);transition:transform .15s;background:#000d;color:#fff;font-size:clamp(9px,3cqh,11px);font-weight:800;padding:1px 5px;border-radius:6px;font-variant-numeric:tabular-nums;white-space:nowrap}
 .dc-speed{display:flex;flex-direction:column;align-items:center;gap:3px;width:calc(100% - 6px)}
 .dc-speed span{font-size:clamp(9.5px,3cqh,11.5px);font-weight:700;color:#8e8e93}
 .dc-speed button{width:100%;border:0;border-radius:9px;background:var(--panel2);color:#d1d1d6;font:inherit;font-size:clamp(10.5px,3.3cqh,13px);font-weight:800;padding:clamp(3px,1.3cqh,6px) 2px;cursor:pointer}
@@ -613,7 +625,8 @@ body,#app,.screen{background:#000;color:#fff}
 .clip button svg{width:15px;height:15px}
 .clip button.red{color:#ff6b5e}
 .clip button:disabled{opacity:.35}
-.share-b{flex:none;border:0;border-radius:14px;background:var(--panel2);color:#fff;display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:10px;align-items:center;padding:clamp(6px,2.4cqh,10px) 12px;font:inherit;cursor:pointer;text-align:left;transition:transform .2s var(--spring)}
+.dc-pane.share{overflow:hidden}
+.share-b{flex:1 1 0;min-height:0;border:0;border-radius:14px;background:var(--panel2);color:#fff;display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:10px;align-items:center;align-content:center;padding:4px 12px;font:inherit;cursor:pointer;text-align:left;transition:transform .2s var(--spring)}
 .share-b svg{grid-row:1/3;width:clamp(24px,8cqh,32px);height:clamp(24px,8cqh,32px);color:var(--acc)}
 .share-b b{font-size:clamp(13px,4.2cqh,16px);font-weight:900}
 .share-b small{font-size:clamp(10px,3.2cqh,12px);color:#a1a1a6}
@@ -707,6 +720,7 @@ body,#app,.screen{background:#000;color:#fff}
   .dc-c{padding:0 8px}
   .dc-mon{flex:none;height:auto;container-type:inline-size}
   .dc-mon canvas{width:100%}
+  .tml{height:clamp(84px,15cqh,120px);padding:0 8px}
   .dc-r{padding:4px 8px calc(8px + env(safe-area-inset-bottom))}
   .cut{grid-template-columns:minmax(0,1fr)}
   .cut-acts{flex-direction:row;flex-wrap:wrap}
@@ -1914,29 +1928,60 @@ function openDeco() {
   const big = h('button', { class: 'dc-play', type: 'button', 'aria-label': '재생', html: icon('play'), onclick: () => Player.toggle() });
   const sub = h('div', { class: 'guide', hidden: true });
   const stage = h('div', { class: 'dc-mon', onclick: e => { if (e.target === cv) Player.toggle(); } }, cv, big, sub);
-  const rng = h('input', { class: 'dc-rng', type: 'range', min: 0, max: 1, step: .001, value: 0, 'aria-label': '위치', oninput: e => { Player.seek(+e.target.value * TL().total); decoTool(); } });
-  const marks = h('div', { class: 'dc-marks' }), time = h('span', { class: 'dc-time' }, '0:00');
-  const bar = h('div', { class: 'dc-bar' }, h('button', { class: 'ri sm', type: 'button', 'aria-label': '처음으로', html: icon('rewind'), onclick: () => { Player.seek(0); decoTool(); } }), h('div', { class: 'dc-track' }, marks, rng), time);
+  const tl = tlBuild();
   const speed = h('div', { class: 'dc-speed' }, h('span', {}, '빠르기'), ...SPEEDS.map(([n, l]) => h('button', { type: 'button', class: P.fps === n ? 'on' : '', onclick: e => { Player.pause(); setFps(n); changed(); [...e.target.parentElement.querySelectorAll('button')].forEach(b => b.classList.toggle('on', b === e.target)); Player.seek(Math.min(Player.t, TL().total)); decoMarks(); } }, l)));
   const left = h('div', { class: 'dc-l rail' }, rb('back', '내 작품', toGallery), rb('cam', '촬영', openShoot, 'cam'), rb('undo', '되돌리기', undo), speed);
   const tabs = h('div', { class: 'dc-tabs' }, ...TOOLS.map(([k, ic, l]) => h('button', { type: 'button', class: k === V.tool ? 'on' : '', 'aria-label': l, html: icon(ic) + `<span>${l}</span>`, onclick: () => { if (V.rec && V.rec.active) V.rec.stop(); AE.stopPreview(); V.tool = k; decoTool(); } })));
   const pane = h('div', { class: 'dc-pane list' });
-  body.append(h('div', { class: 'dc' }, left, h('div', { class: 'dc-c' }, stage, bar), h('div', { class: 'dc-r' }, tabs, pane)));
-  EL = { cv, big, sub, rng, marks, time, tabs, pane, stage };
-  Player.attach(cv, { onTick: t => { if (!EL.rng) return; const T = TL().total; EL.rng.value = T ? t / T : 0; EL.time.textContent = fmt(t) + ' / ' + fmt(T); } });
+  body.append(h('div', { class: 'dc' }, left, h('div', { class: 'dc-c' }, stage, tl.wrap), h('div', { class: 'dc-r' }, tabs, pane)));
+  EL = { cv, big, sub, tl, tabs, pane, stage };
+  Player.attach(cv, { onTick: t => { if (!EL.tl) return; const T = TL().total; const pc = T ? t / T * 100 : 0; EL.tl.head.style.left = pc + '%'; EL.tl.head.classList.toggle('l', pc < 8); EL.tl.head.classList.toggle('r', pc > 92); EL.tl.head.firstChild.textContent = fmt(t); EL.tl.time.textContent = fmt(T); } });
   Player.onState = on => { EL.big.classList.toggle('hide', on); EL.big.innerHTML = icon(on ? 'pause' : 'play'); if (!on) decoTool(); };
   Player.t = 0; Player.draw();
   addEventListener('keydown', onKey);
-  decoPaint();
+  decoPaint(); requestAnimationFrame(tlPaint);
 }
 function decoPaint() { if (V.screen !== 'deco') return; Player.draw(); decoMarks(); decoTool(); }
-function decoMarks() {
-  const m = EL.marks; if (!m) return; m.innerHTML = ''; const T = TL().total || 1;
-  for (const s of P.sfx) { const t = absT(s); if (t != null) m.append(h('i', { class: 'sfx', style: { left: (t / T * 100) + '%' } })); }
-  for (const n of P.narrs) { const t = absT(n); if (t != null) m.append(h('i', { class: 'narr', style: { left: (t / T * 100) + '%', width: (Math.min(n.dur, T - t) / T * 100) + '%' } })); }
+/* 타임라인: 컷 썸네일 줄 + 말·소리·배경음악 줄. 누르거나 끌면 그 자리로 가고, 넣은 것을 누르면 그 자리로 가며 그 도구가 열려요 */
+const TL_ROWS = [['narr', 'mic', '말', '#2F9C9A', 'voice'], ['sfx', 'bell', '소리', '#CF5D2A', 'sfx'], ['bgm', 'music', '음악', '#4E9A63', 'bgm']];
+function tlBuild() {
+  const film = h('canvas', { class: 'tml-film' }), rows = {}, time = h('span', { class: 'tml-time' }, '0:00');
+  const labels = h('div', { class: 'tml-labels' }, time), body = h('div', { class: 'tml-body' }, film);
+  for (const [k, ic, name, col, tool] of TL_ROWS) {
+    labels.append(h('button', { type: 'button', class: 'tml-lab', style: { color: col }, 'aria-label': name, html: icon(ic) + `<span>${name}</span>`, onclick: () => { V.tool = tool; decoTool(); } }));
+    body.append(rows[k] = h('div', { class: 'tml-row ' + k }));
+  }
+  const head = h('div', { class: 'tml-head' }, h('b', {}, '0:00')); body.append(head);
+  let drag = false; const at = e => { const r = body.getBoundingClientRect(); return clamp((e.clientX - r.left) / r.width, 0, 1) * TL().total; };
+  body.addEventListener('pointerdown', e => { if (e.target.closest('.tml-it')) return; drag = true; body.setPointerCapture(e.pointerId); Player.pause(); Player.seek(at(e)); });
+  body.addEventListener('pointermove', e => { if (drag) Player.seek(at(e)); });
+  body.addEventListener('pointerup', e => { if (!drag) return; drag = false; Player.seek(at(e)); decoTool(); });
+  body.addEventListener('pointercancel', () => { drag = false; });
+  return { wrap: h('div', { class: 'tml' }, labels, body), film, rows, head, body, time };
+}
+function decoMarks() { tlPaint(); }
+function tlPaint() {
+  const tl = EL.tl; if (!tl || V.screen !== 'deco') return; const T = TL().total || 1, pct = t => (t / T * 100) + '%';
+  // 컷 썸네일 줄: 칸마다 그 시간의 컷을 그려요
+  const r = tl.film.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio || 1);
+  if (r.width && r.height) {
+    tl.film.width = Math.round(r.width * dpr); tl.film.height = Math.round(r.height * dpr);
+    const c = tl.film.getContext('2d'), hh = tl.film.height, ww = hh * W / H, n = Math.max(1, Math.ceil(tl.film.width / ww));
+    c.fillStyle = '#2c2c2e'; c.fillRect(0, 0, tl.film.width, hh);
+    if (TL().total) for (let i = 0; i < n; i++) { const sg = segAt((i + .5) / n * T), img = sg && sg.f.img; if (!img) continue; c.save(); c.beginPath(); c.rect(i * ww, 0, ww, hh); c.clip(); c.translate(i * ww, 0); c.scale(ww / W, hh / H); drawCover(c, img); c.restore(); }
+    c.fillStyle = '#0006'; for (let i = 1; i < n; i++) c.fillRect(Math.round(i * ww) - 1, 0, 1, hh);
+  }
+  for (const k in tl.rows) tl.rows[k].innerHTML = '';
+  const put = (k, t, w, label, ic, onclick) => tl.rows[k].append(h('button', { type: 'button', class: 'tml-it', style: { left: pct(t), width: w == null ? null : pct(Math.max(.15, Math.min(w, T - t))) }, 'aria-label': label, html: icon(ic) + (label ? `<span>${label}</span>` : ''), onclick }));
+  [...P.narrs].sort((a, b) => absT(a) - absT(b)).forEach((nr, i) => { const t = absT(nr); if (t != null) put('narr', t, nr.dur, `말 ${i + 1}`, 'mic', () => { V.tool = 'voice'; Player.seek(t); decoTool(); Player.play({ until: t + nr.dur + .2 }); }); });
+  for (const x of P.sfx) { const t = absT(x), d = SFX.find(y => y.id === x.snd); if (t != null) put('sfx', t, null, d ? d.name : '', SFX_IC[x.snd] || 'speaker', () => { V.tool = 'sfx'; Player.seek(t); decoTool(); AE.playPreview('sfx', x.snd); }); }
+  const bd = BGM.find(y => y.id === sc().bgm);
+  if (bd) put('bgm', 0, T, bd.name, 'music', () => { V.tool = 'bgm'; decoTool(); });
+  const none = { narr: '말하기에서 녹음하면 여기에 보여요', sfx: '소리를 누르면 그 자리에 들어가요', bgm: '음악 없음' };
+  for (const k in tl.rows) if (!tl.rows[k].children.length) tl.rows[k].append(h('span', { class: 'tml-empty' }, none[k]));
 }
 function decoTool() {
-  const pane = EL.pane; if (!pane) return; pane.innerHTML = '';
+  const pane = EL.pane; if (!pane) return; pane.innerHTML = ''; pane.className = 'dc-pane list' + (V.tool === 'share' ? ' share' : '');
   [...EL.tabs.children].forEach((b, i) => b.classList.toggle('on', TOOLS[i][0] === V.tool));
   ({ voice: paneVoice, sfx: paneSfx, bgm: paneBgm, share: paneShare })[V.tool](pane);
 }
@@ -1995,6 +2040,7 @@ function paneShare(pane) {
 }
 IC.more = IC.more || '<circle cx="5" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="19" cy="12" r="1.6" fill="currentColor"/>';
 IC.expand = IC.expand || '<path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/>';
+addEventListener('resize', () => setTimeout(tlPaint, 120));
 async function saveFile(blob, filename, what = '영상 파일') {
   try {
     if (window.claude && typeof window.claude.use === 'function') {

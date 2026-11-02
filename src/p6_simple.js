@@ -310,29 +310,60 @@ function openDeco() {
   const big = h('button', { class: 'dc-play', type: 'button', 'aria-label': '재생', html: icon('play'), onclick: () => Player.toggle() });
   const sub = h('div', { class: 'guide', hidden: true });
   const stage = h('div', { class: 'dc-mon', onclick: e => { if (e.target === cv) Player.toggle(); } }, cv, big, sub);
-  const rng = h('input', { class: 'dc-rng', type: 'range', min: 0, max: 1, step: .001, value: 0, 'aria-label': '위치', oninput: e => { Player.seek(+e.target.value * TL().total); decoTool(); } });
-  const marks = h('div', { class: 'dc-marks' }), time = h('span', { class: 'dc-time' }, '0:00');
-  const bar = h('div', { class: 'dc-bar' }, h('button', { class: 'ri sm', type: 'button', 'aria-label': '처음으로', html: icon('rewind'), onclick: () => { Player.seek(0); decoTool(); } }), h('div', { class: 'dc-track' }, marks, rng), time);
+  const tl = tlBuild();
   const speed = h('div', { class: 'dc-speed' }, h('span', {}, '빠르기'), ...SPEEDS.map(([n, l]) => h('button', { type: 'button', class: P.fps === n ? 'on' : '', onclick: e => { Player.pause(); setFps(n); changed(); [...e.target.parentElement.querySelectorAll('button')].forEach(b => b.classList.toggle('on', b === e.target)); Player.seek(Math.min(Player.t, TL().total)); decoMarks(); } }, l)));
   const left = h('div', { class: 'dc-l rail' }, rb('back', '내 작품', toGallery), rb('cam', '촬영', openShoot, 'cam'), rb('undo', '되돌리기', undo), speed);
   const tabs = h('div', { class: 'dc-tabs' }, ...TOOLS.map(([k, ic, l]) => h('button', { type: 'button', class: k === V.tool ? 'on' : '', 'aria-label': l, html: icon(ic) + `<span>${l}</span>`, onclick: () => { if (V.rec && V.rec.active) V.rec.stop(); AE.stopPreview(); V.tool = k; decoTool(); } })));
   const pane = h('div', { class: 'dc-pane list' });
-  body.append(h('div', { class: 'dc' }, left, h('div', { class: 'dc-c' }, stage, bar), h('div', { class: 'dc-r' }, tabs, pane)));
-  EL = { cv, big, sub, rng, marks, time, tabs, pane, stage };
-  Player.attach(cv, { onTick: t => { if (!EL.rng) return; const T = TL().total; EL.rng.value = T ? t / T : 0; EL.time.textContent = fmt(t) + ' / ' + fmt(T); } });
+  body.append(h('div', { class: 'dc' }, left, h('div', { class: 'dc-c' }, stage, tl.wrap), h('div', { class: 'dc-r' }, tabs, pane)));
+  EL = { cv, big, sub, tl, tabs, pane, stage };
+  Player.attach(cv, { onTick: t => { if (!EL.tl) return; const T = TL().total; const pc = T ? t / T * 100 : 0; EL.tl.head.style.left = pc + '%'; EL.tl.head.classList.toggle('l', pc < 8); EL.tl.head.classList.toggle('r', pc > 92); EL.tl.head.firstChild.textContent = fmt(t); EL.tl.time.textContent = fmt(T); } });
   Player.onState = on => { EL.big.classList.toggle('hide', on); EL.big.innerHTML = icon(on ? 'pause' : 'play'); if (!on) decoTool(); };
   Player.t = 0; Player.draw();
   addEventListener('keydown', onKey);
-  decoPaint();
+  decoPaint(); requestAnimationFrame(tlPaint);
 }
 function decoPaint() { if (V.screen !== 'deco') return; Player.draw(); decoMarks(); decoTool(); }
-function decoMarks() {
-  const m = EL.marks; if (!m) return; m.innerHTML = ''; const T = TL().total || 1;
-  for (const s of P.sfx) { const t = absT(s); if (t != null) m.append(h('i', { class: 'sfx', style: { left: (t / T * 100) + '%' } })); }
-  for (const n of P.narrs) { const t = absT(n); if (t != null) m.append(h('i', { class: 'narr', style: { left: (t / T * 100) + '%', width: (Math.min(n.dur, T - t) / T * 100) + '%' } })); }
+/* 타임라인: 컷 썸네일 줄 + 말·소리·배경음악 줄. 누르거나 끌면 그 자리로 가고, 넣은 것을 누르면 그 자리로 가며 그 도구가 열려요 */
+const TL_ROWS = [['narr', 'mic', '말', '#2F9C9A', 'voice'], ['sfx', 'bell', '소리', '#CF5D2A', 'sfx'], ['bgm', 'music', '음악', '#4E9A63', 'bgm']];
+function tlBuild() {
+  const film = h('canvas', { class: 'tml-film' }), rows = {}, time = h('span', { class: 'tml-time' }, '0:00');
+  const labels = h('div', { class: 'tml-labels' }, time), body = h('div', { class: 'tml-body' }, film);
+  for (const [k, ic, name, col, tool] of TL_ROWS) {
+    labels.append(h('button', { type: 'button', class: 'tml-lab', style: { color: col }, 'aria-label': name, html: icon(ic) + `<span>${name}</span>`, onclick: () => { V.tool = tool; decoTool(); } }));
+    body.append(rows[k] = h('div', { class: 'tml-row ' + k }));
+  }
+  const head = h('div', { class: 'tml-head' }, h('b', {}, '0:00')); body.append(head);
+  let drag = false; const at = e => { const r = body.getBoundingClientRect(); return clamp((e.clientX - r.left) / r.width, 0, 1) * TL().total; };
+  body.addEventListener('pointerdown', e => { if (e.target.closest('.tml-it')) return; drag = true; body.setPointerCapture(e.pointerId); Player.pause(); Player.seek(at(e)); });
+  body.addEventListener('pointermove', e => { if (drag) Player.seek(at(e)); });
+  body.addEventListener('pointerup', e => { if (!drag) return; drag = false; Player.seek(at(e)); decoTool(); });
+  body.addEventListener('pointercancel', () => { drag = false; });
+  return { wrap: h('div', { class: 'tml' }, labels, body), film, rows, head, body, time };
+}
+function decoMarks() { tlPaint(); }
+function tlPaint() {
+  const tl = EL.tl; if (!tl || V.screen !== 'deco') return; const T = TL().total || 1, pct = t => (t / T * 100) + '%';
+  // 컷 썸네일 줄: 칸마다 그 시간의 컷을 그려요
+  const r = tl.film.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio || 1);
+  if (r.width && r.height) {
+    tl.film.width = Math.round(r.width * dpr); tl.film.height = Math.round(r.height * dpr);
+    const c = tl.film.getContext('2d'), hh = tl.film.height, ww = hh * W / H, n = Math.max(1, Math.ceil(tl.film.width / ww));
+    c.fillStyle = '#2c2c2e'; c.fillRect(0, 0, tl.film.width, hh);
+    if (TL().total) for (let i = 0; i < n; i++) { const sg = segAt((i + .5) / n * T), img = sg && sg.f.img; if (!img) continue; c.save(); c.beginPath(); c.rect(i * ww, 0, ww, hh); c.clip(); c.translate(i * ww, 0); c.scale(ww / W, hh / H); drawCover(c, img); c.restore(); }
+    c.fillStyle = '#0006'; for (let i = 1; i < n; i++) c.fillRect(Math.round(i * ww) - 1, 0, 1, hh);
+  }
+  for (const k in tl.rows) tl.rows[k].innerHTML = '';
+  const put = (k, t, w, label, ic, onclick) => tl.rows[k].append(h('button', { type: 'button', class: 'tml-it', style: { left: pct(t), width: w == null ? null : pct(Math.max(.15, Math.min(w, T - t))) }, 'aria-label': label, html: icon(ic) + (label ? `<span>${label}</span>` : ''), onclick }));
+  [...P.narrs].sort((a, b) => absT(a) - absT(b)).forEach((nr, i) => { const t = absT(nr); if (t != null) put('narr', t, nr.dur, `말 ${i + 1}`, 'mic', () => { V.tool = 'voice'; Player.seek(t); decoTool(); Player.play({ until: t + nr.dur + .2 }); }); });
+  for (const x of P.sfx) { const t = absT(x), d = SFX.find(y => y.id === x.snd); if (t != null) put('sfx', t, null, d ? d.name : '', SFX_IC[x.snd] || 'speaker', () => { V.tool = 'sfx'; Player.seek(t); decoTool(); AE.playPreview('sfx', x.snd); }); }
+  const bd = BGM.find(y => y.id === sc().bgm);
+  if (bd) put('bgm', 0, T, bd.name, 'music', () => { V.tool = 'bgm'; decoTool(); });
+  const none = { narr: '말하기에서 녹음하면 여기에 보여요', sfx: '소리를 누르면 그 자리에 들어가요', bgm: '음악 없음' };
+  for (const k in tl.rows) if (!tl.rows[k].children.length) tl.rows[k].append(h('span', { class: 'tml-empty' }, none[k]));
 }
 function decoTool() {
-  const pane = EL.pane; if (!pane) return; pane.innerHTML = '';
+  const pane = EL.pane; if (!pane) return; pane.innerHTML = ''; pane.className = 'dc-pane list' + (V.tool === 'share' ? ' share' : '');
   [...EL.tabs.children].forEach((b, i) => b.classList.toggle('on', TOOLS[i][0] === V.tool));
   ({ voice: paneVoice, sfx: paneSfx, bgm: paneBgm, share: paneShare })[V.tool](pane);
 }
@@ -391,3 +422,4 @@ function paneShare(pane) {
 }
 IC.more = IC.more || '<circle cx="5" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="19" cy="12" r="1.6" fill="currentColor"/>';
 IC.expand = IC.expand || '<path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/>';
+addEventListener('resize', () => setTimeout(tlPaint, 120));
