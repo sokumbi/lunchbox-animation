@@ -3,7 +3,7 @@
    단순한 세 화면 테마 (2026-10-31) — 검은 바탕 · 크고 이름 붙은 아이콘
    p1_head의 런치박스 스킨 위에 덮어써요. 화면은 p6_simple.js
    ========================================================= */
-:root{--acc:#CF5D2A;--rec:#FF3B30;--panel:#1c1c1e;--panel2:#2c2c2e;--panel3:#3a3a3c;--spring:cubic-bezier(.32,.72,0,1);--pop:cubic-bezier(.2,.9,.25,1.12);--rail:clamp(66px,11cqw,96px)}
+:root{--acc:#CF5D2A;--rec:#FF3B30;--panel:#1c1c1e;--panel2:#2c2c2e;--panel3:#3a3a3c;--spring:cubic-bezier(.32,.72,0,1);--pop:cubic-bezier(.2,.9,.25,1.12);--rail:clamp(62px,9.5cqw,88px)}
 body,#app,.screen{background:#000;color:#fff}
 #studio .tray{margin:0;border:0;border-radius:0;background:#000;box-shadow:none;padding:0;gap:0}
 #studio .tray::before{display:none}
@@ -54,7 +54,7 @@ body,#app,.screen{background:#000;color:#fff}
 /* =========================================================
    촬영
    ========================================================= */
-.sh{position:absolute;inset:0;display:grid;grid-template-columns:calc(var(--rail) + env(safe-area-inset-left)) minmax(0,1fr) calc(var(--rail) + env(safe-area-inset-right));background:#000}
+.sh{position:absolute;inset:0;display:grid;grid-template-columns:max(var(--rail),calc(env(safe-area-inset-left) + 58px)) minmax(0,1fr) max(var(--rail),calc(env(safe-area-inset-right) + 58px));background:#000}
 .sh-l{padding-left:env(safe-area-inset-left)}
 .sh-r{padding-right:env(safe-area-inset-right)}
 .sh-c{position:relative;min-width:0;min-height:0;container-type:size}
@@ -63,18 +63,19 @@ body,#app,.screen{background:#000;color:#fff}
 .sh-banner{position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:3;display:flex;align-items:center;gap:8px;background:var(--acc);color:#fff;border-radius:999px;padding:5px 8px 5px 14px;font-size:clamp(12px,4cqh,15px);font-weight:800;white-space:nowrap;box-shadow:0 4px 14px #0008}
 .sh-banner button{border:0;border-radius:999px;background:#fff;color:var(--acc);font:inherit;font-size:clamp(11px,3.6cqh,13px);font-weight:800;padding:3px 10px;cursor:pointer}
 /* 아래 필름: 찍은 컷이 쌓여요 */
-.sh-film{position:absolute;left:0;right:0;bottom:0;z-index:3;height:clamp(54px,21cqh,88px);display:flex;align-items:center;gap:8px;padding:0 10px;box-sizing:border-box;background:linear-gradient(#0000,#0000008c 40%,#000000a6);border-top:1px solid #ffffff2e;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
-.sh-cnt{flex:none;display:flex;flex-direction:column;align-items:center;line-height:1;font-size:clamp(10px,3.2cqh,12px);font-weight:700;color:#d1d1d6;min-width:34px}
+.sh-film{position:absolute;left:0;right:0;bottom:0;z-index:3;height:clamp(54px,21cqh,88px);display:flex;align-items:center;gap:8px;padding:0 10px;box-sizing:border-box;background:none;pointer-events:none}
+.sh-cnt{flex:none;display:flex;flex-direction:column;align-items:center;line-height:1;font-size:clamp(10px,3.2cqh,12px);font-weight:700;color:#fff;min-width:34px;text-shadow:0 1px 4px #000c}
 .sh-cnt b{font-size:clamp(18px,7cqh,28px);font-weight:900;color:#fff}
+.sh-film>*{pointer-events:auto}
 .sh-list{flex:1;min-width:0;height:100%;display:flex;align-items:center;gap:6px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;padding:0 4px;scroll-behavior:smooth}
 .sh-list::-webkit-scrollbar{display:none}
-.sh-fr{flex:none;height:72%;aspect-ratio:var(--ar,1.7778);border:0;padding:0;background:var(--panel2);border-radius:6px;position:relative;overflow:hidden;cursor:pointer;box-shadow:0 0 0 1.5px #ffffff55;transition:transform .2s var(--spring)}
+.sh-fr{flex:none;height:72%;box-shadow:0 2px 8px #000c;aspect-ratio:var(--ar,1.7778);border:0;padding:0;background:var(--panel2);border-radius:6px;position:relative;overflow:hidden;cursor:pointer;box-shadow:0 0 0 1.5px #ffffff55;transition:transform .2s var(--spring)}
 .sh-fr img{width:100%;height:100%;object-fit:cover;display:block}
 .sh-fr b{position:absolute;left:0;bottom:0;background:#000a;color:#fff;font-size:clamp(9px,3cqh,11px);font-weight:800;padding:0 5px;border-radius:0 5px 0 0}
 .sh-fr:active{transform:scale(.94)}
 .sh-fr.retake{box-shadow:0 0 0 3px var(--acc)}
 .sh-ins{flex:none;width:4px;height:76%;border-radius:2px;background:var(--acc);box-shadow:0 0 8px var(--acc)}
-.sh-none{color:#aaa;font-size:clamp(11px,3.6cqh,14px);font-weight:700;white-space:nowrap;padding:0 6px}
+.sh-none{color:#aaa;font-size:clamp(11px,3.6cqh,14px);font-weight:700;white-space:nowrap;padding:0 6px;text-shadow:0 1px 4px #000c}
 /* 찰칵 · 다 찍었어요 */
 .shutter{--d:min(clamp(64px,22cqh,92px),calc(var(--rail) - 6px));width:var(--d);height:var(--d);box-sizing:border-box;border-radius:50%;border:4px solid #fff;background:transparent;padding:0;display:grid;place-items:center;cursor:pointer;flex:none}
 .shutter .in{width:84%;height:84%;border-radius:50%;background:var(--rec);transition:all .15s}
