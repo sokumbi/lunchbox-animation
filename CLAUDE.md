@@ -58,7 +58,7 @@ tests/ui-test.js       Playwright 흐름 점검 (가짜 카메라로 촬영까�
    - **배경음악**: 음악 없음 + 7곡 타일, 누르면 미리 듣고 작품 전체에 깔려요(`P.scenes[0].bgm`). "말할 때 음악 작게"(`P.duck`)
    - **내보내기**(스크롤 없이 한 화면, `.dc-pane.share`): 작품 이름 · 요약 · **제목 카드 / 엔딩 크레딧** 버튼(`openCard('credits')`: 글 여러 줄, 배경·글씨체, 아래에서 위로 흐름) · **영상 파일 만들기**(`exportVideo`: mp4→webm, 보내기/사진에 저장/파일로 저장) · 작품 파일(`.lunchbox.json`)
 - **제목 카드·엔딩 크레딧**은 타임라인 앞뒤에 붙어요: `TL()`의 `lead`(CARD_DUR 2.5초)·`tail`(CREDIT_DUR 4초)·`body`. `renderAt`이 그 구간에 `drawTitleCard`/`drawCredits`를 그려요. 소리 위치(`setAbs`)는 컷 구간 안으로 눌러요(`bodyT`). 데이터는 `P.card {on, design, font}`, `P.credits {text, design, font}`.
-- **처음 한 번 설명 레이어**(`hintOnce(key)`): 제목 카드·촬영·꾸미기·크레딧 화면을 처음 열 때만 반투명 안내가 뜨고 아무 데나 누르면 사라져요(localStorage `lb_hint_*`). 자동 점검은 `.hint`를 먼저 눌러 없애요.
+- **처음 한 번 설명 레이어**(`hintOnce(key)`): 제목 카드·촬영·꾸미기·크레딧 화면을 처음 열 때만 반투명 안내가 뜨고 아무 데나 누르면 사라져요(localStorage `lb_hint_*`). 자동 점검은 `.hint-ov`를 먼저 눌러 없애요. (`.hint`는 창 안 작은 안내 글 클래스라 쓰면 안 돼요)
 - 되돌리기: `changed()`마다 `histPush`, `undo()`가 `goStep()`으로 지금 화면을 다시 그려요(`shootPaint`/`decoPaint`)
 - 안내·알림(toast)은 손가락이 통과해서 버튼을 막지 않아요
 

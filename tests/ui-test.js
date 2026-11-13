@@ -45,7 +45,7 @@ fs.mkdirSync(path.join(__dirname, 'shots'), { recursive: true });
     const p = await ctx.newPage(); p.on('pageerror', e => out.push(name + ' ERR ' + e.message)); p.on('console', m => { if (m.type() === 'error') out.push(name + ' CONSOLE ' + m.text()); });
     const sh = async n => p.screenshot({ path: `${__dirname}/shots/${name}_${n}.png` });
     await p.goto('http://localhost:8765/index.html'); await p.waitForTimeout(1400);
-    const hint = async () => { const hn = p.locator('.hint'); if (await hn.count()) { await hn.first().click({ position: { x: 6, y: 6 } }); await p.waitForTimeout(350); } };
+    const hint = async () => { const hn = p.locator('.hint-ov'); if (await hn.count()) { await hn.first().click({ position: { x: 6, y: 6 } }); await p.waitForTimeout(350); } };
     const T = async (sel, ms = 400, o = {}) => { await hint(); await p.locator(sel).first().click(o); await p.waitForTimeout(ms); };
     const ev = f => p.evaluate(f);
     await sh('01_gallery'); await clipCheck(p, name + ' gallery');

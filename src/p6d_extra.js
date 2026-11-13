@@ -135,7 +135,7 @@ function openCard(kind) {
 /* ---------- 처음 한 번 설명 레이어: 그 화면을 처음 열 때만, 아무 데나 누르면 사라져요 ---------- */
 function hintOnce(key, title, lines) {
   const k = 'lb_hint_' + key; try { if (localStorage.getItem(k)) return; } catch (e) { }
-  const el = h('div', { class: 'hint', role: 'dialog' }, h('div', { class: 'hint-card' }, h('b', {}, title), ...lines.map(([ic, tx]) => h('div', { class: 'hint-l' }, h('i', { html: icon(ic) }), h('span', {}, tx))), h('small', {}, '아무 데나 누르면 시작해요')));
+  const el = h('div', { class: 'hint-ov', role: 'dialog' }, h('div', { class: 'hint-card' }, h('b', {}, title), ...lines.map(([ic, tx]) => h('div', { class: 'hint-l' }, h('i', { html: icon(ic) }), h('span', {}, tx))), h('small', {}, '아무 데나 누르면 시작해요')));
   el.addEventListener('pointerdown', e => { e.stopPropagation(); e.preventDefault(); try { localStorage.setItem(k, '1'); } catch (x) { } fadeRemove(el); }, { capture: true });
   $('#app').append(el);
 }
