@@ -57,19 +57,20 @@ body,#app,.screen{background:#000;color:#fff}
 .sh{position:absolute;inset:0;display:grid;grid-template-columns:max(var(--rail),calc(env(safe-area-inset-left) + 58px)) minmax(0,1fr) max(var(--rail),calc(env(safe-area-inset-right) + 58px));background:#000}
 .sh-l{padding-left:env(safe-area-inset-left)}
 .sh-r{padding-right:env(safe-area-inset-right)}
-.sh-c{position:relative;min-width:0;min-height:0;container-type:size}
+.sh-c{position:relative;min-width:0;min-height:0;container-type:size;display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:6px}
+/* 카메라 자리: 가로가 꽉 차는 16:9 높이, 남는 높이에서 필름 띠를 뺀 만큼까지 */
+.sh-stage{position:relative;flex:none;min-height:0;height:calc(100cqw / var(--ar,1.7778));max-height:calc(100cqh - clamp(48px,17cqh,80px) - 6px);container-type:size}
 .sh-mon{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(100cqw,100cqh*var(--ar,1.7778));aspect-ratio:var(--ar,1.7778);overflow:hidden;background:#000;border-radius:10px;box-shadow:0 0 0 1.5px #ffffff66}
 .sh-mon canvas{width:100%;height:100%;display:block}
 .sh-banner{position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:3;display:flex;align-items:center;gap:8px;background:var(--acc);color:#fff;border-radius:999px;padding:5px 8px 5px 14px;font-size:clamp(12px,4cqh,15px);font-weight:800;white-space:nowrap;box-shadow:0 4px 14px #0008}
 .sh-banner button{border:0;border-radius:999px;background:#fff;color:var(--acc);font:inherit;font-size:clamp(11px,3.6cqh,13px);font-weight:800;padding:3px 10px;cursor:pointer}
-/* 아래 필름: 찍은 컷이 쌓여요 */
-.sh-film{position:absolute;left:0;right:0;bottom:0;z-index:3;height:clamp(54px,21cqh,88px);display:flex;align-items:center;gap:8px;padding:0 10px;box-sizing:border-box;background:none;pointer-events:none}
+/* 아래 필름: 찍은 컷이 쌓여요. 카메라 화면 밖(아래)에 있어서 화면을 가리지 않아요 */
+.sh-film{position:relative;flex:none;height:clamp(48px,17cqh,80px);display:flex;align-items:center;gap:8px;padding:0 6px;box-sizing:border-box}
 .sh-cnt{flex:none;display:flex;flex-direction:column;align-items:center;line-height:1;font-size:clamp(11px,3.4cqh,12.5px);font-weight:700;color:#fff;min-width:34px;text-shadow:0 1px 4px #000c}
 .sh-cnt b{font-size:clamp(18px,7cqh,28px);font-weight:900;color:#fff}
-.sh-film>*{pointer-events:auto}
 .sh-list{flex:1;min-width:0;height:100%;display:flex;align-items:center;gap:6px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;padding:0 4px;scroll-behavior:smooth}
 .sh-list::-webkit-scrollbar{display:none}
-.sh-fr{flex:none;height:72%;box-shadow:0 2px 8px #000c;aspect-ratio:var(--ar,1.7778);border:0;padding:0;background:var(--panel2);border-radius:6px;position:relative;overflow:hidden;cursor:pointer;box-shadow:0 0 0 1.5px #ffffff55;transition:transform .2s var(--spring)}
+.sh-fr{flex:none;height:80%;box-shadow:0 2px 8px #000c;aspect-ratio:var(--ar,1.7778);border:0;padding:0;background:var(--panel2);border-radius:6px;position:relative;overflow:hidden;cursor:pointer;box-shadow:0 0 0 1.5px #ffffff55;transition:transform .2s var(--spring)}
 .sh-fr img{width:100%;height:100%;object-fit:cover;display:block}
 .sh-fr b{position:absolute;left:0;bottom:0;background:#000a;color:#fff;font-size:clamp(10px,3.2cqh,12px);font-weight:800;padding:0 5px;border-radius:0 5px 0 0}
 .sh-fr:active{transform:scale(.94)}

@@ -193,7 +193,9 @@ function openShoot() {
   const banner = h('div', { class: 'sh-banner', hidden: true });
   const film = h('div', { class: 'sh-film' });
   const tale = P.tale && TALES.find(t => t.id === P.tale), guide = tale ? taleGuide(tale) : '';   // 전래동화 따라 찍기면 위에 장면 자막
-  const mon = h('div', { class: 'sh-mon' + (tale ? ' tale' : ''), onpointerdown: e => { if (EL.pop && !e.target.closest('.sh-fr')) cutPopClose(); } }, cv, flash, cd, nocam, guide, banner, film);
+  const mon = h('div', { class: 'sh-mon' + (tale ? ' tale' : '') }, cv, flash, cd, nocam, guide, banner);
+  // 카메라(.sh-stage) 아래에 필름이 따로 있어요. 컷이 아닌 곳을 누르면 컷 메뉴가 닫혀요
+  const sc_ = h('div', { class: 'sh-c', onpointerdown: e => { if (EL.pop && !e.target.closest('.sh-fr')) cutPopClose(); } }, h('div', { class: 'sh-stage' }, mon), film);
   const onionB = rb('onion', '겹쳐보기', () => { V.onion = !V.onion; onionB.classList.toggle('on', V.onion); }, V.onion ? 'on' : '');
   const gridB = rb('grid', '격자', () => { V.grid = !V.grid; gridB.classList.toggle('on', V.grid); }, V.grid ? 'on' : '');
   const playB = rb('play', '재생', shootPv);
@@ -202,8 +204,8 @@ function openShoot() {
   const shutterB = h('button', { class: 'shutter', type: 'button', 'aria-label': '찰칵', onclick: shutter }, h('span', { class: 'in' }));
   const doneB = h('button', { class: 'sh-done', type: 'button', 'aria-label': '다 찍었어요', onclick: () => { if (!nFrames()) { toast('먼저 찰칵을 눌러 한 컷이라도 찍어 보세요', 2200); return; } openDeco(); }, html: icon('sparkle') + '<span>다 찍었어요<b>꾸미기 ›</b></span>' });
   const right = h('div', { class: 'sh-r rail' }, rb('switchCam', '카메라', async () => { if (Cam.failed) { camStart(); return; } if (!(await Cam.next())) toast('바꿀 수 있는 다른 카메라가 없어요'); }), timerB, shutterB, doneB);
-  body.append(h('div', { class: 'sh' }, left, h('div', { class: 'sh-c' }, mon), right));
-  EL = { cv, ctx: cv.getContext('2d'), flash, cd, nocam, banner, film, timerB, shutterB, playB, mon, pop: null };
+  body.append(h('div', { class: 'sh' }, left, sc_, right));
+  EL = { cv, ctx: cv.getContext('2d'), flash, cd, nocam, banner, film, timerB, shutterB, playB, mon, sc: sc_, pop: null };
   addEventListener('keydown', onKey);
   timerPaint(); shootPaint(); camStart();
   cancelAnimationFrame(V.raf); shootLoop();
@@ -321,8 +323,8 @@ function cutPop(i) {
     act('insert', '뒤에 찍기', () => { cutPopClose(); V.ins = i + 1; V.retake = null; shootPaint(); }),
     act('trash', '지우기', () => { cutPopClose(); delFrames(i, 1); if (V.retake === i) V.retake = null; if (V.ins != null && V.ins > i) V.ins--; changed(); shootPaint(); toast('컷을 지웠어요. 되돌리기로 살릴 수 있어요', 1800); }, 'red'),
     h('i', { class: 'sh-pop-tip' }));
-  EL.mon.append(pop); EL.pop = pop;
-  const mr = EL.mon.getBoundingClientRect(), tr = th.getBoundingClientRect(), half = pop.offsetWidth / 2 + 6;
+  EL.sc.append(pop); EL.pop = pop;   // 가운데 칸(.sh-c) 기준으로 컷 바로 위에 떠요(카메라 화면 아래쪽을 살짝 덮어요)
+  const mr = EL.sc.getBoundingClientRect(), tr = th.getBoundingClientRect(), half = pop.offsetWidth / 2 + 6;
   const cx = clamp(tr.left + tr.width / 2 - mr.left, half, mr.width - half);
   pop.style.left = cx + 'px'; pop.style.bottom = (mr.bottom - tr.top + 8) + 'px';
   pop.lastChild.style.left = clamp(tr.left + tr.width / 2 - mr.left - (cx - pop.offsetWidth / 2), 14, pop.offsetWidth - 14) + 'px';
