@@ -11,6 +11,7 @@ app.html
 *.png
 *.jpeg
 *.jpg
+!icon-*.png
 design/
 !brand/**
 

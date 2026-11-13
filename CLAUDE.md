@@ -6,7 +6,7 @@
 
 ## 한눈에
 
-- 결과물은 **`index.html` 한 장**이에요. 외부 파일 없이 열려요.
+- 결과물은 **`index.html` 한 장**이에요. 외부 파일 없이 열려요. 예외는 **홈 화면 아이콘**뿐이에요(`icon.svg` · `icon-180/192/512.png` · `manifest.webmanifest`, 아이폰이 HTML 안에 심은 아이콘을 못 읽어서 파일로 둬요). 아이콘이 없어도 앱은 열려요.
 - 소스는 `src/`의 조각 파일이에요. **`index.html`을 직접 고치지 말고** `src/`를 고친 뒤 `./build.sh`를 실행하세요.
 - 프레임워크 없는 순수 JS예요. 화면은 `h()` 헬퍼로 DOM을 만들고, 무대는 canvas에 그려요. 크기 `W`·`H`는 `setFormat`이 정해요(기본 16:9, 960×540). CSS는 `--ar`(가로÷세로)로 비율을 맞춰요.
 - 실시간 카메라는 **https나 localhost에서만** 켜져요. 폰 테스트는 GitHub Pages에 올려서 해요(아래 "배포" 참고).
@@ -40,6 +40,9 @@ src/                   앱 소스 (빌드 순서대로)
   p6d_extra.js         제목 카드·엔딩 크레딧 페이지(openCard, DESIGNS·FONTS, drawTitleCard/drawCredits) · 전래동화 5편(TALES, playTale 이모지 애니메이션) · 처음 한 번 설명 레이어(hintOnce)
   p5d_export.js        영상 파일 만들기(MediaRecorder, mp4→webm), 시작 호출
 brand/, design/        예전 아르떼노바 CI·런치박스 시안 (앱에서는 로고 인트로만 써요)
+icon.svg, icon-*.png     홈 화면 아이콘(검정 바탕에 아르떼노바 심볼 + 영문명). icon.svg를 고치면 `node tools/make-icon.js`로 PNG를 다시 만들어요
+manifest.webmanifest   안드로이드 설치용(이름·아이콘·standalone)
+tools/make-icon.js     icon.svg → PNG 3장(playwright)
 tests/ui-test.js       Playwright 흐름 점검 (가짜 카메라로 촬영까지 눌러 봐요)
 ```
 
@@ -99,7 +102,7 @@ tests/ui-test.js       Playwright 흐름 점검 (가짜 카메라로 촬영까�
 - 저장소: https://github.com/sokumbi/lunchbox-animation (공개, `main` / root)
 - 주소: **https://sokumbi.github.io/lunchbox-animation/**
 - 고친 뒤 `./build.sh` → `git add -A && git commit` → `git push` 하면 1~2분 뒤 반영돼요.
-- 올리지 않는 파일(mp3, *.bin, 시안 png/jpeg, `design/`)은 `.gitignore`에 있어요. 새 파일을 넣을 땐 사용자에게 확인하세요.
+- 올리지 않는 파일(mp3, *.bin, 시안 png/jpeg, `design/`)은 `.gitignore`에 있어요(아이콘 `icon-*.png`만 예외). 새 파일을 넣을 땐 사용자에게 확인하세요.
 
 ## 참고 링크 (claude.ai)
 
