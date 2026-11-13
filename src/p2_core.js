@@ -244,7 +244,7 @@ function heart(ctx, x, y, k, c) { ctx.fillStyle = c; ctx.strokeStyle = INK; ctx.
 function burst(ctx, x, y, R, r, n, c, stroke = true) { ctx.fillStyle = c; ctx.strokeStyle = INK; ctx.lineWidth = 5; ctx.beginPath(); for (let i = 0; i < n * 2; i++) { const a = i / (n * 2) * 6.283, rr = i % 2 ? r : R; ctx.lineTo(x + Math.cos(a) * rr * 1.25, y + Math.sin(a) * rr); } ctx.closePath(); ctx.fill(); if (stroke) ctx.stroke(); }
 
 /* =========================================================
-   소리 — 효과음·배경음악을 앱 안에서 직접 만들어요 (파일 없이)
+   소리 — 효과음·배경음악. audio/ 폴더의 mp3를 먼저 읽고, 없으면 아래 합성 소리로 대신해요
    ========================================================= */
 const SFX = [
   { id: 'pop', name: '뽁', desc: '짠! 나타날 때' }, { id: 'boing', name: '뿅', desc: '깡충 뛸 때' },
@@ -313,8 +313,26 @@ const AE = {
     fail: [1.6, (oc, o, m) => { [587, 554, 523, 494].forEach((f, i) => { const os = m.tone('triangle', f, f, i * .3, i === 3 ? .8 : .26, .3); }); }]
   },
   async getSfx(id) {
-    if (!this.sfx[id]) { const d = this.SFX_DEF[id]; this.sfx[id] = this.render(d[0], d[1]); }
+    if (!this.sfx[id]) { const d = this.SFX_DEF[id]; this.sfx[id] = this.file('sfx', id).catch(() => this.render(d[0], d[1])); }
     return this.sfx[id];
+  },
+  /* audio/sfx/뽁.mp3 같은 진짜 소리 파일을 먼저 찾아요. 없거나(오프라인·file://) 못 읽으면 위의 합성 소리로 대신해요 */
+  async file(kind, id) {
+    const r = await fetch(`audio/${kind}/${id}.mp3`); if (!r.ok) throw new Error(r.status);
+    const ab = await r.arrayBuffer(), c = this.ctx || new OfflineAudioContext(1, 1, 44100);
+    const buf = await new Promise((res, rej) => c.decodeAudioData(ab, res, rej));
+    return this.trim(buf, kind === 'bgm');
+  },
+  /* 앞뒤 무음을 잘라요(효과음은 컷 시간에 딱 맞게, 음악은 반복 구간으로). 음량도 고르게 맞춰 __gain에 적어 둬요 */
+  trim(buf, music) {
+    const n = buf.length, ch = buf.numberOfChannels, th = music ? .004 : .01; let a = n, b = 0, peak = 0, sq = 0;
+    for (let k = 0; k < ch; k++) { const d = buf.getChannelData(k); for (let i = 0; i < n; i++) { const v = Math.abs(d[i]); if (v > th) { if (i < a) a = i; if (i > b) b = i; } if (v > peak) peak = v; sq += d[i] * d[i]; } }
+    if (b <= a) return buf;
+    const rms = Math.sqrt(sq / (n * ch)) || .01, sr = buf.sampleRate;
+    if (music) { buf.__loopStart = Math.max(0, a - sr * .01) / sr; buf.__loopEnd = Math.min(n, b + sr * .02) / sr; buf.__gain = Math.min(.12 / rms, .95 / peak, 3); return buf; }
+    const s0 = Math.max(0, a - Math.round(sr * .004)), s1 = Math.min(n, b + Math.round(sr * .15)), out = (this.ctx || new OfflineAudioContext(1, 1, sr)).createBuffer(ch, s1 - s0, sr);
+    for (let k = 0; k < ch; k++) out.getChannelData(k).set(buf.getChannelData(k).subarray(s0, s1));
+    out.__gain = Math.min(.8 / peak, 3); return out;
   },
   BGM_DEF: {
     sea: [12, (oc, o, m) => { const ch = [[57, 64, 69], [55, 62, 67], [53, 60, 65], [55, 62, 69]]; ch.forEach((c, i) => c.forEach(n => m.pad(i * 3, midi(n), 3.4, .07))); const r = seeded('sea'); for (let i = 0; i < 14; i++) m.bell(r() * 11, midi([76, 79, 81, 84, 86][Math.floor(r() * 5)]), 1.6, .07); }],
@@ -326,15 +344,15 @@ const AE = {
     happy: [8.8, (oc, o, m) => { const ar = [[60, 64, 67, 72], [65, 69, 72, 77], [67, 71, 74, 79], [60, 64, 67, 72]]; ar.forEach((c, i) => { for (let j = 0; j < 8; j++) { const t = i * 2.2 + j * .275; m.bell(t, midi(c[j % 4] + 12), .5, .07); if (j % 2 === 0) m.pluck(t, midi(c[(j / 2) % 4]), .4, .14); } m.drum(i * 2.2, .45, 110); m.drum(i * 2.2 + 1.1, .3, 140); m.pad(i * 2.2, midi(c[0] - 12), 2.3, .07); }); }]
   },
   async getBgm(id) {
-    if (!this.bgm[id]) { const d = this.BGM_DEF[id]; this.bgm[id] = this.render(d[0], d[1]); }
+    if (!this.bgm[id]) { const d = this.BGM_DEF[id]; this.bgm[id] = this.file('bgm', id).catch(() => this.render(d[0], d[1])); }
     return this.bgm[id];
   },
   preview: null,
   async playPreview(kind, id) {
     this.init(); this.stopPreview();
     const buf = kind === 'sfx' ? await this.getSfx(id) : await this.getBgm(id);
-    const s = this.ctx.createBufferSource(); s.buffer = buf; s.connect(this.buses.ui); s.start();
-    if (kind === 'bgm') s.stop(this.ctx.currentTime + Math.min(buf.duration, 8));
+    const s = this.ctx.createBufferSource(), g = this.ctx.createGain(); s.buffer = buf; g.gain.value = buf.__gain || 1; s.connect(g).connect(this.buses.ui);
+    if (kind === 'bgm') { const t = this.ctx.currentTime; s.start(0, buf.__loopStart || 0); g.gain.setValueAtTime(buf.__gain || 1, t + 7.2); g.gain.linearRampToValueAtTime(0, t + 8); s.stop(t + 8); } else s.start();
     this.preview = s; return s;
   },
   stopPreview() { try { this.preview && this.preview.stop(); } catch (e) { } this.preview = null; },

@@ -243,7 +243,7 @@ function playTale(tale) {
   const bg = h('div', { class: 'tale-bg' }, cap, h('div', { class: 'tale-mon' }, cv, pauseB, end), skip);
   let i = 0, t0 = 0, paused = false, pausedAt = 0, raf = 0, done = false;
   const total = tale.scenes.reduce((a, s) => a + s.d, 0);
-  const music = async () => { try { const b = await AE.getBgm(tale.bgm); if (!bg.isConnected) return; AE.stopPreview(); const s = AE.ctx.createBufferSource(); s.buffer = b; s.loop = true; const g = AE.ctx.createGain(); g.gain.value = .5; s.connect(g).connect(AE.buses.ui); s.start(); AE.preview = s; } catch (e) { } };
+  const music = async () => { try { const b = await AE.getBgm(tale.bgm); if (!bg.isConnected) return; AE.stopPreview(); const s = AE.ctx.createBufferSource(); s.buffer = b; s.loop = true; s.loopStart = b.__loopStart || 0; s.loopEnd = b.__loopEnd || b.duration; const g = AE.ctx.createGain(); g.gain.value = .5 * (b.__gain || 1); s.connect(g).connect(AE.buses.ui); s.start(0, s.loopStart); AE.preview = s; } catch (e) { } };
   const start = () => { end.hidden = true; done = false; paused = false; i = 0; t0 = performance.now(); music(); cancelAnimationFrame(raf); loop(); };
   const loop = () => {
     if (!bg.isConnected) return; raf = requestAnimationFrame(loop);

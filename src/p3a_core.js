@@ -165,7 +165,7 @@ const Player = {
   },
   schedule(t0, at) {
     const c = AE.ctx, tl = TL(), endT = this.until ?? tl.total;
-    for (const s of P.sfx) { const st = absT(s), b = AE.sfx[s.snd]; if (st == null || !b || !b.__buf) continue; this.startBuf(b.__buf, AE.buses.sfx, st, t0, at, s.vol ?? 1, endT); }
+    for (const s of P.sfx) { const st = absT(s), b = AE.sfx[s.snd]; if (st == null || !b || !b.__buf) continue; this.startBuf(b.__buf, AE.buses.sfx, st, t0, at, (s.vol ?? 1) * (b.__buf.__gain || 1), endT); }
     const voices = this.muteVoices ? [] : P.voices; const narrs = P.narrs;
     for (const v of voices) { if (!v.buf || v.id === this.exclude) continue; const st = absT(v); if (st != null) this.startBuf(v.buf, AE.buses.voice, st, t0, at, v.vol ?? 1, endT); }
     for (const v of narrs) { if (!v.buf || v.id === this.exclude) continue; const st = absT(v); if (st != null) this.startBuf(v.buf, AE.buses.narr, st, t0, at, v.vol ?? 1, endT); }
@@ -175,12 +175,13 @@ const Player = {
     for (const sg of segs) {
       const p = AE.bgm[sg.id]; const buf = p && p.__buf; if (!buf) continue;
       const b = Math.min(sg.b, endT); if (b <= t0) continue;
-      const s = c.createBufferSource(); s.buffer = buf; s.loop = true; const g = c.createGain();
+      const s = c.createBufferSource(); s.buffer = buf; s.loop = true; const g = c.createGain(), G = buf.__gain || 1;
+      const L0 = buf.__loopStart || 0, L1 = buf.__loopEnd || buf.duration; s.loopStart = L0; s.loopEnd = L1;   // 파일 음악은 무음 없는 구간으로 반복해요
       s.connect(g).connect(AE.duck);
-      const startAt = at + Math.max(0, sg.a - t0), off = Math.max(0, t0 - sg.a) % buf.duration, stopAt = at + (b - t0);
+      const startAt = at + Math.max(0, sg.a - t0), off = L0 + Math.max(0, t0 - sg.a) % (L1 - L0), stopAt = at + (b - t0);
       const fi = Math.max(0, sg.a - t0) > 0 ? .5 : .15;
-      g.gain.setValueAtTime(0, startAt); g.gain.linearRampToValueAtTime(1, startAt + fi);
-      g.gain.setValueAtTime(1, Math.max(startAt + fi, stopAt - .6)); g.gain.linearRampToValueAtTime(0, stopAt);
+      g.gain.setValueAtTime(0, startAt); g.gain.linearRampToValueAtTime(G, startAt + fi);
+      g.gain.setValueAtTime(G, Math.max(startAt + fi, stopAt - .6)); g.gain.linearRampToValueAtTime(0, stopAt);
       s.start(startAt, off); s.stop(stopAt + .05); this.nodes.push(s, g);
     }
     if (P.duck) {
