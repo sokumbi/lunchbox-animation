@@ -76,7 +76,7 @@ fs.mkdirSync(path.join(__dirname, 'shots'), { recursive: true });
     await T('.dc-tabs [aria-label="소리"]', 400); await sh('04_deco_sfx'); await clipCheck(p, name + ' deco sfx');
     await T('.tl >> nth=1', 300); out.push(name + ' sfx add ' + await ev(() => P.sfx.length)); await T('.tl >> nth=1', 300); out.push(name + ' sfx toggle off ' + await ev(() => P.sfx.length)); await T('.tl >> nth=2', 300);
     await T('.tml-row.sfx .tml-x', 300); out.push(name + ' chip x -> ' + await ev(() => P.sfx.length)); await T('.tl >> nth=2', 300);
-    await T('.dc-tabs [aria-label="배경음악"]', 400); await T('.tl >> nth=2', 300); await sh('04_deco_bgm'); await clipCheck(p, name + ' deco bgm'); out.push(name + ' bgm ' + await ev(() => sc().bgm));
+    await T('.dc-tabs [aria-label="배경음악"]', 400); await T('.tl >> nth=2', 300); await sh('04_deco_bgm'); await clipCheck(p, name + ' deco bgm'); out.push(name + ' bgm ' + await ev(() => sc().bgm + ' chip=' + document.querySelectorAll('.tml-row.bgm .tml-it').length));
     await T('.dc-speed button:has-text("빠르게")', 300); out.push(name + ' fps ' + await ev(() => P.fps));
     await T('.dc-play', 120); out.push(name + ' playing ' + await ev(() => Player.playing)); await sh('05_play'); await p.waitForTimeout(600); await T('.dc-mon canvas', 300, { position: { x: 20, y: 20 } });
     await T('.dc-tabs [aria-label="내보내기"]', 400); await sh('06_share'); await clipCheck(p, name + ' deco share'); out.push(name + ' share scroll ' + await ev(() => { const q = document.querySelector('.dc-pane.share'); return q.scrollHeight - q.clientHeight; }));

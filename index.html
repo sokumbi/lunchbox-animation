@@ -2170,7 +2170,7 @@ function paneSfx(pane) {
 /* 배경음악: 하나 고르면 작품 전체에 깔려요 */
 function paneBgm(pane) {
   const cur = sc().bgm, grid = h('div', { class: 'tiles' });
-  const set = id => { sc().bgm = id; changed(); if (id) AE.playPreview('bgm', id); else AE.stopPreview(); decoTool(); };
+  const set = id => { sc().bgm = id; changed(); if (id) AE.playPreview('bgm', id); else AE.stopPreview(); decoMarks(); decoTool(); };
   grid.append(tile('mute', '음악 없음', !cur, () => set(null), '#4E9A63'));
   for (const b of BGM) grid.append(tile('music', b.name, cur === b.id, () => set(b.id), '#4E9A63'));
   pane.append(h('p', { class: 'dc-tip' }, '눌러서 들어 봐요. 고른 음악이 작품 전체에 깔려요'), grid,
@@ -2179,7 +2179,7 @@ function paneBgm(pane) {
 /* 내보내기: 영상 파일(저장·보내기) · 작품 파일 */
 function paneShare(pane) {
   const big = (ic, label, sub, onclick, cls = '') => h('button', { class: 'share-b ' + cls, type: 'button', onclick, html: `${icon(ic)}<b>${label}</b><small>${sub}</small>` });
-  pane.append(h('label', { class: 'dc-title' }, h('span', {}, '작품 이름'), h('input', { class: 'input', value: P.title, maxlength: 40, 'aria-label': '작품 이름', oninput: e => { P.title = e.target.value; changed(); } })),
+  pane.append(h('label', { class: 'dc-title' }, h('span', {}, '작품 이름'), h('input', { class: 'input', value: P.title, maxlength: 40, 'aria-label': '작품 이름', oninput: e => { P.title = e.target.value; changed(); decoMarks(); Player.draw(); } })),
     h('p', { class: 'dc-tip' }, `컷 ${nFrames()} · ${fmt(TL().total)}초 · 말 ${P.narrs.length} · 소리 ${P.sfx.length}${sc().bgm ? ' · 음악' : ''}`),
     h('div', { class: 'cp-two' },
       h('button', { class: 'cp-mini', type: 'button', onclick: () => openCard('title'), html: icon('edit') + `<span>제목 카드<small>${hasCard() ? designOf(P.card.design).name + ' · ' + fontOf(P.card.font).name : P.card && P.card.on ? '제목을 쓰면 나와요' : '없음'}</small></span>` }),
