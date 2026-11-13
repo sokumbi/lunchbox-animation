@@ -287,7 +287,9 @@ function taleSheet(tale) {
 function taleGrid(grid) {
   for (const t of TALES) {
     const card = h('button', { class: 'g-card tale', type: 'button', 'aria-label': t.title, onclick: () => taleSheet(t) },
-      h('span', { class: 'th', style: { background: `linear-gradient(135deg, ${t.c}, #000000aa)` } }, h('span', { class: 'tale-big' }, t.e)), h('span', { class: 'tt' }, h('b', {}, t.title), h('small', {}, t.sub)));
+      h('span', { class: 'th', style: { background: `linear-gradient(135deg, ${t.c}, #000000aa)` } }, h('span', { class: 'tale-big' }, t.e),
+        // 카드 그림(tales/<id>.jpg). 못 읽으면(오프라인·file://) 지워져서 아래 이모지가 보여요
+        h('img', { class: 'tale-img', src: `tales/${t.id}.jpg`, alt: '', loading: 'lazy', draggable: false, onerror: e => e.target.remove() })), h('span', { class: 'tt' }, h('b', {}, t.title), h('small', {}, t.sub)));
     card.style.setProperty('--i', grid.children.length); grid.append(card);
   }
 }
