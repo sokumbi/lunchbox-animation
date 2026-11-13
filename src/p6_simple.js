@@ -59,7 +59,8 @@ async function openGallery(o = {}) {
   const up = h('input', { type: 'file', accept: '.json,application/json', hidden: true, onchange: async e => { const f = e.target.files[0]; if (!f) return; const d = await importProjectFile(f); if (d) { toast(`“${d.title}”을(를) 불러왔어요`); openGallery(); } } });
   const tab = (ic, label, id, short = label) => h('button', { class: 'g-rb' + (galTab === id ? ' on' : ''), type: 'button', 'aria-label': label, html: icon(ic) + `<span>${short}</span>`, onclick: () => { galTab = id; openGallery(); } });
   const rail = h('nav', { class: 'g-rail' }, tab('folder', '내 작품', 'movies'), tab('book', '전래동화', 'tales'), tab('trash', '휴지통', 'trash'), h('span', { class: 'g-sp' }),
-    h('button', { class: 'g-rb', type: 'button', 'aria-label': '작품 파일 불러오기', html: icon('upload') + '<span>불러오기</span>', onclick: () => up.click() }), up);
+    h('button', { class: 'g-rb sm', type: 'button', 'aria-label': '도움말', html: icon('help') + '<span>도움말</span>', onclick: hintReset }),
+    h('button', { class: 'g-rb sm', type: 'button', 'aria-label': '작품 파일 불러오기', html: icon('upload') + '<span>불러오기</span>', onclick: () => up.click() }), up);
   const { list, trash } = await loadWorks();
   const isTrash = galTab === 'trash', isTales = galTab === 'tales';
   const grid = h('div', { class: 'g-grid list' });
@@ -191,7 +192,8 @@ function openShoot() {
   const flash = h('div', { class: 'flash' }), cd = h('div', { class: 'countdown', hidden: true }), nocam = h('div', { class: 'nocam', hidden: true });
   const banner = h('div', { class: 'sh-banner', hidden: true });
   const film = h('div', { class: 'sh-film' });
-  const mon = h('div', { class: 'sh-mon', onpointerdown: e => { if (EL.pop && !e.target.closest('.sh-fr')) cutPopClose(); } }, cv, flash, cd, nocam, banner, film);
+  const tale = P.tale && TALES.find(t => t.id === P.tale), guide = tale ? taleGuide(tale) : '';   // 전래동화 따라 찍기면 위에 장면 자막
+  const mon = h('div', { class: 'sh-mon' + (tale ? ' tale' : ''), onpointerdown: e => { if (EL.pop && !e.target.closest('.sh-fr')) cutPopClose(); } }, cv, flash, cd, nocam, guide, banner, film);
   const onionB = rb('onion', '겹쳐보기', () => { V.onion = !V.onion; onionB.classList.toggle('on', V.onion); }, V.onion ? 'on' : '');
   const gridB = rb('grid', '격자', () => { V.grid = !V.grid; gridB.classList.toggle('on', V.grid); }, V.grid ? 'on' : '');
   const playB = rb('play', '재생', shootPv);
@@ -386,11 +388,13 @@ function tlPaint() {
     c.fillStyle = '#0006'; for (let i = 1; i < n; i++) c.fillRect(Math.round(i * ww) - 1, 0, 1, hh);
   }
   for (const k in tl.rows) tl.rows[k].innerHTML = '';
-  const put = (k, t, w, label, ic, onclick) => tl.rows[k].append(h('button', { type: 'button', class: 'tml-it', style: { left: pct(t), width: w == null ? null : pct(Math.max(.15, Math.min(w, T - t))) }, 'aria-label': label, html: icon(ic) + (label ? `<span>${label}</span>` : ''), onclick }));
-  [...P.narrs].sort((a, b) => absT(a) - absT(b)).forEach((nr, i) => { const t = absT(nr); if (t != null) put('narr', t, nr.dur, `말 ${i + 1}`, 'mic', () => { V.tool = 'voice'; Player.seek(t); decoTool(); Player.play({ until: t + nr.dur + .2 }); }); });
-  for (const x of P.sfx) { const t = absT(x), d = SFX.find(y => y.id === x.snd); if (t != null) put('sfx', t, null, d ? d.name : '', SFX_IC[x.snd] || 'speaker', () => { V.tool = 'sfx'; Player.seek(t); decoTool(); AE.playPreview('sfx', x.snd); }); }
+  // 칩: 누르면 그 자리로 가며 도구가 열려요. 오른쪽 ✕로 바로 빼요(되돌리기로 살릴 수 있어요)
+  const put = (k, t, w, label, ic, onclick, del) => { const b = h('button', { type: 'button', class: 'tml-it', style: { left: pct(t), width: w == null ? null : pct(Math.max(.15, Math.min(w, T - t))) }, 'aria-label': label, html: icon(ic) + (label ? `<span>${label}</span>` : ''), onclick });
+    b.append(h('i', { class: 'tml-x', role: 'button', 'aria-label': `${label} 빼기`, html: icon('x'), onclick: e => { e.stopPropagation(); del(); changed(); decoMarks(); decoTool(); } })); tl.rows[k].append(b); };
+  [...P.narrs].sort((a, b) => absT(a) - absT(b)).forEach((nr, i) => { const t = absT(nr); if (t != null) put('narr', t, nr.dur, `말 ${i + 1}`, 'mic', () => { V.tool = 'voice'; Player.seek(t); decoTool(); Player.play({ until: t + nr.dur + .2 }); }, () => { P.narrs = P.narrs.filter(x => x !== nr); toast('녹음한 말을 뺐어요 · 되돌리기로 살릴 수 있어요', 1800); }); });
+  for (const x of P.sfx) { const t = absT(x), d = SFX.find(y => y.id === x.snd); if (t != null) put('sfx', t, null, d ? d.name : '', SFX_IC[x.snd] || 'speaker', () => { V.tool = 'sfx'; Player.seek(t); decoTool(); AE.playPreview('sfx', x.snd); }, () => { P.sfx = P.sfx.filter(y => y !== x); toast(`${d ? d.name + ' ' : ''}소리를 뺐어요`, 1000); }); }
   const bd = BGM.find(y => y.id === sc().bgm);
-  if (bd) put('bgm', 0, T, bd.name, 'music', () => { V.tool = 'bgm'; decoTool(); });
+  if (bd) put('bgm', 0, T, bd.name, 'music', () => { V.tool = 'bgm'; decoTool(); }, () => { sc().bgm = null; AE.stopPreview(); toast('음악을 뺐어요', 1000); });
   const none = { narr: '말하기에서 녹음하면 여기에 보여요', sfx: '소리를 누르면 그 자리에 들어가요', bgm: '음악 없음' };
   for (const k in tl.rows) if (!tl.rows[k].children.length) tl.rows[k].append(h('span', { class: 'tml-empty' }, none[k]));
 }
@@ -452,11 +456,13 @@ function paneShare(pane) {
   pane.append(h('label', { class: 'dc-title' }, h('span', {}, '작품 이름'), h('input', { class: 'input', value: P.title, maxlength: 40, 'aria-label': '작품 이름', oninput: e => { P.title = e.target.value; changed(); } })),
     h('p', { class: 'dc-tip' }, `컷 ${nFrames()} · ${fmt(TL().total)}초 · 말 ${P.narrs.length} · 소리 ${P.sfx.length}${sc().bgm ? ' · 음악' : ''}`),
     h('div', { class: 'cp-two' },
-      h('button', { class: 'cp-mini', type: 'button', onclick: () => openCard('title'), html: icon('edit') + `<span>제목 카드<small>${P.card && P.card.on ? designOf(P.card.design).name + ' · ' + fontOf(P.card.font).name : '없음'}</small></span>` }),
-      h('button', { class: 'cp-mini', type: 'button', onclick: () => openCard('credits'), html: icon('film') + `<span>크레딧<small>${P.credits && P.credits.text.trim() ? designOf(P.credits.design).name + ' · ' + fontOf(P.credits.font).name : '없음'}</small></span>` })),
-    big('download', '영상 파일 만들기', '저장하거나 친구에게 보내요', () => { if (!TL().total) { toast('먼저 촬영에서 컷을 찍어요'); return; } Player.pause(); exportVideo(); }, 'or'),
-    big('save', '작품 파일', '다른 폰·태블릿으로 옮겨요', async () => { await saveProject(); const d = await DB.get(P.id).catch(() => null); d ? exportProjectFile(d) : toast('먼저 저장이 되어야 해요'); }));
+      h('button', { class: 'cp-mini', type: 'button', onclick: () => openCard('title'), html: icon('edit') + `<span>제목 카드<small>${hasCard() ? designOf(P.card.design).name + ' · ' + fontOf(P.card.font).name : P.card && P.card.on ? '제목을 쓰면 나와요' : '없음'}</small></span>` }),
+      h('button', { class: 'cp-mini', type: 'button', onclick: () => openCard('credits'), html: icon('film') + `<span>크레딧<small>${hasCredits() ? designOf(P.credits.design).name + ' · ' + fontOf(P.credits.font).name : '없음'}</small></span>` })),
+    h('div', { class: 'share-two' },   // 세로 화면에선 나란히, 가로에선 위아래로
+      big('download', '영상 파일 만들기', '저장하거나 친구에게 보내요', () => { if (!TL().total) { toast('먼저 촬영에서 컷을 찍어요'); return; } Player.pause(); exportVideo(); }, 'or'),
+      big('save', '작품 파일', '다른 폰·태블릿으로 옮겨요', async () => { await saveProject(); const d = await DB.get(P.id).catch(() => null); d ? exportProjectFile(d) : toast('먼저 저장이 되어야 해요'); })));
 }
+IC.help = IC.help || '<circle cx="12" cy="12" r="9"/><path d="M9.6 9.6a2.4 2.4 0 1 1 3.4 2.2c-.7.4-1 .9-1 1.7"/><circle cx="12" cy="17" r=".7" fill="currentColor"/>';
 IC.more = IC.more || '<circle cx="5" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="19" cy="12" r="1.6" fill="currentColor"/>';
 IC.expand = IC.expand || '<path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/>';
 addEventListener('resize', () => setTimeout(tlPaint, 120));

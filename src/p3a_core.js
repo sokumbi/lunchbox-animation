@@ -52,9 +52,12 @@ function undo() {
   if (!P.scenes.find(s => s.id === S.curScene)) S.curScene = P.scenes[P.scenes.length - 1].id;
   goStep(S.step); toast('되돌렸어요', 1100);
 }
-/* 제목 카드는 맨 앞(lead), 엔딩 크레딧은 맨 뒤(tail)에 붙어요 (p6d_extra: CARD_DUR·CREDIT_DUR) */
-const cardLead = () => (P.card && P.card.on && P.title) ? CARD_DUR : 0;
-const cardTail = () => (P.credits && P.credits.text && P.credits.text.trim()) ? CREDIT_DUR : 0;
+/* 제목 카드는 맨 앞(lead), 엔딩 크레딧은 맨 뒤(tail)에 붙어요 (p6d_extra: CARD_DUR·creditDur) */
+const isAutoTitle = t => /^작품 \d+$/.test((t || '').trim());   // 새 작품의 자동 이름("작품 3")은 제목 카드에 안 써요
+const hasCard = () => !!(P.card && P.card.on && (P.title || '').trim() && !isAutoTitle(P.title));
+const hasCredits = () => !!(P.credits && P.credits.text && P.credits.text.trim());
+const cardLead = () => hasCard() ? CARD_DUR : 0;
+const cardTail = () => hasCredits() ? creditDur(P.credits.text) : 0;
 function TL() {
   if (TLc) return TLc;
   const seq = [], ranges = [], map = {}; const lead = cardLead(), tail = cardTail(); let t = lead;
@@ -200,7 +203,7 @@ function scheduleSave() { clearTimeout(saveT); const el = $('#savedState'); if (
 function projectDump() {
   return {
     id: P.id, title: P.title, storyId: P.storyId, created: P.created, updated: P.updated, fps: P.fps, hold: P.hold,
-    synopsis: P.synopsis || '', lastStep: P.lastStep || 'shoot', scriptMode: P.scriptMode, script: P.script, narrText: P.narrText, mix: P.mix, look: P.look || null, duck: P.duck, fade: P.fade, subs: P.subs, done: P.done, fmt: P.fmt || 'wide', card: P.card || null, credits: P.credits || null,
+    synopsis: P.synopsis || '', lastStep: P.lastStep || 'shoot', scriptMode: P.scriptMode, script: P.script, narrText: P.narrText, mix: P.mix, look: P.look || null, duck: P.duck, fade: P.fade, subs: P.subs, done: P.done, fmt: P.fmt || 'wide', card: P.card || null, credits: P.credits || null, tale: P.tale || null, taleStep: P.taleStep || 0,
     fx: P.fx, sfx: P.sfx,
     scenes: P.scenes.map(s => ({ id: s.id, name: s.name, desc: s.desc || '', trimIn: s.trimIn, trimOut: s.trimOut, bgm: s.bgm, stage: s.stage, sketch: s.sketch ? s.sketch.blob : null, frames: s.frames.map(f => ({ id: f.id, hold: f.hold, blob: f.blob })) })),
     voices: P.voices.map(v => ({ ...v, buf: undefined })), narrs: P.narrs.map(v => ({ ...v, buf: undefined })),

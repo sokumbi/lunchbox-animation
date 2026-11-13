@@ -52,6 +52,7 @@ fs.mkdirSync(path.join(__dirname, 'shots'), { recursive: true });
     // 새 작품 → 제목 카드 → 촬영
     await T('.g-card.new', 900); out.push(name + ' title page ' + await ev(() => V.screen));
     await sh('01b_title_hint'); await hint(); await sh('01c_title'); await clipCheck(p, name + ' title page');
+    out.push(name + ' title starts empty ' + ((await p.locator('.cp-in').inputValue()) === ''));
     await T('.cp-tile[data-id="night"]', 300); await T('.cp-font >> nth=2', 300); await p.locator('.cp-in').fill('우리 이야기'); await T('.cp-go', 900);
     out.push(name + ' shoot open ' + await ev(() => V.screen + ' ' + P.title + ' fps=' + P.fps + ' ' + W + 'x' + H));
     await sh('02_shoot'); await clipCheck(p, name + ' shoot');
@@ -74,10 +75,11 @@ fs.mkdirSync(path.join(__dirname, 'shots'), { recursive: true });
     await sh('04_deco_voice'); await clipCheck(p, name + ' deco voice');
     await T('.dc-tabs [aria-label="소리"]', 400); await sh('04_deco_sfx'); await clipCheck(p, name + ' deco sfx');
     await T('.tl >> nth=1', 300); out.push(name + ' sfx add ' + await ev(() => P.sfx.length)); await T('.tl >> nth=1', 300); out.push(name + ' sfx toggle off ' + await ev(() => P.sfx.length)); await T('.tl >> nth=2', 300);
+    await T('.tml-row.sfx .tml-x', 300); out.push(name + ' chip x -> ' + await ev(() => P.sfx.length)); await T('.tl >> nth=2', 300);
     await T('.dc-tabs [aria-label="배경음악"]', 400); await T('.tl >> nth=2', 300); await sh('04_deco_bgm'); await clipCheck(p, name + ' deco bgm'); out.push(name + ' bgm ' + await ev(() => sc().bgm));
     await T('.dc-speed button:has-text("빠르게")', 300); out.push(name + ' fps ' + await ev(() => P.fps));
     await T('.dc-play', 120); out.push(name + ' playing ' + await ev(() => Player.playing)); await sh('05_play'); await p.waitForTimeout(600); await T('.dc-mon canvas', 300, { position: { x: 20, y: 20 } });
-    await T('.dc-tabs [aria-label="내보내기"]', 400); await sh('06_share'); await clipCheck(p, name + ' deco share');
+    await T('.dc-tabs [aria-label="내보내기"]', 400); await sh('06_share'); await clipCheck(p, name + ' deco share'); out.push(name + ' share scroll ' + await ev(() => { const q = document.querySelector('.dc-pane.share'); return q.scrollHeight - q.clientHeight; }));
     await T('.cp-mini:has-text("크레딧")', 700); await hint(); await p.locator('.cp-in').fill('만든 사람\n홍길동'); await T('.cp-tile[data-id="stage"]', 300); await sh('06b_credits'); await clipCheck(p, name + ' credits page');
     await T('.cp-go', 800); out.push(name + ' credits -> ' + await ev(() => V.screen + ' ' + V.tool + ' total=' + TL().total.toFixed(1) + ' lead=' + TL().lead + ' tail=' + TL().tail));
     await T('.dc-play', 120); await sh('06c_title_play'); await p.waitForTimeout(500); await T('.dc-mon canvas', 300, { position: { x: 20, y: 20 } });
@@ -92,6 +94,11 @@ fs.mkdirSync(path.join(__dirname, 'shots'), { recursive: true });
     await T('.g-card', 400); await T('.cm-i:has-text("되살리기")', 700); await T('.g-rb[aria-label="내 작품"]', 500);
     await T('.g-rb[aria-label="전래동화"]', 500); await sh('09_tales'); await clipCheck(p, name + ' tales'); await T('.g-card.tale', 400); await sh('09b_tale_sheet');
     await T('.tale-b.or', 1500); await sh('09c_tale_play'); await clipCheck(p, name + ' tale play'); await T('.tale-cv', 300); await T('.tale-cv', 300); await T('.tale-skip', 500); out.push(name + ' tale closed ' + await p.locator('.tale-bg').count());
+    // 스토리 만들기 → 이야기 이름으로 새 작품, 촬영 화면 위 장면 안내
+    await T('.g-card.tale >> nth=1', 400); await T('.tale-b:not(.or)', 1200); out.push(name + ' tale make -> ' + await ev(() => V.screen + ' ' + P.title + ' tale=' + P.tale + ' guide=' + document.querySelectorAll('.sh-guide').length));
+    await T('.sh-guide [aria-label="다음 장면"]', 300); out.push(name + ' tale step ' + await ev(() => P.taleStep)); await sh('09d_tale_make'); await clipCheck(p, name + ' tale make');
+    await T('.sh-l [aria-label="내 작품"]', 900);
+    await T('.g-rb[aria-label="도움말"]', 500); await sh('10_help'); out.push(name + ' help ' + await p.locator('.hint-ov').count()); await hint();
     await ctx.close();
   }
   await b.close(); server.close();

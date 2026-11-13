@@ -1,7 +1,10 @@
 /* =========================================================
    더하기: 제목 카드 · 엔딩 크레딧 페이지(openCard) · 전래동화(스토리 보기 애니메이션) · 처음 한 번 설명 레이어(hintOnce)
    ========================================================= */
-const CARD_DUR = 2.5, CREDIT_DUR = 4;
+const CARD_DUR = 2;            // 제목 카드 길이(초)
+const CREDIT_SPEED = 200;      // 크레딧이 올라가는 빠르기(px/초). 줄이 많을수록 길어져요(3~10초)
+const creditLines = text => (text || '').trim().split('\n').reduce((n, l) => n + Math.max(1, Math.ceil(l.trim().length / 15)), 0);
+const creditDur = text => Math.min(10, Math.max(3, (H + creditLines(text) * 52 * 1.4 + 60) / CREDIT_SPEED));
 /* 글씨체 — 구글 폰트(p1_head). 인터넷이 없으면 기본 글꼴로 나와요 */
 const FONTS = [
   { id: 'jua', name: '둥글둥글', ff: 'Jua' },
@@ -77,7 +80,7 @@ function drawTitleCard(ctx, card, title, p = 0) {
 }
 function drawCredits(ctx, cr, p = 0) {
   const d = designOf(cr && cr.design), text = (cr && cr.text || '').trim();
-  ctx.save(); drawDesign(ctx, d.id, p * CREDIT_DUR);
+  ctx.save(); drawDesign(ctx, d.id, p * creditDur(text));
   ctx.font = fontCSS(cr && cr.font, 52); const lines = text.split('\n').flatMap(l => wrapText(ctx, l, W * .84)), lh = 52 * 1.4, total = lines.length * lh;
   const y = H + 30 - p * (H + total + 60);   // 아래에서 위로 흘러요
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = d.ink;
@@ -91,15 +94,17 @@ function openCard(kind) {
   closeScreen(); show('studio'); V.screen = 'card'; S.step = 'card'; histInit();
   const isT = kind === 'title', body = $('#stBody'); body.innerHTML = '';
   const st = isT ? P.card : P.credits;
+  const auto = isT && isAutoTitle(P.title) ? P.title : null;   // 자동 이름이면 칸을 비워 두고 아이가 직접 쓰게 해요
+  const realT = () => !!(P.title || '').trim() && !isAutoTitle(P.title);
   const cv = h('canvas', { class: 'stage', width: W, height: H });
   const stage = h('div', { class: 'dc-mon' }, cv);
   const inp = isT
-    ? h('input', { class: 'input cp-in', value: P.title, maxlength: 24, placeholder: '작품 제목', 'aria-label': '작품 제목', oninput: e => { P.title = e.target.value; changed(); paintTiles(); } })
+    ? h('input', { class: 'input cp-in', value: auto ? '' : P.title, maxlength: 24, placeholder: '여기에 제목을 써요', 'aria-label': '작품 제목', oninput: e => { const v = e.target.value; P.title = v.trim() ? v : (auto || ''); changed(); paintTiles(); } })
     : h('textarea', { class: 'input cp-in', rows: 3, maxlength: 200, placeholder: '만든 사람\n이름을 써요', 'aria-label': '엔딩 크레딧 글', oninput: e => { st.text = e.target.value; changed(); } });
   if (!isT) inp.value = st.text || '';
   const left = h('div', { class: 'dc-l rail' }, rb('back', isT ? '내 작품' : '꾸미기', isT ? toGallery : openDeco));
   const pane = h('div', { class: 'dc-pane list' });
-  const go = h('button', { class: 'sh-done cp-go', type: 'button', html: icon(isT ? 'cam' : 'share') + `<span>${isT ? '다 골랐어요' : '다 썼어요'}<b>${isT ? '촬영 ›' : '내보내기 ›'}</b></span>`, onclick: async () => { await saveProject(); if (isT) openShoot(); else { V.tool = 'share'; openDeco(); } } });
+  const go = h('button', { class: 'sh-done cp-go', type: 'button', html: icon(isT ? 'cam' : 'share') + `<span>${isT ? '다 골랐어요' : '다 썼어요'}<b>${isT ? '촬영 ›' : '내보내기 ›'}</b></span>`, onclick: async () => { if (isT && st.on && !realT()) toast('제목을 쓰지 않아서 제목 카드 없이 시작해요', 2200); await saveProject(); if (isT) openShoot(); else { V.tool = 'share'; openDeco(); } } });
   body.append(h('div', { class: 'dc cp' }, left, h('div', { class: 'dc-c' }, stage, h('div', { class: 'cp-row' }, h('span', { class: 'cp-lab' }, isT ? '제목' : '크레딧'), inp)), h('div', { class: 'dc-r' }, pane, go)));
   EL = { cv, ctx: cv.getContext('2d'), pane, tiles: [] };
   const minis = [];
@@ -108,7 +113,7 @@ function openCard(kind) {
   const dTiles = h('div', { class: 'tiles cp-tiles' });
   const pick = (id) => { if (id === null) st.on = false; else { st.design = id; if (isT) st.on = true; } changed(); [...dTiles.children].forEach(b => b.classList.toggle('on', b.dataset.id === String(id))); };
   const mini = (id) => {
-    const c = h('canvas', { width: 192, height: 108 }); const paint = () => { const x = c.getContext('2d'); x.setTransform(192 / W, 0, 0, 108 / H, 0, 0); if (id === null) { x.fillStyle = '#000'; x.fillRect(0, 0, W, H); x.fillStyle = '#8e8e93'; x.font = '60px sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('✕', W / 2, H / 2); } else { drawDesign(x, id, 0); drawCardText(x, isT ? (P.title || '제목') : '만든 사람', st.font, 84, H / 2, designOf(id).ink); } };
+    const c = h('canvas', { width: 192, height: 108 }); const paint = () => { const x = c.getContext('2d'); x.setTransform(192 / W, 0, 0, 108 / H, 0, 0); if (id === null) { x.fillStyle = '#000'; x.fillRect(0, 0, W, H); x.fillStyle = '#8e8e93'; x.font = '60px sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('✕', W / 2, H / 2); } else { drawDesign(x, id, 0); drawCardText(x, isT ? (realT() ? P.title : '제목') : '만든 사람', st.font, 84, H / 2, designOf(id).ink); } };
     minis.push(paint); paint(); return c;
   };
   const dtile = (id, name) => { const b = h('button', { class: 'cp-tile' + ((id === null ? isT && !st.on : (st.design === id && (!isT || st.on))) ? ' on' : ''), type: 'button', 'data-id': String(id), 'aria-label': name, onclick: () => pick(id) }, mini(id), h('span', {}, name)); return b; };
@@ -119,11 +124,11 @@ function openCard(kind) {
   pane.append(sec(isT ? '디자인을 골라요' : '배경을 골라요'), dTiles, sec('글씨체를 골라요'), fTiles);
   fontsReady().then(paintTiles);
   // 미리 보기: 제목은 살짝 커지고, 크레딧은 아래에서 위로 흘러요
-  const t0 = performance.now(), dur = isT ? CARD_DUR : CREDIT_DUR;
+  const t0 = performance.now();
   const loop = () => {
     if (V.screen !== 'card') return; V.raf = requestAnimationFrame(loop);
-    const p = ((performance.now() - t0) / 1000 % (dur + .8)) / dur, ctx = EL.ctx; ctx.setTransform(1, 0, 0, 1, 0, 0);
-    if (isT) { if (st.on) drawTitleCard(ctx, st, P.title, Math.min(1, p)); else { ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H); ctx.fillStyle = '#8e8e93'; ctx.font = '30px Jua, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('제목 카드 없이 바로 시작해요', W / 2, H / 2); } }
+    const dur = isT ? CARD_DUR : creditDur(st.text), p = ((performance.now() - t0) / 1000 % (dur + .8)) / dur, ctx = EL.ctx; ctx.setTransform(1, 0, 0, 1, 0, 0);
+    if (isT) { if (st.on && realT()) drawTitleCard(ctx, st, P.title, Math.min(1, p)); else if (st.on) { drawDesign(ctx, st.design, 0); ctx.fillStyle = designOf(st.design).ink; ctx.globalAlpha = .6; ctx.font = '30px Jua, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('아래 칸에 제목을 써요', W / 2, H / 2); ctx.globalAlpha = 1; } else { ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H); ctx.fillStyle = '#8e8e93'; ctx.font = '30px Jua, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('제목 카드 없이 바로 시작해요', W / 2, H / 2); } }
     else { if ((st.text || '').trim()) drawCredits(ctx, st, Math.min(1, p)); else { drawDesign(ctx, st.design, 0); ctx.fillStyle = designOf(st.design).ink; ctx.globalAlpha = .6; ctx.font = '30px Jua, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('아래에 만든 사람 이름을 써요', W / 2, H / 2); ctx.globalAlpha = 1; } }
   };
   cancelAnimationFrame(V.raf); loop();
@@ -133,11 +138,17 @@ function openCard(kind) {
 }
 
 /* ---------- 처음 한 번 설명 레이어: 그 화면을 처음 열 때만, 아무 데나 누르면 사라져요 ---------- */
-function hintOnce(key, title, lines) {
-  const k = 'lb_hint_' + key; try { if (localStorage.getItem(k)) return; } catch (e) { }
+function hintOnce(key, title, lines, always = false) {
+  const k = 'lb_hint_' + key; if (!always) try { if (localStorage.getItem(k)) return; } catch (e) { }
+  const old = $('.hint-ov'); if (old) old.remove();
   const el = h('div', { class: 'hint-ov', role: 'dialog' }, h('div', { class: 'hint-card' }, h('b', {}, title), ...lines.map(([ic, tx]) => h('div', { class: 'hint-l' }, h('i', { html: icon(ic) }), h('span', {}, tx))), h('small', {}, '아무 데나 누르면 시작해요')));
-  el.addEventListener('pointerdown', e => { e.stopPropagation(); e.preventDefault(); try { localStorage.setItem(k, '1'); } catch (x) { } fadeRemove(el); }, { capture: true });
+  el.addEventListener('pointerdown', e => { e.stopPropagation(); e.preventDefault(); if (!always) try { localStorage.setItem(k, '1'); } catch (x) { } fadeRemove(el); }, { capture: true });
   $('#app').append(el);
+}
+/* 도움말(내 작품 줄): 한눈에 보는 안내를 띄우고, 각 화면의 처음 한 번 설명도 다시 나오게 해요 */
+function hintReset() {
+  try { Object.keys(localStorage).filter(k => k.startsWith('lb_hint_')).forEach(k => localStorage.removeItem(k)); } catch (e) { }
+  hintOnce('all', '이렇게 만들어요', [['plus', '＋ 새 작품을 누르고 제목을 써요'], ['cam', '촬영: 조금씩 움직이며 찰칵을 눌러요'], ['sparkle', '꾸미기: 말하기·소리·음악을 넣어요'], ['share', '내보내기: 크레딧을 쓰고 영상 파일을 만들어요'], ['book', '전래동화: 이야기를 보고 따라 찍어요']], true);
 }
 
 /* ---------- 전래동화 5편: 스토리 보기(애니메이션) ---------- */
@@ -246,13 +257,30 @@ function playTale(tale) {
   cv.onclick = () => { if (done) return; paused = !paused; pauseB.hidden = !paused; if (paused) pausedAt = performance.now(); else t0 += performance.now() - pausedAt; if (paused) AE.stopPreview(); else music(); };
   $('#app').append(bg); start();
 }
-/* 전래동화 카드를 누르면: 스토리 보기 · 스토리 만들기(준비 중) */
+/* 전래동화 카드를 누르면: 스토리 보기 · 스토리 만들기(이야기 이름으로 새 작품 → 촬영, 장면 자막 안내) */
+const TALE_DESIGN = { byeoljubu: 'night', heungbu: 'meadow', haenim: 'night', geumdokki: 'paper', kongjwi: 'sunset' };
+async function makeTale(tale) {
+  const { list } = await loadWorks();
+  let n = 1, title = tale.title; while (list.some(d => d.title === title)) title = `${tale.title} ${++n}`;
+  P = newProject(title); P.tale = tale.id; P.taleStep = 0; P.card.design = TALE_DESIGN[tale.id] || 'paper'; setFormat(P.fmt); TLc = null; await saveProject();
+  openShoot();
+}
+/* 촬영 화면 위 장면 안내: 전래동화 자막을 한 장면씩 넘기며 따라 찍어요 */
+function taleGuide(tale) {
+  const n = tale.scenes.length, txt = h('span', { class: 'sh-gd-t' }), num = h('b', {});
+  const prev = h('button', { type: 'button', 'aria-label': '앞 장면', html: icon('back'), onclick: () => step(-1) });
+  const next = h('button', { type: 'button', 'aria-label': '다음 장면', html: icon('next'), onclick: () => step(1) });
+  const paint = () => { const i = Math.min(n - 1, Math.max(0, P.taleStep || 0)); P.taleStep = i; num.textContent = `${i + 1}/${n}`; txt.textContent = tale.scenes[i].cap; prev.disabled = i === 0; next.disabled = i === n - 1; };
+  const step = d => { P.taleStep = (P.taleStep || 0) + d; paint(); scheduleSave(); };
+  paint();
+  return h('div', { class: 'sh-guide' }, h('span', { class: 'sh-gd-e' }, tale.e), prev, h('span', { class: 'sh-gd-c' }, num, txt), next);
+}
 function taleSheet(tale) {
   const done = () => { bg.classList.add('out'); setTimeout(() => bg.remove(), 160); };
   const bg = h('div', { class: 'al-bg', onpointerdown: e => { if (e.target === bg) done(); } },
     h('div', { class: 'al tale-al', role: 'dialog', 'aria-modal': 'true' }, h('span', { class: 'tale-e', style: { background: tale.c } }, tale.e), h('b', { class: 'al-t' }, tale.title), h('p', { class: 'al-p' }, tale.sub),
       h('button', { class: 'tale-b or', type: 'button', html: icon('play') + '<span>스토리 보기</span>', onclick: () => { done(); playTale(tale); } }),
-      h('button', { class: 'tale-b', type: 'button', disabled: true, html: icon('cam') + '<span>스토리 만들기<small>준비 중이에요</small></span>' }),
+      h('button', { class: 'tale-b', type: 'button', html: icon('cam') + '<span>스토리 만들기<small>이야기를 따라 찍어요</small></span>', onclick: () => { done(); makeTale(tale); } }),
       h('button', { class: 'tale-x', type: 'button', 'aria-label': '닫기', html: icon('x'), onclick: done })));
   $('#app').append(bg);
 }

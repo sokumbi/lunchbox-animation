@@ -491,9 +491,9 @@ body,#app,.screen{background:#000;color:#fff}
 
 /* ---------- 공통: 이름 붙은 큰 아이콘 줄 ---------- */
 .rail{display:flex;flex-direction:column;align-items:center;justify-content:space-evenly;gap:2px;min-height:0;padding:4px 2px}
-.ri{width:100%;max-width:var(--rail);border:0;background:none;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:5px 0;border-radius:14px;cursor:pointer;font:inherit;transition:transform .2s var(--spring),background-color .2s,color .2s}
-.ri svg{width:clamp(26px,8.6cqh,38px);height:clamp(26px,8.6cqh,38px);stroke-width:1.7}
-.ri span{font-size:clamp(10.5px,3.3cqh,13px);font-weight:700;line-height:1.1;color:#d1d1d6;white-space:nowrap;letter-spacing:-.02em}
+.ri{width:100%;max-width:var(--rail);border:0;background:none;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:4px 0;border-radius:14px;cursor:pointer;font:inherit;transition:transform .2s var(--spring),background-color .2s,color .2s}
+.ri svg{width:clamp(26px,8.2cqh,36px);height:clamp(26px,8.2cqh,36px);stroke-width:1.7}
+.ri span{font-size:clamp(12px,3.7cqh,14px);font-weight:700;line-height:1.1;color:#d1d1d6;white-space:nowrap;letter-spacing:-.02em}
 .ri:active{transform:scale(.9);background:#ffffff1c}
 .ri.on{color:var(--acc)}
 .ri.on span{color:var(--acc)}
@@ -514,25 +514,35 @@ body,#app,.screen{background:#000;color:#fff}
 .sh-banner button{border:0;border-radius:999px;background:#fff;color:var(--acc);font:inherit;font-size:clamp(11px,3.6cqh,13px);font-weight:800;padding:3px 10px;cursor:pointer}
 /* 아래 필름: 찍은 컷이 쌓여요 */
 .sh-film{position:absolute;left:0;right:0;bottom:0;z-index:3;height:clamp(54px,21cqh,88px);display:flex;align-items:center;gap:8px;padding:0 10px;box-sizing:border-box;background:none;pointer-events:none}
-.sh-cnt{flex:none;display:flex;flex-direction:column;align-items:center;line-height:1;font-size:clamp(10px,3.2cqh,12px);font-weight:700;color:#fff;min-width:34px;text-shadow:0 1px 4px #000c}
+.sh-cnt{flex:none;display:flex;flex-direction:column;align-items:center;line-height:1;font-size:clamp(11px,3.4cqh,12.5px);font-weight:700;color:#fff;min-width:34px;text-shadow:0 1px 4px #000c}
 .sh-cnt b{font-size:clamp(18px,7cqh,28px);font-weight:900;color:#fff}
 .sh-film>*{pointer-events:auto}
 .sh-list{flex:1;min-width:0;height:100%;display:flex;align-items:center;gap:6px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;padding:0 4px;scroll-behavior:smooth}
 .sh-list::-webkit-scrollbar{display:none}
 .sh-fr{flex:none;height:72%;box-shadow:0 2px 8px #000c;aspect-ratio:var(--ar,1.7778);border:0;padding:0;background:var(--panel2);border-radius:6px;position:relative;overflow:hidden;cursor:pointer;box-shadow:0 0 0 1.5px #ffffff55;transition:transform .2s var(--spring)}
 .sh-fr img{width:100%;height:100%;object-fit:cover;display:block}
-.sh-fr b{position:absolute;left:0;bottom:0;background:#000a;color:#fff;font-size:clamp(9px,3cqh,11px);font-weight:800;padding:0 5px;border-radius:0 5px 0 0}
+.sh-fr b{position:absolute;left:0;bottom:0;background:#000a;color:#fff;font-size:clamp(10px,3.2cqh,12px);font-weight:800;padding:0 5px;border-radius:0 5px 0 0}
 .sh-fr:active{transform:scale(.94)}
 .sh-fr.retake{box-shadow:0 0 0 3px var(--acc)}
 .sh-fr.now,.sh-fr.sel{box-shadow:0 0 0 3px var(--acc)}
 .sh-pop{position:absolute;z-index:6;transform:translateX(-50%);display:flex;gap:4px;padding:5px;background:#2c2c2ef5;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:14px;box-shadow:0 6px 20px #000a;animation:popUp .18s var(--pop) both}
 @keyframes popUp{from{opacity:0;transform:translateX(-50%) translateY(8px)}}
-.sh-pop button{border:0;border-radius:10px;background:none;color:#fff;font:inherit;font-size:clamp(10px,3.2cqh,12px);font-weight:800;display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 8px;cursor:pointer;white-space:nowrap}
+.sh-pop button{border:0;border-radius:10px;background:none;color:#fff;font:inherit;font-size:clamp(11.5px,3.5cqh,13px);font-weight:800;display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 8px;cursor:pointer;white-space:nowrap}
 .sh-pop button svg{width:clamp(18px,6cqh,24px);height:clamp(18px,6cqh,24px);color:var(--acc)}
 .sh-pop button.red,.sh-pop button.red svg{color:#ff6b5e}
 .sh-pop button:active{background:#ffffff1f}
 .sh-pop-tip{position:absolute;bottom:-6px;width:12px;height:12px;background:#2c2c2ef5;transform:translateX(-50%) rotate(45deg);border-radius:2px}
 .sh-ins{flex:none;width:4px;height:76%;border-radius:2px;background:var(--acc);box-shadow:0 0 8px var(--acc)}
+/* 전래동화 따라 찍기: 촬영 화면 위 장면 자막 안내 */
+.sh-guide{position:absolute;top:6px;left:4%;right:4%;width:fit-content;max-width:min(100%,560px);margin:0 auto;z-index:3;display:flex;align-items:center;gap:4px;box-sizing:border-box;background:#000000b8;color:#fff;border-radius:16px;padding:4px 6px 4px 8px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.sh-gd-e{font-size:clamp(16px,6cqh,22px);line-height:1;flex:none}
+.sh-guide button{border:0;background:#ffffff22;color:#fff;border-radius:50%;width:clamp(26px,9cqh,32px);height:clamp(26px,9cqh,32px);display:grid;place-items:center;padding:0;cursor:pointer;flex:none}
+.sh-guide button svg{width:16px;height:16px}
+.sh-guide button:disabled{opacity:.3}
+.sh-gd-c{display:flex;align-items:center;gap:6px;min-width:0;font-size:clamp(11.5px,3.8cqh,14px);font-weight:700;line-height:1.25}
+.sh-gd-c b{flex:none;color:var(--acc);font-weight:900}
+.sh-gd-t{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.sh-mon.tale .sh-banner{top:calc(12px + clamp(34px,12cqh,44px))}
 .sh-none{color:#aaa;font-size:clamp(11px,3.6cqh,14px);font-weight:700;white-space:nowrap;padding:0 6px;text-shadow:0 1px 4px #000c}
 /* 찰칵 · 다 찍었어요 */
 .shutter{--d:min(clamp(64px,22cqh,92px),calc(var(--rail) - 6px));width:var(--d);height:var(--d);box-sizing:border-box;border-radius:50%;border:4px solid #fff;background:transparent;padding:0;display:grid;place-items:center;cursor:pointer;flex:none}
@@ -541,8 +551,8 @@ body,#app,.screen{background:#000;color:#fff}
 .shutter.run .in{width:44%;height:44%;border-radius:8px;background:#8e8e93}
 .sh-done{width:calc(100% - 8px);max-width:var(--rail);border:0;border-radius:16px;background:var(--acc);color:#fff;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 2px;cursor:pointer;font:inherit;box-shadow:0 4px 14px #cf5d2a66;transition:transform .2s var(--spring)}
 .sh-done svg{width:clamp(22px,7cqh,30px);height:clamp(22px,7cqh,30px)}
-.sh-done span{display:flex;flex-direction:column;align-items:center;font-size:clamp(9.5px,3cqh,11.5px);font-weight:700;line-height:1.15}
-.sh-done span b{font-size:clamp(12px,4cqh,15px);font-weight:900}
+.sh-done span{display:flex;flex-direction:column;align-items:center;font-size:clamp(11px,3.4cqh,12.5px);font-weight:700;line-height:1.15;word-break:keep-all;text-align:center}
+.sh-done span b{font-size:clamp(13px,4.3cqh,16px);font-weight:900}
 .sh-done:active{transform:scale(.94)}
 /* 컷 창 */
 .modal.wide:has(.cut){width:min(760px,calc(100% - 16px));padding:12px}
@@ -578,29 +588,34 @@ body,#app,.screen{background:#000;color:#fff}
 .tml-labels,.tml-body{display:grid;grid-template-rows:var(--tmlr);gap:3px;min-height:0}
 .tml-body{position:relative;touch-action:none;cursor:pointer}
 .tml-time{align-self:center;justify-self:end;font-size:clamp(10px,3.2cqh,12px);font-weight:700;color:#8e8e93;font-variant-numeric:tabular-nums;padding-right:2px}
-.tml-lab{border:0;background:none;font:inherit;display:flex;align-items:center;gap:3px;padding:0 2px;cursor:pointer;font-size:clamp(10px,3.2cqh,12px);font-weight:800;min-height:0}
+.tml-lab{border:0;background:none;font:inherit;display:flex;align-items:center;gap:3px;padding:0 2px;cursor:pointer;font-size:clamp(11px,3.4cqh,12.5px);font-weight:800;min-height:0}
 .tml-lab svg{width:clamp(13px,4.4cqh,16px);height:clamp(13px,4.4cqh,16px);flex:none}
 .tml-film{width:100%;height:100%;display:block;border-radius:6px;background:var(--panel2);min-height:0}
 .tml-row{position:relative;background:var(--panel);border-radius:6px;min-height:0;overflow:hidden}
 .tml-empty{position:absolute;inset:0;display:flex;align-items:center;padding:0 8px;font-size:clamp(9px,3cqh,11px);color:#6e6e73;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
-.tml-it{position:absolute;top:1px;bottom:1px;border:0;border-radius:999px;color:#fff;font:inherit;font-size:clamp(9px,3cqh,11px);font-weight:800;display:flex;align-items:center;gap:3px;padding:0 7px 0 4px;cursor:pointer;white-space:nowrap;overflow:hidden;box-sizing:border-box;min-width:20px;transition:transform .2s var(--spring)}
+.tml-it{position:absolute;top:1px;bottom:1px;border:0;border-radius:999px;color:#fff;font:inherit;font-size:clamp(10px,3.3cqh,12px);font-weight:800;display:flex;align-items:center;gap:3px;padding:0 7px 0 4px;cursor:pointer;white-space:nowrap;overflow:hidden;box-sizing:border-box;min-width:20px;transition:transform .2s var(--spring)}
 .tml-it svg{width:clamp(11px,3.6cqh,14px);height:clamp(11px,3.6cqh,14px);flex:none}
 .tml-it:active{transform:scale(.94)}
 .tml-row.narr .tml-it{background:#2F9C9A}
 .tml-row.sfx .tml-it{background:var(--acc)}
-.tml-row.bgm .tml-it{background:#4E9A63;justify-content:center}
+.tml-row.bgm .tml-it{background:#4E9A63}
+.tml-row.bgm .tml-it span{margin-left:auto}
+.tml-row.narr .tml-it{min-width:48px}
+.tml-x{margin-left:auto;flex:none;width:clamp(16px,5.4cqh,20px);height:clamp(16px,5.4cqh,20px);border-radius:50%;background:#00000050;display:grid;place-items:center;cursor:pointer}
+.tml-x svg{width:60%;height:60%}
+.tml-x:active{background:#000000a0}
 .tml-head{position:absolute;top:0;bottom:0;width:2px;background:#fff;transform:translateX(-1px);pointer-events:none;z-index:4;box-shadow:0 0 4px #000}
 .tml-head.l b{transform:translateX(0)}
 .tml-head.r b{transform:translateX(-100%)}
 .tml-head b{position:absolute;top:2px;left:50%;transform:translateX(-50%);transition:transform .15s;background:#000d;color:#fff;font-size:clamp(9px,3cqh,11px);font-weight:800;padding:1px 5px;border-radius:6px;font-variant-numeric:tabular-nums;white-space:nowrap}
 .dc-speed{display:flex;flex-direction:column;align-items:center;gap:3px;width:calc(100% - 6px)}
 .dc-speed span{font-size:clamp(9.5px,3cqh,11.5px);font-weight:700;color:#8e8e93}
-.dc-speed button{width:100%;border:0;border-radius:9px;background:var(--panel2);color:#d1d1d6;font:inherit;font-size:clamp(10.5px,3.3cqh,13px);font-weight:800;padding:clamp(3px,1.3cqh,6px) 2px;cursor:pointer}
+.dc-speed button{width:100%;border:0;border-radius:9px;background:var(--panel2);color:#d1d1d6;font:inherit;font-size:clamp(12px,3.6cqh,13.5px);font-weight:800;padding:clamp(3px,1.3cqh,6px) 2px;cursor:pointer}
 .dc-speed button.on{background:#fff;color:#111}
 /* 오른쪽 도구 판 */
 .dc-r{min-height:0;display:flex;flex-direction:column;gap:6px;padding:8px 8px 8px 4px;padding-right:max(8px,env(safe-area-inset-right))}
 .dc-tabs{flex:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;background:var(--panel);border-radius:14px;padding:4px}
-.dc-tabs button{border:0;border-radius:11px;background:none;color:#d1d1d6;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px;cursor:pointer;font:inherit;font-size:clamp(9.5px,3cqh,12px);font-weight:800;transition:transform .2s var(--spring),background-color .2s}
+.dc-tabs button{border:0;border-radius:11px;background:none;color:#d1d1d6;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;cursor:pointer;font:inherit;font-size:clamp(11.5px,3.5cqh,13px);font-weight:800;letter-spacing:-.02em;white-space:nowrap;min-width:0;transition:transform .2s var(--spring),background-color .2s}
 .dc-tabs button svg{width:clamp(20px,6.6cqh,28px);height:clamp(20px,6.6cqh,28px)}
 .dc-tabs button.on{background:var(--acc);color:#fff}
 .dc-tabs button:active{transform:scale(.92)}
@@ -616,7 +631,7 @@ body,#app,.screen{background:#000;color:#fff}
 .tl{border:2px solid transparent;border-radius:12px;background:var(--panel2);color:#fff;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;font:inherit;cursor:pointer;--tc:var(--acc);transition:transform .2s var(--spring),background-color .2s;min-width:0}
 .tl i{width:clamp(28px,9cqh,38px);height:clamp(28px,9cqh,38px);border-radius:50%;background:color-mix(in srgb,var(--tc) 30%,transparent);display:grid;place-items:center}
 .tl i svg{width:58%;height:58%}
-.tl span{font-size:clamp(10px,3.1cqh,12px);font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.tl span{font-size:clamp(11.5px,3.4cqh,13px);font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .tl:active{transform:scale(.92)}
 .tl.on{border-color:var(--tc);background:color-mix(in srgb,var(--tc) 32%,var(--panel2))}
 .tl.on i{background:var(--tc)}
@@ -638,6 +653,7 @@ body,#app,.screen{background:#000;color:#fff}
 .share-b svg{grid-row:1/3;width:clamp(24px,8cqh,32px);height:clamp(24px,8cqh,32px);color:var(--acc)}
 .share-b b{font-size:clamp(13px,4.2cqh,16px);font-weight:900}
 .share-b small{font-size:clamp(10px,3.2cqh,12px);color:#a1a1a6}
+.share-two{display:contents}
 .share-b.or{background:var(--acc)}
 .share-b.or svg,.share-b.or small{color:#fff}
 .share-b:active{transform:scale(.96)}
@@ -646,10 +662,13 @@ body,#app,.screen{background:#000;color:#fff}
    내 작품
    ========================================================= */
 .gal-screen{flex-direction:row;transition:transform .38s var(--spring),filter .38s}
-.g-rail{flex:none;width:var(--rail);display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 0 calc(10px + env(safe-area-inset-bottom));padding-left:env(safe-area-inset-left);background:var(--panel)}
+.g-rail{flex:none;width:var(--rail);display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 0 calc(8px + env(safe-area-inset-bottom));padding-left:env(safe-area-inset-left);background:var(--panel)}
 .g-rb{width:calc(100% - 8px);border:0;border-radius:12px;background:none;color:#fff;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 0;cursor:pointer;font:inherit;transition:transform .2s var(--spring),background-color .2s}
 .g-rb svg{width:clamp(26px,8.4cqh,32px);height:clamp(26px,8.4cqh,32px);stroke-width:1.7}
-.g-rb span{font-size:clamp(10px,3.1cqh,12.5px);font-weight:700;line-height:1.1;color:#d1d1d6;white-space:nowrap}
+.g-rb span{font-size:clamp(12px,3.5cqh,14px);font-weight:700;line-height:1.1;color:#d1d1d6;white-space:nowrap}
+.g-rb.sm{padding:4px 0}
+.g-rb.sm svg{width:clamp(20px,6.4cqh,26px);height:clamp(20px,6.4cqh,26px)}
+.g-rb.sm span{font-size:clamp(11px,3.2cqh,12.5px)}
 .g-rb.on{background:var(--panel3)}
 .g-rb:active{transform:scale(.92)}
 .g-sp{flex:1}
@@ -719,7 +738,7 @@ textarea.cp-in{height:clamp(54px,18cqh,74px)}
 .cp-tiles{grid-template-columns:repeat(auto-fill,minmax(clamp(74px,24cqh,104px),1fr))}
 .cp-tile{border:2px solid transparent;border-radius:12px;background:var(--panel2);color:#fff;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px;font:inherit;cursor:pointer;min-width:0;transition:transform .2s var(--spring)}
 .cp-tile canvas{width:100%;height:auto;border-radius:8px;display:block}
-.cp-tile span{font-size:clamp(10px,3.1cqh,12px);font-weight:800}
+.cp-tile span{font-size:clamp(11.5px,3.4cqh,13px);font-weight:800}
 .cp-tile.on{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 30%,var(--panel2))}
 .cp-tile:active{transform:scale(.94)}
 .cp-font{border:2px solid transparent;border-radius:12px;background:var(--panel2);color:#fff;padding:clamp(8px,3cqh,12px) 4px;cursor:pointer;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:transform .2s var(--spring)}
@@ -793,7 +812,11 @@ textarea.cp-in{height:clamp(54px,18cqh,74px)}
   .dc-r{padding:4px 8px calc(8px + env(safe-area-inset-bottom))}
   .cp .dc-c{padding:0 8px 4px}
   .dc-pane.share{overflow:auto}
-  .share-b{flex:none;grid-template-rows:auto;padding:9px 12px}
+  .dc-pane.share .dc-title{flex-direction:row;align-items:center;gap:8px}
+  .dc-pane.share .dc-title span{flex:none}
+  .dc-pane.share .dc-title .input{flex:1;min-width:0;padding:6px 10px}
+  .share-two{display:grid;grid-template-columns:1.4fr 1fr;gap:6px;flex:none}
+  .share-b{flex:none;grid-template-rows:auto;padding:9px 10px;column-gap:8px}
   .share-b small{display:none}
   .tale-top{padding-top:max(10px,env(safe-area-inset-top))}
   .intro{padding-bottom:22cqh;box-sizing:border-box}
@@ -1304,9 +1327,12 @@ function undo() {
   if (!P.scenes.find(s => s.id === S.curScene)) S.curScene = P.scenes[P.scenes.length - 1].id;
   goStep(S.step); toast('되돌렸어요', 1100);
 }
-/* 제목 카드는 맨 앞(lead), 엔딩 크레딧은 맨 뒤(tail)에 붙어요 (p6d_extra: CARD_DUR·CREDIT_DUR) */
-const cardLead = () => (P.card && P.card.on && P.title) ? CARD_DUR : 0;
-const cardTail = () => (P.credits && P.credits.text && P.credits.text.trim()) ? CREDIT_DUR : 0;
+/* 제목 카드는 맨 앞(lead), 엔딩 크레딧은 맨 뒤(tail)에 붙어요 (p6d_extra: CARD_DUR·creditDur) */
+const isAutoTitle = t => /^작품 \d+$/.test((t || '').trim());   // 새 작품의 자동 이름("작품 3")은 제목 카드에 안 써요
+const hasCard = () => !!(P.card && P.card.on && (P.title || '').trim() && !isAutoTitle(P.title));
+const hasCredits = () => !!(P.credits && P.credits.text && P.credits.text.trim());
+const cardLead = () => hasCard() ? CARD_DUR : 0;
+const cardTail = () => hasCredits() ? creditDur(P.credits.text) : 0;
 function TL() {
   if (TLc) return TLc;
   const seq = [], ranges = [], map = {}; const lead = cardLead(), tail = cardTail(); let t = lead;
@@ -1452,7 +1478,7 @@ function scheduleSave() { clearTimeout(saveT); const el = $('#savedState'); if (
 function projectDump() {
   return {
     id: P.id, title: P.title, storyId: P.storyId, created: P.created, updated: P.updated, fps: P.fps, hold: P.hold,
-    synopsis: P.synopsis || '', lastStep: P.lastStep || 'shoot', scriptMode: P.scriptMode, script: P.script, narrText: P.narrText, mix: P.mix, look: P.look || null, duck: P.duck, fade: P.fade, subs: P.subs, done: P.done, fmt: P.fmt || 'wide', card: P.card || null, credits: P.credits || null,
+    synopsis: P.synopsis || '', lastStep: P.lastStep || 'shoot', scriptMode: P.scriptMode, script: P.script, narrText: P.narrText, mix: P.mix, look: P.look || null, duck: P.duck, fade: P.fade, subs: P.subs, done: P.done, fmt: P.fmt || 'wide', card: P.card || null, credits: P.credits || null, tale: P.tale || null, taleStep: P.taleStep || 0,
     fx: P.fx, sfx: P.sfx,
     scenes: P.scenes.map(s => ({ id: s.id, name: s.name, desc: s.desc || '', trimIn: s.trimIn, trimOut: s.trimOut, bgm: s.bgm, stage: s.stage, sketch: s.sketch ? s.sketch.blob : null, frames: s.frames.map(f => ({ id: f.id, hold: f.hold, blob: f.blob })) })),
     voices: P.voices.map(v => ({ ...v, buf: undefined })), narrs: P.narrs.map(v => ({ ...v, buf: undefined })),
@@ -1759,7 +1785,8 @@ async function openGallery(o = {}) {
   const up = h('input', { type: 'file', accept: '.json,application/json', hidden: true, onchange: async e => { const f = e.target.files[0]; if (!f) return; const d = await importProjectFile(f); if (d) { toast(`“${d.title}”을(를) 불러왔어요`); openGallery(); } } });
   const tab = (ic, label, id, short = label) => h('button', { class: 'g-rb' + (galTab === id ? ' on' : ''), type: 'button', 'aria-label': label, html: icon(ic) + `<span>${short}</span>`, onclick: () => { galTab = id; openGallery(); } });
   const rail = h('nav', { class: 'g-rail' }, tab('folder', '내 작품', 'movies'), tab('book', '전래동화', 'tales'), tab('trash', '휴지통', 'trash'), h('span', { class: 'g-sp' }),
-    h('button', { class: 'g-rb', type: 'button', 'aria-label': '작품 파일 불러오기', html: icon('upload') + '<span>불러오기</span>', onclick: () => up.click() }), up);
+    h('button', { class: 'g-rb sm', type: 'button', 'aria-label': '도움말', html: icon('help') + '<span>도움말</span>', onclick: hintReset }),
+    h('button', { class: 'g-rb sm', type: 'button', 'aria-label': '작품 파일 불러오기', html: icon('upload') + '<span>불러오기</span>', onclick: () => up.click() }), up);
   const { list, trash } = await loadWorks();
   const isTrash = galTab === 'trash', isTales = galTab === 'tales';
   const grid = h('div', { class: 'g-grid list' });
@@ -1891,7 +1918,8 @@ function openShoot() {
   const flash = h('div', { class: 'flash' }), cd = h('div', { class: 'countdown', hidden: true }), nocam = h('div', { class: 'nocam', hidden: true });
   const banner = h('div', { class: 'sh-banner', hidden: true });
   const film = h('div', { class: 'sh-film' });
-  const mon = h('div', { class: 'sh-mon', onpointerdown: e => { if (EL.pop && !e.target.closest('.sh-fr')) cutPopClose(); } }, cv, flash, cd, nocam, banner, film);
+  const tale = P.tale && TALES.find(t => t.id === P.tale), guide = tale ? taleGuide(tale) : '';   // 전래동화 따라 찍기면 위에 장면 자막
+  const mon = h('div', { class: 'sh-mon' + (tale ? ' tale' : ''), onpointerdown: e => { if (EL.pop && !e.target.closest('.sh-fr')) cutPopClose(); } }, cv, flash, cd, nocam, guide, banner, film);
   const onionB = rb('onion', '겹쳐보기', () => { V.onion = !V.onion; onionB.classList.toggle('on', V.onion); }, V.onion ? 'on' : '');
   const gridB = rb('grid', '격자', () => { V.grid = !V.grid; gridB.classList.toggle('on', V.grid); }, V.grid ? 'on' : '');
   const playB = rb('play', '재생', shootPv);
@@ -2086,11 +2114,13 @@ function tlPaint() {
     c.fillStyle = '#0006'; for (let i = 1; i < n; i++) c.fillRect(Math.round(i * ww) - 1, 0, 1, hh);
   }
   for (const k in tl.rows) tl.rows[k].innerHTML = '';
-  const put = (k, t, w, label, ic, onclick) => tl.rows[k].append(h('button', { type: 'button', class: 'tml-it', style: { left: pct(t), width: w == null ? null : pct(Math.max(.15, Math.min(w, T - t))) }, 'aria-label': label, html: icon(ic) + (label ? `<span>${label}</span>` : ''), onclick }));
-  [...P.narrs].sort((a, b) => absT(a) - absT(b)).forEach((nr, i) => { const t = absT(nr); if (t != null) put('narr', t, nr.dur, `말 ${i + 1}`, 'mic', () => { V.tool = 'voice'; Player.seek(t); decoTool(); Player.play({ until: t + nr.dur + .2 }); }); });
-  for (const x of P.sfx) { const t = absT(x), d = SFX.find(y => y.id === x.snd); if (t != null) put('sfx', t, null, d ? d.name : '', SFX_IC[x.snd] || 'speaker', () => { V.tool = 'sfx'; Player.seek(t); decoTool(); AE.playPreview('sfx', x.snd); }); }
+  // 칩: 누르면 그 자리로 가며 도구가 열려요. 오른쪽 ✕로 바로 빼요(되돌리기로 살릴 수 있어요)
+  const put = (k, t, w, label, ic, onclick, del) => { const b = h('button', { type: 'button', class: 'tml-it', style: { left: pct(t), width: w == null ? null : pct(Math.max(.15, Math.min(w, T - t))) }, 'aria-label': label, html: icon(ic) + (label ? `<span>${label}</span>` : ''), onclick });
+    b.append(h('i', { class: 'tml-x', role: 'button', 'aria-label': `${label} 빼기`, html: icon('x'), onclick: e => { e.stopPropagation(); del(); changed(); decoMarks(); decoTool(); } })); tl.rows[k].append(b); };
+  [...P.narrs].sort((a, b) => absT(a) - absT(b)).forEach((nr, i) => { const t = absT(nr); if (t != null) put('narr', t, nr.dur, `말 ${i + 1}`, 'mic', () => { V.tool = 'voice'; Player.seek(t); decoTool(); Player.play({ until: t + nr.dur + .2 }); }, () => { P.narrs = P.narrs.filter(x => x !== nr); toast('녹음한 말을 뺐어요 · 되돌리기로 살릴 수 있어요', 1800); }); });
+  for (const x of P.sfx) { const t = absT(x), d = SFX.find(y => y.id === x.snd); if (t != null) put('sfx', t, null, d ? d.name : '', SFX_IC[x.snd] || 'speaker', () => { V.tool = 'sfx'; Player.seek(t); decoTool(); AE.playPreview('sfx', x.snd); }, () => { P.sfx = P.sfx.filter(y => y !== x); toast(`${d ? d.name + ' ' : ''}소리를 뺐어요`, 1000); }); }
   const bd = BGM.find(y => y.id === sc().bgm);
-  if (bd) put('bgm', 0, T, bd.name, 'music', () => { V.tool = 'bgm'; decoTool(); });
+  if (bd) put('bgm', 0, T, bd.name, 'music', () => { V.tool = 'bgm'; decoTool(); }, () => { sc().bgm = null; AE.stopPreview(); toast('음악을 뺐어요', 1000); });
   const none = { narr: '말하기에서 녹음하면 여기에 보여요', sfx: '소리를 누르면 그 자리에 들어가요', bgm: '음악 없음' };
   for (const k in tl.rows) if (!tl.rows[k].children.length) tl.rows[k].append(h('span', { class: 'tml-empty' }, none[k]));
 }
@@ -2152,18 +2182,23 @@ function paneShare(pane) {
   pane.append(h('label', { class: 'dc-title' }, h('span', {}, '작품 이름'), h('input', { class: 'input', value: P.title, maxlength: 40, 'aria-label': '작품 이름', oninput: e => { P.title = e.target.value; changed(); } })),
     h('p', { class: 'dc-tip' }, `컷 ${nFrames()} · ${fmt(TL().total)}초 · 말 ${P.narrs.length} · 소리 ${P.sfx.length}${sc().bgm ? ' · 음악' : ''}`),
     h('div', { class: 'cp-two' },
-      h('button', { class: 'cp-mini', type: 'button', onclick: () => openCard('title'), html: icon('edit') + `<span>제목 카드<small>${P.card && P.card.on ? designOf(P.card.design).name + ' · ' + fontOf(P.card.font).name : '없음'}</small></span>` }),
-      h('button', { class: 'cp-mini', type: 'button', onclick: () => openCard('credits'), html: icon('film') + `<span>크레딧<small>${P.credits && P.credits.text.trim() ? designOf(P.credits.design).name + ' · ' + fontOf(P.credits.font).name : '없음'}</small></span>` })),
-    big('download', '영상 파일 만들기', '저장하거나 친구에게 보내요', () => { if (!TL().total) { toast('먼저 촬영에서 컷을 찍어요'); return; } Player.pause(); exportVideo(); }, 'or'),
-    big('save', '작품 파일', '다른 폰·태블릿으로 옮겨요', async () => { await saveProject(); const d = await DB.get(P.id).catch(() => null); d ? exportProjectFile(d) : toast('먼저 저장이 되어야 해요'); }));
+      h('button', { class: 'cp-mini', type: 'button', onclick: () => openCard('title'), html: icon('edit') + `<span>제목 카드<small>${hasCard() ? designOf(P.card.design).name + ' · ' + fontOf(P.card.font).name : P.card && P.card.on ? '제목을 쓰면 나와요' : '없음'}</small></span>` }),
+      h('button', { class: 'cp-mini', type: 'button', onclick: () => openCard('credits'), html: icon('film') + `<span>크레딧<small>${hasCredits() ? designOf(P.credits.design).name + ' · ' + fontOf(P.credits.font).name : '없음'}</small></span>` })),
+    h('div', { class: 'share-two' },   // 세로 화면에선 나란히, 가로에선 위아래로
+      big('download', '영상 파일 만들기', '저장하거나 친구에게 보내요', () => { if (!TL().total) { toast('먼저 촬영에서 컷을 찍어요'); return; } Player.pause(); exportVideo(); }, 'or'),
+      big('save', '작품 파일', '다른 폰·태블릿으로 옮겨요', async () => { await saveProject(); const d = await DB.get(P.id).catch(() => null); d ? exportProjectFile(d) : toast('먼저 저장이 되어야 해요'); })));
 }
+IC.help = IC.help || '<circle cx="12" cy="12" r="9"/><path d="M9.6 9.6a2.4 2.4 0 1 1 3.4 2.2c-.7.4-1 .9-1 1.7"/><circle cx="12" cy="17" r=".7" fill="currentColor"/>';
 IC.more = IC.more || '<circle cx="5" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="19" cy="12" r="1.6" fill="currentColor"/>';
 IC.expand = IC.expand || '<path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/>';
 addEventListener('resize', () => setTimeout(tlPaint, 120));
 /* =========================================================
    더하기: 제목 카드 · 엔딩 크레딧 페이지(openCard) · 전래동화(스토리 보기 애니메이션) · 처음 한 번 설명 레이어(hintOnce)
    ========================================================= */
-const CARD_DUR = 2.5, CREDIT_DUR = 4;
+const CARD_DUR = 2;            // 제목 카드 길이(초)
+const CREDIT_SPEED = 200;      // 크레딧이 올라가는 빠르기(px/초). 줄이 많을수록 길어져요(3~10초)
+const creditLines = text => (text || '').trim().split('\n').reduce((n, l) => n + Math.max(1, Math.ceil(l.trim().length / 15)), 0);
+const creditDur = text => Math.min(10, Math.max(3, (H + creditLines(text) * 52 * 1.4 + 60) / CREDIT_SPEED));
 /* 글씨체 — 구글 폰트(p1_head). 인터넷이 없으면 기본 글꼴로 나와요 */
 const FONTS = [
   { id: 'jua', name: '둥글둥글', ff: 'Jua' },
@@ -2239,7 +2274,7 @@ function drawTitleCard(ctx, card, title, p = 0) {
 }
 function drawCredits(ctx, cr, p = 0) {
   const d = designOf(cr && cr.design), text = (cr && cr.text || '').trim();
-  ctx.save(); drawDesign(ctx, d.id, p * CREDIT_DUR);
+  ctx.save(); drawDesign(ctx, d.id, p * creditDur(text));
   ctx.font = fontCSS(cr && cr.font, 52); const lines = text.split('\n').flatMap(l => wrapText(ctx, l, W * .84)), lh = 52 * 1.4, total = lines.length * lh;
   const y = H + 30 - p * (H + total + 60);   // 아래에서 위로 흘러요
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = d.ink;
@@ -2253,15 +2288,17 @@ function openCard(kind) {
   closeScreen(); show('studio'); V.screen = 'card'; S.step = 'card'; histInit();
   const isT = kind === 'title', body = $('#stBody'); body.innerHTML = '';
   const st = isT ? P.card : P.credits;
+  const auto = isT && isAutoTitle(P.title) ? P.title : null;   // 자동 이름이면 칸을 비워 두고 아이가 직접 쓰게 해요
+  const realT = () => !!(P.title || '').trim() && !isAutoTitle(P.title);
   const cv = h('canvas', { class: 'stage', width: W, height: H });
   const stage = h('div', { class: 'dc-mon' }, cv);
   const inp = isT
-    ? h('input', { class: 'input cp-in', value: P.title, maxlength: 24, placeholder: '작품 제목', 'aria-label': '작품 제목', oninput: e => { P.title = e.target.value; changed(); paintTiles(); } })
+    ? h('input', { class: 'input cp-in', value: auto ? '' : P.title, maxlength: 24, placeholder: '여기에 제목을 써요', 'aria-label': '작품 제목', oninput: e => { const v = e.target.value; P.title = v.trim() ? v : (auto || ''); changed(); paintTiles(); } })
     : h('textarea', { class: 'input cp-in', rows: 3, maxlength: 200, placeholder: '만든 사람\n이름을 써요', 'aria-label': '엔딩 크레딧 글', oninput: e => { st.text = e.target.value; changed(); } });
   if (!isT) inp.value = st.text || '';
   const left = h('div', { class: 'dc-l rail' }, rb('back', isT ? '내 작품' : '꾸미기', isT ? toGallery : openDeco));
   const pane = h('div', { class: 'dc-pane list' });
-  const go = h('button', { class: 'sh-done cp-go', type: 'button', html: icon(isT ? 'cam' : 'share') + `<span>${isT ? '다 골랐어요' : '다 썼어요'}<b>${isT ? '촬영 ›' : '내보내기 ›'}</b></span>`, onclick: async () => { await saveProject(); if (isT) openShoot(); else { V.tool = 'share'; openDeco(); } } });
+  const go = h('button', { class: 'sh-done cp-go', type: 'button', html: icon(isT ? 'cam' : 'share') + `<span>${isT ? '다 골랐어요' : '다 썼어요'}<b>${isT ? '촬영 ›' : '내보내기 ›'}</b></span>`, onclick: async () => { if (isT && st.on && !realT()) toast('제목을 쓰지 않아서 제목 카드 없이 시작해요', 2200); await saveProject(); if (isT) openShoot(); else { V.tool = 'share'; openDeco(); } } });
   body.append(h('div', { class: 'dc cp' }, left, h('div', { class: 'dc-c' }, stage, h('div', { class: 'cp-row' }, h('span', { class: 'cp-lab' }, isT ? '제목' : '크레딧'), inp)), h('div', { class: 'dc-r' }, pane, go)));
   EL = { cv, ctx: cv.getContext('2d'), pane, tiles: [] };
   const minis = [];
@@ -2270,7 +2307,7 @@ function openCard(kind) {
   const dTiles = h('div', { class: 'tiles cp-tiles' });
   const pick = (id) => { if (id === null) st.on = false; else { st.design = id; if (isT) st.on = true; } changed(); [...dTiles.children].forEach(b => b.classList.toggle('on', b.dataset.id === String(id))); };
   const mini = (id) => {
-    const c = h('canvas', { width: 192, height: 108 }); const paint = () => { const x = c.getContext('2d'); x.setTransform(192 / W, 0, 0, 108 / H, 0, 0); if (id === null) { x.fillStyle = '#000'; x.fillRect(0, 0, W, H); x.fillStyle = '#8e8e93'; x.font = '60px sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('✕', W / 2, H / 2); } else { drawDesign(x, id, 0); drawCardText(x, isT ? (P.title || '제목') : '만든 사람', st.font, 84, H / 2, designOf(id).ink); } };
+    const c = h('canvas', { width: 192, height: 108 }); const paint = () => { const x = c.getContext('2d'); x.setTransform(192 / W, 0, 0, 108 / H, 0, 0); if (id === null) { x.fillStyle = '#000'; x.fillRect(0, 0, W, H); x.fillStyle = '#8e8e93'; x.font = '60px sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('✕', W / 2, H / 2); } else { drawDesign(x, id, 0); drawCardText(x, isT ? (realT() ? P.title : '제목') : '만든 사람', st.font, 84, H / 2, designOf(id).ink); } };
     minis.push(paint); paint(); return c;
   };
   const dtile = (id, name) => { const b = h('button', { class: 'cp-tile' + ((id === null ? isT && !st.on : (st.design === id && (!isT || st.on))) ? ' on' : ''), type: 'button', 'data-id': String(id), 'aria-label': name, onclick: () => pick(id) }, mini(id), h('span', {}, name)); return b; };
@@ -2281,11 +2318,11 @@ function openCard(kind) {
   pane.append(sec(isT ? '디자인을 골라요' : '배경을 골라요'), dTiles, sec('글씨체를 골라요'), fTiles);
   fontsReady().then(paintTiles);
   // 미리 보기: 제목은 살짝 커지고, 크레딧은 아래에서 위로 흘러요
-  const t0 = performance.now(), dur = isT ? CARD_DUR : CREDIT_DUR;
+  const t0 = performance.now();
   const loop = () => {
     if (V.screen !== 'card') return; V.raf = requestAnimationFrame(loop);
-    const p = ((performance.now() - t0) / 1000 % (dur + .8)) / dur, ctx = EL.ctx; ctx.setTransform(1, 0, 0, 1, 0, 0);
-    if (isT) { if (st.on) drawTitleCard(ctx, st, P.title, Math.min(1, p)); else { ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H); ctx.fillStyle = '#8e8e93'; ctx.font = '30px Jua, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('제목 카드 없이 바로 시작해요', W / 2, H / 2); } }
+    const dur = isT ? CARD_DUR : creditDur(st.text), p = ((performance.now() - t0) / 1000 % (dur + .8)) / dur, ctx = EL.ctx; ctx.setTransform(1, 0, 0, 1, 0, 0);
+    if (isT) { if (st.on && realT()) drawTitleCard(ctx, st, P.title, Math.min(1, p)); else if (st.on) { drawDesign(ctx, st.design, 0); ctx.fillStyle = designOf(st.design).ink; ctx.globalAlpha = .6; ctx.font = '30px Jua, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('아래 칸에 제목을 써요', W / 2, H / 2); ctx.globalAlpha = 1; } else { ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H); ctx.fillStyle = '#8e8e93'; ctx.font = '30px Jua, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('제목 카드 없이 바로 시작해요', W / 2, H / 2); } }
     else { if ((st.text || '').trim()) drawCredits(ctx, st, Math.min(1, p)); else { drawDesign(ctx, st.design, 0); ctx.fillStyle = designOf(st.design).ink; ctx.globalAlpha = .6; ctx.font = '30px Jua, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('아래에 만든 사람 이름을 써요', W / 2, H / 2); ctx.globalAlpha = 1; } }
   };
   cancelAnimationFrame(V.raf); loop();
@@ -2295,11 +2332,17 @@ function openCard(kind) {
 }
 
 /* ---------- 처음 한 번 설명 레이어: 그 화면을 처음 열 때만, 아무 데나 누르면 사라져요 ---------- */
-function hintOnce(key, title, lines) {
-  const k = 'lb_hint_' + key; try { if (localStorage.getItem(k)) return; } catch (e) { }
+function hintOnce(key, title, lines, always = false) {
+  const k = 'lb_hint_' + key; if (!always) try { if (localStorage.getItem(k)) return; } catch (e) { }
+  const old = $('.hint-ov'); if (old) old.remove();
   const el = h('div', { class: 'hint-ov', role: 'dialog' }, h('div', { class: 'hint-card' }, h('b', {}, title), ...lines.map(([ic, tx]) => h('div', { class: 'hint-l' }, h('i', { html: icon(ic) }), h('span', {}, tx))), h('small', {}, '아무 데나 누르면 시작해요')));
-  el.addEventListener('pointerdown', e => { e.stopPropagation(); e.preventDefault(); try { localStorage.setItem(k, '1'); } catch (x) { } fadeRemove(el); }, { capture: true });
+  el.addEventListener('pointerdown', e => { e.stopPropagation(); e.preventDefault(); if (!always) try { localStorage.setItem(k, '1'); } catch (x) { } fadeRemove(el); }, { capture: true });
   $('#app').append(el);
+}
+/* 도움말(내 작품 줄): 한눈에 보는 안내를 띄우고, 각 화면의 처음 한 번 설명도 다시 나오게 해요 */
+function hintReset() {
+  try { Object.keys(localStorage).filter(k => k.startsWith('lb_hint_')).forEach(k => localStorage.removeItem(k)); } catch (e) { }
+  hintOnce('all', '이렇게 만들어요', [['plus', '＋ 새 작품을 누르고 제목을 써요'], ['cam', '촬영: 조금씩 움직이며 찰칵을 눌러요'], ['sparkle', '꾸미기: 말하기·소리·음악을 넣어요'], ['share', '내보내기: 크레딧을 쓰고 영상 파일을 만들어요'], ['book', '전래동화: 이야기를 보고 따라 찍어요']], true);
 }
 
 /* ---------- 전래동화 5편: 스토리 보기(애니메이션) ---------- */
@@ -2408,13 +2451,30 @@ function playTale(tale) {
   cv.onclick = () => { if (done) return; paused = !paused; pauseB.hidden = !paused; if (paused) pausedAt = performance.now(); else t0 += performance.now() - pausedAt; if (paused) AE.stopPreview(); else music(); };
   $('#app').append(bg); start();
 }
-/* 전래동화 카드를 누르면: 스토리 보기 · 스토리 만들기(준비 중) */
+/* 전래동화 카드를 누르면: 스토리 보기 · 스토리 만들기(이야기 이름으로 새 작품 → 촬영, 장면 자막 안내) */
+const TALE_DESIGN = { byeoljubu: 'night', heungbu: 'meadow', haenim: 'night', geumdokki: 'paper', kongjwi: 'sunset' };
+async function makeTale(tale) {
+  const { list } = await loadWorks();
+  let n = 1, title = tale.title; while (list.some(d => d.title === title)) title = `${tale.title} ${++n}`;
+  P = newProject(title); P.tale = tale.id; P.taleStep = 0; P.card.design = TALE_DESIGN[tale.id] || 'paper'; setFormat(P.fmt); TLc = null; await saveProject();
+  openShoot();
+}
+/* 촬영 화면 위 장면 안내: 전래동화 자막을 한 장면씩 넘기며 따라 찍어요 */
+function taleGuide(tale) {
+  const n = tale.scenes.length, txt = h('span', { class: 'sh-gd-t' }), num = h('b', {});
+  const prev = h('button', { type: 'button', 'aria-label': '앞 장면', html: icon('back'), onclick: () => step(-1) });
+  const next = h('button', { type: 'button', 'aria-label': '다음 장면', html: icon('next'), onclick: () => step(1) });
+  const paint = () => { const i = Math.min(n - 1, Math.max(0, P.taleStep || 0)); P.taleStep = i; num.textContent = `${i + 1}/${n}`; txt.textContent = tale.scenes[i].cap; prev.disabled = i === 0; next.disabled = i === n - 1; };
+  const step = d => { P.taleStep = (P.taleStep || 0) + d; paint(); scheduleSave(); };
+  paint();
+  return h('div', { class: 'sh-guide' }, h('span', { class: 'sh-gd-e' }, tale.e), prev, h('span', { class: 'sh-gd-c' }, num, txt), next);
+}
 function taleSheet(tale) {
   const done = () => { bg.classList.add('out'); setTimeout(() => bg.remove(), 160); };
   const bg = h('div', { class: 'al-bg', onpointerdown: e => { if (e.target === bg) done(); } },
     h('div', { class: 'al tale-al', role: 'dialog', 'aria-modal': 'true' }, h('span', { class: 'tale-e', style: { background: tale.c } }, tale.e), h('b', { class: 'al-t' }, tale.title), h('p', { class: 'al-p' }, tale.sub),
       h('button', { class: 'tale-b or', type: 'button', html: icon('play') + '<span>스토리 보기</span>', onclick: () => { done(); playTale(tale); } }),
-      h('button', { class: 'tale-b', type: 'button', disabled: true, html: icon('cam') + '<span>스토리 만들기<small>준비 중이에요</small></span>' }),
+      h('button', { class: 'tale-b', type: 'button', html: icon('cam') + '<span>스토리 만들기<small>이야기를 따라 찍어요</small></span>', onclick: () => { done(); makeTale(tale); } }),
       h('button', { class: 'tale-x', type: 'button', 'aria-label': '닫기', html: icon('x'), onclick: done })));
   $('#app').append(bg);
 }
