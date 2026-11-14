@@ -6,7 +6,7 @@
 
 ## 한눈에
 
-- 결과물은 **`index.html` 한 장**이에요. 외부 파일 없이 열려요. 예외는 **홈 화면 아이콘**뿐이에요(`icon-180/192/512.png` · `icon-maskable-512.png` · `manifest.webmanifest`, 아이폰이 HTML 안에 심은 아이콘을 못 읽어서 파일로 둬요). 아이콘이 없어도 앱은 열려요. **효과음·배경음악**도 `audio/sfx/<id>.mp3`·`audio/bgm/<id>.mp3` 파일을 먼저 읽고, 없으면(오프라인·file://) 코드로 합성한 소리로 대신해요(`AE.file`/`AE.trim`, p2_core.js).
+- 결과물은 **`index.html` 한 장**이에요. `build.sh`가 `p1_head.html`의 첫 `<style>` 앞 줄(제목·아이콘·manifest)을 `<head>` 안에 넣어요(아이폰은 body의 아이콘을 못 읽어요). 외부 파일 없이 열려요. 예외는 **홈 화면 아이콘**뿐이에요(`icon-180/192/512.png` · `icon-maskable-512.png` · `manifest.webmanifest`, 아이폰이 HTML 안에 심은 아이콘을 못 읽어서 파일로 둬요). 아이콘이 없어도 앱은 열려요. **효과음·배경음악**도 `audio/sfx/<id>.mp3`·`audio/bgm/<id>.mp3` 파일을 먼저 읽고, 없으면(오프라인·file://) 코드로 합성한 소리로 대신해요(`AE.file`/`AE.trim`, p2_core.js).
 - 소스는 `src/`의 조각 파일이에요. **`index.html`을 직접 고치지 말고** `src/`를 고친 뒤 `./build.sh`를 실행하세요.
 - 프레임워크 없는 순수 JS예요. 화면은 `h()` 헬퍼로 DOM을 만들고, 무대는 canvas에 그려요. 크기 `W`·`H`는 `setFormat`이 정해요(기본 16:9, 960×540). CSS는 `--ar`(가로÷세로)로 비율을 맞춰요.
 - **새 버전 자동 확인**: `build.sh`가 `<meta name="lb-build">`에 빌드 시각을 넣고, 앱이 열릴 때 `checkUpdate()`(p3c_screens.js)가 서버 번호를 캐시 없이 읽어 다르면 `?b=번호`로 다시 열어요(폰·홈 화면 앱이 예전 파일을 붙잡는 문제).
