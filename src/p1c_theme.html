@@ -47,6 +47,9 @@ body,#app,.screen{background:#000;color:#fff}
 .ri:active{transform:scale(.9);background:#ffffff1c}
 .ri.on{color:var(--acc)}
 .ri.on span{color:var(--acc)}
+/* 클레이 아이콘: 색을 바꿀 수 없으니 켜진 버튼은 아이콘 뒤에 주황빛 판을 깔아요 */
+svg.clay{overflow:visible;filter:drop-shadow(0 1px 1.5px #0007)}
+.ri.on svg.clay,.g-rb.on svg.clay{background:color-mix(in srgb,var(--acc) 38%,transparent);border-radius:30%;box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 38%,transparent)}
 .ri.cam svg{color:#fff}
 .ri.sm{width:auto;padding:4px}
 .ri.sm svg{width:clamp(18px,6cqh,24px);height:clamp(18px,6cqh,24px)}

@@ -30,6 +30,7 @@ node tests/ui-test.js i13,se  # 고른 기기만 (i13=아이폰13 가로, se=작
 src/                   앱 소스 (빌드 순서대로)
   p1_head.html         <head> 메타, 기본 CSS(버튼·창·토스트·카운트다운 등), 화면 뼈대(#library · #studio > #stBody)
   p1c_theme.html       검은 바탕 테마 + 세 화면 CSS(.rail/.ri 아이콘 줄, 촬영 .sh-*, 꾸미기 .dc-*, 내 작품 .g-*, 메뉴 .cm-*, 알림창 .al-*, 세로 화면)
+  p2c_clay.js          클레이 UI 아이콘 45개(CLAY: 이름 → 72px 투명 WebP data URL, 2026-11-14). `icon(n)`이 CLAY에 있으면 그림을 <svg><image>로, 없으면 선 아이콘. 켜진 버튼은 아이콘 뒤 주황빛 판(`svg.clay`). 시트·자르는 과정은 `design/icon2/ui/`
   p2_core.js           BRAND, 무대 크기 W·H, h(), 아이콘 IC, toast/modal, DB(IndexedDB), 영상 효과 FX(지금은 UI 없음), 효과음 SFX, 배경음악 BGM, 오디오 엔진 AE
   p2b_ui.js            추가 아이콘(timer 등), 예전 LCD·key 헬퍼(거의 안 씀)
   p3a_core.js          작품 모델 P(newProject: fps 6 · hold 1), setFormat, 타임라인 TL(), 재생기 Player, 되돌리기 HIST, 저장, 작품 파일

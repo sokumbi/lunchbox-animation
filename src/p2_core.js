@@ -83,7 +83,8 @@ const IC = {
   rewind: '<path d="M11 6 4 12l7 6zM20 6l-7 6 7 6z" fill="currentColor" stroke="none"/>',
   insert: '<path d="M12 4v16M4 8h4M4 16h4M16 8h4M16 16h4"/>'
 };
-const icon = (n, cls = '') => `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[n] || ''}</svg>`;
+// 클레이 그림이 있는 이름(CLAY, p2c_clay.js)은 그림으로, 없으면 선 아이콘으로 그려요. 둘 다 <svg>라서 크기 CSS가 그대로 먹어요
+const icon = (n, cls = '') => typeof CLAY !== 'undefined' && CLAY[n] ? `<svg class="${cls} clay" viewBox="0 0 24 24" aria-hidden="true"><image href="${CLAY[n]}" x="0" y="0" width="24" height="24"/></svg>` : `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[n] || ''}</svg>`;
 const ib = (n, label, cls = 'btn sm', attrs = {}) => h('button', { class: cls, type: 'button', ...attrs, html: icon(n) + (label ? `<span>${label}</span>` : '') , 'aria-label': attrs['aria-label'] || label || n });
 
 /* ---------- 토스트 & 모달 ---------- */
