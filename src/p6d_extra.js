@@ -227,7 +227,7 @@ function drawTaleScene(ctx, sc, t, img, k = 0) {
     ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H); ctx.drawImage(img, (W - w) / 2 + dx, (H - hh) * .4, w, hh);
     ctx.globalAlpha = 1 - clamp(t / .5, 0, 1); ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1;   // 장면이 바뀔 때 살짝 어두웠다 밝아져요
   } else { drawTaleBg(ctx, sc.bg, t);
-  for (const [em, x0, y0, x1, y1, s, mo] of sc.a) {
+  for (const [em, x0, y0, x1, y1, s, mo] of sc.a || []) {
     let x = (x0 + (x1 - x0) * e) * W, y = (y0 + (y1 - y0) * e) * H, rot = 0, sc2 = 1;
     if (mo === 'bob') y += Math.sin(t * 3) * 8; if (mo === 'hop') y -= Math.abs(Math.sin(t * 6)) * 30; if (mo === 'shake') x += Math.sin(t * 25) * 6; if (mo === 'spin') rot = t * 4; if (mo === 'pop') sc2 = Math.min(1, t * 2.5) * (1 + Math.sin(t * 4) * .06);
     ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.scale(sc2, sc2); if (x1 < x0) ctx.scale(-1, 1);
@@ -235,15 +235,24 @@ function drawTaleScene(ctx, sc, t, img, k = 0) {
   } }
   // 자막
   ctx.font = '600 30px "Noto Sans KR", "Apple SD Gothic Neo", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  const lines = wrapText(ctx, sc.cap, W * .86), lh = 40, bh = lines.length * lh + 22;
-  ctx.fillStyle = 'rgba(0,0,0,.62)'; ctx.beginPath(); ctx.roundRect(W * .05, H - 18 - bh, W * .9, bh, 14); ctx.fill();
-  ctx.fillStyle = '#fff'; lines.forEach((l, i) => ctx.fillText(l, W / 2, H - 18 - bh + 11 + lh / 2 + i * lh));
+  const text = sc.who ? `“${sc.cap}”` : sc.cap;
+  const lines = wrapText(ctx, text, W * .86), lh = 40, bh = lines.length * lh + 22, by = H - 18 - bh;
+  ctx.fillStyle = 'rgba(0,0,0,.62)'; ctx.beginPath(); ctx.roundRect(W * .05, by, W * .9, bh, 14); ctx.fill();
+  ctx.fillStyle = sc.who ? '#FFE7A8' : '#fff'; lines.forEach((l, i) => ctx.fillText(l, W / 2, by + 11 + lh / 2 + i * lh));
+  if (sc.who) {   // 대사: 위에 말하는 이 이름표
+    ctx.font = '800 24px "Noto Sans KR", "Apple SD Gothic Neo", sans-serif'; const nw = ctx.measureText(sc.who).width + 28;
+    ctx.fillStyle = '#CF5D2A'; ctx.beginPath(); ctx.roundRect(W * .05 + 14, by - 22, nw, 38, 19); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.textAlign = 'left'; ctx.fillText(sc.who, W * .05 + 28, by - 3); ctx.textAlign = 'center';
+  }
 }
 /* 스토리 보기: 전체 화면 · 아래 타임라인(끌거나 눌러서 앞뒤로, ‹ › 장면 넘기기, 재생/멈춤) · 건너뛰기 · 화면 누르면 멈춤/계속
    장면 그림(tales/<id>/<n>.jpg)이 준비될 때까지 기다렸다가 시작해요. 그림을 못 읽은 장면만 예전 이모지 장면으로 그려요 */
 function playTale(tale) {
   AE.init(); const cv = h('canvas', { class: 'tale-cv', width: W, height: H }), ctx = cv.getContext('2d');
-  const N = tale.scenes.length, starts = [], total = tale.scenes.reduce((a, s) => (starts.push(a), a + s.d), 0);
+  // 녹음된 이야기(STORY, p6e_story.js)는 장면마다 내레이션·대사 목소리가 차례로 나오고, 장면 길이 = 목소리 길이 + 쉼
+  const story = typeof STORY !== 'undefined' && STORY[tale.id], GAP = .35, PRE = .5, POST = .8;
+  const SC = story ? story.map(sc => { let t = PRE; const lines = sc.lines.map(l => { const o = { ...l, s: t }; t += l.d + GAP; return o; }); return { d: t - GAP + POST, lines, img: sc.img, cap: '' }; }) : tale.scenes;
+  const N = SC.length, starts = [], total = SC.reduce((a, s) => (starts.push(a), a + s.d), 0);
   const cap = h('div', { class: 'tale-top' }, h('b', {}, tale.title), h('span', { class: 'tale-n' }, ''));
   const skip = h('button', { class: 'tale-skip', type: 'button', 'aria-label': '닫기', html: icon('x') + '<span>닫기</span>' });
   const pauseB = h('div', { class: 'tale-pause', hidden: true, html: icon('play') });
@@ -251,41 +260,54 @@ function playTale(tale) {
   const end = h('div', { class: 'tale-end', hidden: true }, h('b', {}, '끝'), h('div', {}, h('button', { class: 'btn', type: 'button', onclick: () => { seek(0); play(); } }, '다시 보기'), h('button', { class: 'btn or', type: 'button', onclick: () => close() }, '닫기')));
   // 타임라인: 장면마다 칸, 흰 손잡이. 누르거나 끌면 그 자리로 가요
   const fill = h('i', { class: 'tale-fill' }), knob = h('i', { class: 'tale-knob' });
-  const track = h('div', { class: 'tale-track' }, ...tale.scenes.map(s => h('span', { style: { flex: s.d } })), fill, knob);
+  const track = h('div', { class: 'tale-track' }, ...SC.map(s => h('span', { style: { flex: s.d } })), fill, knob);
   const prevB = h('button', { class: 'tale-tb', type: 'button', 'aria-label': '앞 장면', html: icon('back') });
   const playB = h('button', { class: 'tale-tb big', type: 'button', 'aria-label': '재생', html: icon('pause') });
   const nextB = h('button', { class: 'tale-tb', type: 'button', 'aria-label': '다음 장면', html: icon('next') });
   const bar = h('div', { class: 'tale-bar' }, prevB, playB, nextB, track);
   const bg = h('div', { class: 'tale-bg' }, cap, h('div', { class: 'tale-mon' }, cv, wait, pauseB, end), bar, skip);
   let pos = 0, playing = false, last = 0, raf = 0, ready = false;
-  const imgs = tale.scenes.map((_, n) => { const im = new Image(); im.onerror = () => { im._bad = true; }; im.src = `tales/${tale.id}/${n + 1}.jpg`; return im; });
+  const imgs = SC.map((s, n) => { const im = new Image(); im.onerror = () => { im._bad = true; }; im.src = !story ? `tales/${tale.id}/${n + 1}.jpg` : s.img === 'card' ? `tales/${tale.id}.jpg` : `tales/${tale.id}/${s.img}.jpg`; return im; });
+  // 목소리: 줄마다 mp3를 미리 받아 두고, 재생 위치에 맞춰 그 줄을 틀어요(앞뒤로 옮기면 그 자리부터)
+  const vbuf = {}, vtry = {}; let vsrc = null, vkey = null;
+  const loadVoice = l => { if (vtry[l.a]) return vtry[l.a]; return vtry[l.a] = fetch(`tales/${tale.id}/v/${l.a}.mp3`).then(r => r.ok ? r.arrayBuffer() : Promise.reject()).then(ab => new Promise((res, rej) => AE.ctx.decodeAudioData(ab, res, rej))).then(b => { vbuf[l.a] = b; }).catch(() => { vbuf[l.a] = null; }); };
+  if (story) SC.forEach(s => s.lines.forEach(loadVoice));
+  const voiceStop = () => { try { vsrc && vsrc.stop(); } catch (e) { } vsrc = null; vkey = null; };
+  const lineAt = (k, t) => { const L = SC[k].lines; let i = 0; while (i < L.length - 1 && t >= L[i + 1].s) i++; return L[i]; };
   const okImg = im => im.complete && im.naturalWidth > 0;
-  const music = async () => { try { const b = await AE.getBgm(tale.bgm); if (!bg.isConnected || !playing) return; AE.stopPreview(); const s = AE.ctx.createBufferSource(); s.buffer = b; s.loop = true; s.loopStart = b.__loopStart || 0; s.loopEnd = b.__loopEnd || b.duration; const g = AE.ctx.createGain(); g.gain.value = .5 * (b.__gain || 1); s.connect(g).connect(AE.buses.ui); s.start(0, s.loopStart); AE.preview = s; } catch (e) { } };
+  const music = async () => { try { const b = await AE.getBgm(tale.bgm); if (!bg.isConnected || !playing) return; AE.stopPreview(); const s = AE.ctx.createBufferSource(); s.buffer = b; s.loop = true; s.loopStart = b.__loopStart || 0; s.loopEnd = b.__loopEnd || b.duration; const g = AE.ctx.createGain(); g.gain.value = (story ? .2 : .5) * (b.__gain || 1); s.connect(g).connect(AE.buses.ui); s.start(0, s.loopStart); AE.preview = s; } catch (e) { } };
   const sceneAt = t => { let k = 0; while (k < N - 1 && t >= starts[k + 1]) k++; return k; };
   const draw = () => {
     const k = sceneAt(pos), t = pos - starts[k], im = imgs[k]; ctx.setTransform(1, 0, 0, 1, 0, 0);
-    if (okImg(im)) drawTaleScene(ctx, tale.scenes[k], t, im, k);
-    else if (im._bad) drawTaleScene(ctx, tale.scenes[k], t, null, k);
+    let scn = SC[k]; if (story) { const l = lineAt(k, t); scn = { ...scn, cap: l.t, who: l.w }; }
+    if (okImg(im)) drawTaleScene(ctx, scn, t, im, k);
+    else if (im._bad) drawTaleScene(ctx, scn, t, null, k);
     else { ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H); }   // 아직 오는 중이면 검은 화면(이모지 장면이 잠깐 비치지 않게)
     cap.lastChild.textContent = `${k + 1} / ${N}`;
     const f = pos / total * 100; fill.style.width = f + '%'; knob.style.left = f + '%';
   };
   const setPlayIcon = () => { playB.innerHTML = icon(playing ? 'pause' : 'play'); pauseB.hidden = playing || pos >= total; };
   const play = () => { if (!ready) return; if (pos >= total) pos = 0; end.hidden = true; playing = true; last = performance.now(); setPlayIcon(); music(); };
-  const pause = () => { playing = false; AE.stopPreview(); setPlayIcon(); };
-  const seek = t => { pos = Math.max(0, Math.min(total - .001, t)); end.hidden = true; draw(); };
+  const pause = () => { playing = false; AE.stopPreview(); voiceStop(); setPlayIcon(); };
+  const seek = t => { pos = Math.max(0, Math.min(total - .001, t)); end.hidden = true; voiceStop(); draw(); };
+  // 지금 줄의 목소리: 줄 안이면 (처음 들어갈 때만) 그 위치부터 틀고, 줄 사이 쉼에서는 아무것도 안 틀어요
+  const voiceTick = () => { if (!story || !playing) return; const k = sceneAt(pos), t = pos - starts[k], l = lineAt(k, t), off = t - l.s, key = k + ':' + l.a;
+    if (off < 0 || off >= l.d) { if (vkey && vkey !== key) voiceStop(); return; }
+    if (vkey === key) return; voiceStop(); const b = vbuf[l.a]; vkey = key; if (!b) return;
+    const s = AE.ctx.createBufferSource(); s.buffer = b; const g = AE.ctx.createGain(); g.gain.value = 1; s.connect(g).connect(AE.buses.voice || AE.buses.ui); s.start(0, Math.min(off, b.duration - .01)); vsrc = s; };
   const loop = () => {
     if (!bg.isConnected) return; raf = requestAnimationFrame(loop);
     if (!ready) return;
     // 지금 장면 그림이 아직 오는 중이면 시간을 멈추고 "불러오는 중"을 보여요(그림 없이 이야기가 흘러가지 않게)
-    const cur = imgs[sceneAt(pos)], loading = !okImg(cur) && !cur._bad; wait.hidden = !loading;
+    const ck = sceneAt(pos), cur = imgs[ck], cl = story && lineAt(ck, pos - starts[ck]);
+    const loading = (!okImg(cur) && !cur._bad) || (story && !(cl.a in vbuf)); wait.hidden = !loading;   // 그림이나 지금 줄 목소리가 오는 중이면 기다려요
     if (playing && loading) last = performance.now();
-    else if (playing) { const now = performance.now(); pos += (now - last) / 1000; last = now; if (pos >= total) { pos = total; playing = false; AE.stopPreview(); setPlayIcon(); end.hidden = false; pauseB.hidden = true; } }
-    draw();
+    else if (playing) { const now = performance.now(); pos += (now - last) / 1000; last = now; if (pos >= total) { pos = total; playing = false; AE.stopPreview(); voiceStop(); setPlayIcon(); end.hidden = false; pauseB.hidden = true; } }
+    voiceTick(); draw();
   };
   // 스토리를 보는 동안 뒤 화면(내 작품)은 숨겨요(가려진 버튼이 눌리지 않게)
   const under = [...document.querySelectorAll('#library,#studio')].filter(e => e.style.visibility !== 'hidden'); under.forEach(e => e.style.visibility = 'hidden');
-  const close = () => { cancelAnimationFrame(raf); AE.stopPreview(); under.forEach(e => e.style.visibility = ''); fadeRemove(bg); };
+  const close = () => { cancelAnimationFrame(raf); AE.stopPreview(); voiceStop(); under.forEach(e => e.style.visibility = ''); fadeRemove(bg); };
   skip.onclick = close;
   cv.onclick = () => { if (!ready || !end.hidden) return; playing ? pause() : play(); };
   playB.onclick = () => { if (!end.hidden) { seek(0); play(); return; } playing ? pause() : play(); };
@@ -300,7 +322,9 @@ function playTale(tale) {
   $('#app').append(bg); loop();
   // 첫 장면 그림이 준비되면 시작해요(못 읽으면 이모지 장면으로)
   const go = () => { if (ready || !bg.isConnected) return; ready = true; play(); };
-  const first = imgs[0]; if (okImg(first) || first._bad) go(); else { first.addEventListener('load', go); first.addEventListener('error', go); }
+  const firstVoice = story ? Promise.all(SC[0].lines.map(loadVoice)) : Promise.resolve();
+  const first = imgs[0], imgReady = new Promise(r => { if (okImg(first) || first._bad) r(); else { first.addEventListener('load', r); first.addEventListener('error', r); } });
+  Promise.all([imgReady, firstVoice]).then(go);
 }
 /* 전래동화 카드를 누르면: 스토리 보기 · 스토리 만들기(이야기 이름으로 새 작품 → 촬영, 장면 자막 안내) */
 const TALE_DESIGN = { byeoljubu: 'night', heungbu: 'meadow', haenim: 'night', geumdokki: 'paper', kongjwi: 'sunset' };
@@ -312,10 +336,12 @@ async function makeTale(tale) {
 }
 /* 촬영 화면 위 장면 안내: 전래동화 자막을 한 장면씩 넘기며 따라 찍어요 */
 function taleGuide(tale) {
-  const n = tale.scenes.length, txt = h('span', { class: 'sh-gd-t' }), num = h('b', {});
+  // 녹음된 이야기는 장면마다 내레이션(없으면 첫 대사)을 안내로 보여 줘요
+  const GS = typeof STORY !== 'undefined' && STORY[tale.id] ? STORY[tale.id].map(sc => ({ cap: (sc.lines.find(l => !l.w) || sc.lines[0]).t })) : tale.scenes;
+  const n = GS.length, txt = h('span', { class: 'sh-gd-t' }), num = h('b', {});
   const prev = h('button', { type: 'button', 'aria-label': '앞 장면', html: icon('back'), onclick: () => step(-1) });
   const next = h('button', { type: 'button', 'aria-label': '다음 장면', html: icon('next'), onclick: () => step(1) });
-  const paint = () => { const i = Math.min(n - 1, Math.max(0, P.taleStep || 0)); P.taleStep = i; num.textContent = `${i + 1}/${n}`; txt.textContent = tale.scenes[i].cap; prev.disabled = i === 0; next.disabled = i === n - 1; };
+  const paint = () => { const i = Math.min(n - 1, Math.max(0, P.taleStep || 0)); P.taleStep = i; num.textContent = `${i + 1}/${n}`; txt.textContent = GS[i].cap; prev.disabled = i === 0; next.disabled = i === n - 1; };
   const step = d => { P.taleStep = (P.taleStep || 0) + d; paint(); scheduleSave(); };
   paint();
   return h('div', { class: 'sh-guide' }, h('span', { class: 'sh-gd-e' }, tale.e), prev, h('span', { class: 'sh-gd-c' }, num, txt), next);
