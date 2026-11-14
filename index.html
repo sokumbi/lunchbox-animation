@@ -2439,14 +2439,20 @@ function drawTaleBg(ctx, bg, t) {
   else if (bg === 'palaceK') { sky('#f6e6c8', '#f3d9a8'); ctx.fillStyle = '#7a3b2e'; ctx.fillRect(W * .08, H * .3, W * .84, H * .45); ctx.fillStyle = '#2f5d8a'; ctx.beginPath(); ctx.moveTo(W * .02, H * .3); ctx.lineTo(W / 2, H * .1); ctx.lineTo(W * .98, H * .3); ctx.fill(); ctx.fillStyle = '#c9b48a'; ctx.fillRect(0, H * .75, W, H * .25); }
   else { sky('#333', '#111'); }
 }
-function drawTaleScene(ctx, sc, t) {
-  drawTaleBg(ctx, sc.bg, t); const p = clamp(t / sc.d, 0, 1), e = p < .5 ? 2 * p * p : -1 + (4 - 2 * p) * p;
+/* 장면 그림(tales/<id>/<n>.jpg)이 있으면 그 그림을 천천히 다가가며(켄 번즈) 보여 주고, 없으면 예전 이모지 애니메이션을 그려요 */
+function drawTaleScene(ctx, sc, t, img, k = 0) {
+  const p = clamp(t / sc.d, 0, 1), e = p < .5 ? 2 * p * p : -1 + (4 - 2 * p) * p;
+  if (img && img.complete && img.naturalWidth) {
+    const z = 1.02 + .07 * p, dx = (k % 2 ? 1 : -1) * W * .012 * (p - .5), w = W * z, hh = H * z;
+    ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H); ctx.drawImage(img, (W - w) / 2 + dx, (H - hh) * .4, w, hh);
+    ctx.globalAlpha = 1 - clamp(t / .5, 0, 1); ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1;   // 장면이 바뀔 때 살짝 어두웠다 밝아져요
+  } else { drawTaleBg(ctx, sc.bg, t);
   for (const [em, x0, y0, x1, y1, s, mo] of sc.a) {
     let x = (x0 + (x1 - x0) * e) * W, y = (y0 + (y1 - y0) * e) * H, rot = 0, sc2 = 1;
     if (mo === 'bob') y += Math.sin(t * 3) * 8; if (mo === 'hop') y -= Math.abs(Math.sin(t * 6)) * 30; if (mo === 'shake') x += Math.sin(t * 25) * 6; if (mo === 'spin') rot = t * 4; if (mo === 'pop') sc2 = Math.min(1, t * 2.5) * (1 + Math.sin(t * 4) * .06);
     ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.scale(sc2, sc2); if (x1 < x0) ctx.scale(-1, 1);
     ctx.font = `${H * .22 * s}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(em, 0, 0); ctx.restore();
-  }
+  } }
   // 자막
   ctx.font = '600 30px "Noto Sans KR", "Apple SD Gothic Neo", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   const lines = wrapText(ctx, sc.cap, W * .86), lh = 40, bh = lines.length * lh + 22;
@@ -2463,6 +2469,7 @@ function playTale(tale) {
   const bg = h('div', { class: 'tale-bg' }, cap, h('div', { class: 'tale-mon' }, cv, pauseB, end), skip);
   let i = 0, t0 = 0, paused = false, pausedAt = 0, raf = 0, done = false;
   const total = tale.scenes.reduce((a, s) => a + s.d, 0);
+  const imgs = tale.scenes.map((_, n) => { const im = new Image(); im.src = `tales/${tale.id}/${n + 1}.jpg`; return im; });   // 못 읽으면 이모지 장면으로 대신해요
   const music = async () => { try { const b = await AE.getBgm(tale.bgm); if (!bg.isConnected) return; AE.stopPreview(); const s = AE.ctx.createBufferSource(); s.buffer = b; s.loop = true; s.loopStart = b.__loopStart || 0; s.loopEnd = b.__loopEnd || b.duration; const g = AE.ctx.createGain(); g.gain.value = .5 * (b.__gain || 1); s.connect(g).connect(AE.buses.ui); s.start(0, s.loopStart); AE.preview = s; } catch (e) { } };
   const start = () => { end.hidden = true; done = false; paused = false; i = 0; t0 = performance.now(); music(); cancelAnimationFrame(raf); loop(); };
   const loop = () => {
@@ -2470,7 +2477,7 @@ function playTale(tale) {
     if (paused || done) return;
     let t = (performance.now() - t0) / 1000, k = 0; while (k < tale.scenes.length && t >= tale.scenes[k].d) { t -= tale.scenes[k].d; k++; }
     if (k >= tale.scenes.length) { done = true; end.hidden = false; AE.stopPreview(); return; }
-    i = k; ctx.setTransform(1, 0, 0, 1, 0, 0); drawTaleScene(ctx, tale.scenes[k], t); cap.lastChild.textContent = `${k + 1} / ${tale.scenes.length}`;
+    i = k; ctx.setTransform(1, 0, 0, 1, 0, 0); drawTaleScene(ctx, tale.scenes[k], t, imgs[k], k); cap.lastChild.textContent = `${k + 1} / ${tale.scenes.length}`;
   };
   const close = () => { cancelAnimationFrame(raf); AE.stopPreview(); fadeRemove(bg); };
   skip.onclick = close;
