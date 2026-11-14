@@ -44,7 +44,7 @@ fs.mkdirSync(path.join(__dirname, 'shots'), { recursive: true });
     const ctx = await b.newContext({ ...dev, permissions: ['camera', 'microphone'] });
     const p = await ctx.newPage(); p.on('pageerror', e => out.push(name + ' ERR ' + e.message)); p.on('console', m => { if (m.type() === 'error') out.push(name + ' CONSOLE ' + m.text()); });
     const sh = async n => p.screenshot({ path: `${__dirname}/shots/${name}_${n}.png` });
-    await p.goto('http://localhost:8765/index.html'); await p.waitForTimeout(1400);
+    await p.goto('http://localhost:8765/index.html?theater=mock'); await p.waitForTimeout(1400);
     const hint = async () => { const hn = p.locator('.hint-ov'); if (await hn.count()) { await hn.first().click({ position: { x: 6, y: 6 } }); await p.waitForTimeout(350); } };
     const T = async (sel, ms = 400, o = {}) => { await hint(); await p.locator(sel).first().click(o); await p.waitForTimeout(ms); };
     const ev = f => p.evaluate(f);
@@ -80,6 +80,13 @@ fs.mkdirSync(path.join(__dirname, 'shots'), { recursive: true });
     await T('.dc-speed button:has-text("빠르게")', 300); out.push(name + ' fps ' + await ev(() => P.fps));
     await T('.dc-play', 120); out.push(name + ' playing ' + await ev(() => Player.playing)); await sh('05_play'); await p.waitForTimeout(600); await T('.dc-mon canvas', 300, { position: { x: 20, y: 20 } });
     await T('.dc-tabs [aria-label="내보내기"]', 400); await sh('06_share'); await clipCheck(p, name + ' deco share'); out.push(name + ' share scroll ' + await ev(() => { const q = document.querySelector('.dc-pane.share'); return q.scrollHeight - q.clientHeight; }));
+    // 상영관에 올리기(가짜 서버): 작은 영상 만들기 → 별명·보호자 확인 → 올리기
+    await T('.share-b:has-text("상영관에 올리기")', 300); await p.locator('.th-form').waitFor({ timeout: 30000 }); await p.waitForTimeout(300); await sh('06d_upload'); await clipCheck(p, name + ' upload sheet');
+    await T('.modal .btn.primary', 200); out.push(name + ' upload blocked: ' + await p.locator('.th-err').textContent());
+    await p.locator('.th-form input[aria-label="별명"]').fill('테스트'); await p.locator('.th-form input[aria-label="작품 제목"]').fill('올린 작품');
+    const q = await p.locator('.th-qrow span').textContent(); const [qa, qb] = q.match(/\d+/g).map(Number);
+    await p.locator('.th-q').fill(String(qa * qb)); for (const c of await p.locator('.th-chk input').all()) await c.check();
+    await T('.modal .btn.primary', 800); out.push(name + ' uploaded ' + await p.locator('.al-t').textContent()); await T('.al-acts button', 300);
     await T('.cp-mini:has-text("크레딧")', 700); await hint(); await p.locator('.cp-in').fill('만든 사람\n홍길동'); await T('.cp-tile[data-id="stage"]', 300); await sh('06b_credits'); await clipCheck(p, name + ' credits page');
     await T('.cp-go', 800); out.push(name + ' credits -> ' + await ev(() => V.screen + ' ' + V.tool + ' total=' + TL().total.toFixed(1) + ' lead=' + TL().lead + ' tail=' + TL().tail));
     await T('.dc-play', 120); await sh('06c_title_play'); await p.waitForTimeout(500); await T('.dc-mon canvas', 300, { position: { x: 20, y: 20 } });
@@ -98,6 +105,14 @@ fs.mkdirSync(path.join(__dirname, 'shots'), { recursive: true });
     await T('.g-card.tale >> nth=1', 400); await T('.tale-b:not(.or)', 1200); out.push(name + ' tale make -> ' + await ev(() => V.screen + ' ' + P.title + ' tale=' + P.tale + ' guide=' + document.querySelectorAll('.sh-guide').length));
     await T('.sh-guide [aria-label="다음 장면"]', 300); out.push(name + ' tale step ' + await ev(() => P.taleStep)); await sh('09d_tale_make'); await clipCheck(p, name + ' tale make');
     await T('.sh-l [aria-label="내 작품"]', 900);
+    // 상영관: 순위 탭 · 보기 · 좋아요 · 신고 · 내가 올린
+    await T('.g-rb[aria-label="상영관"]', 700); await sh('11_theater'); await clipCheck(p, name + ' theater');
+    await T('.th-seg button:has-text("이번 주")', 500); out.push(name + ' theater week rank ' + await p.locator('.th-rank').count()); await sh('11b_week');
+    await T('.th-card', 600); await sh('11c_play'); await clipCheck(p, name + ' theater play');
+    const before = await p.locator('.thp-like b').textContent(); await T('.thp-like', 300); out.push(name + ' like ' + before + '->' + await p.locator('.thp-like b').textContent());
+    await T('.thp-rep', 300); await sh('11d_report'); await clipCheck(p, name + ' report'); await T('.al-list button', 300);
+    await T('.thp-x', 600); await T('.th-seg button:has-text("내가 올린")', 500); out.push(name + ' mine ' + await p.locator('.th-card').count() + ' ' + await p.locator('.th-card .tt small').first().textContent()); await sh('11e_mine'); await clipCheck(p, name + ' theater mine');
+    await T('.g-rb[aria-label="내 작품"]', 500);
     await T('.g-rb[aria-label="도움말"]', 500); await sh('10_help'); out.push(name + ' help ' + await p.locator('.hint-ov').count()); await hint();
     await ctx.close();
   }

@@ -1,4 +1,4 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="lb-build" content="20261114203613"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="lb-build" content="20261114212739"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>런치박스애니메이션</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="theme-color" content="#F4EFE5">
@@ -679,11 +679,11 @@ svg.clay{overflow:visible;filter:drop-shadow(0 1px 1.5px #0007)}
    내 작품
    ========================================================= */
 .gal-screen{flex-direction:row;transition:transform .38s var(--spring),filter .38s}
-.g-rail{flex:none;width:var(--rail);display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 0 calc(8px + env(safe-area-inset-bottom));padding-left:env(safe-area-inset-left);background:var(--panel)}
-.g-rb{width:calc(100% - 8px);border:0;border-radius:12px;background:none;color:#fff;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 0;cursor:pointer;font:inherit;transition:transform .2s var(--spring),background-color .2s}
+.g-rail{flex:none;width:var(--rail);display:flex;flex-direction:column;align-items:center;gap:clamp(2px,1.2cqh,6px);padding:clamp(4px,2cqh,10px) 0 calc(4px + env(safe-area-inset-bottom));padding-left:env(safe-area-inset-left);background:var(--panel)}
+.g-rb{width:calc(100% - 8px);border:0;border-radius:12px;background:none;color:#fff;display:flex;flex-direction:column;align-items:center;gap:2px;padding:clamp(3px,1.6cqh,7px) 0;cursor:pointer;font:inherit;transition:transform .2s var(--spring),background-color .2s}
 .g-rb svg{width:clamp(26px,8.4cqh,32px);height:clamp(26px,8.4cqh,32px);stroke-width:1.7}
 .g-rb span{font-size:clamp(12px,3.5cqh,14px);font-weight:700;line-height:1.1;color:#d1d1d6;white-space:nowrap}
-.g-rb.sm{padding:4px 0}
+.g-rb.sm{padding:clamp(2px,1cqh,4px) 0}
 .g-rb.sm svg{width:clamp(20px,6.4cqh,26px);height:clamp(20px,6.4cqh,26px)}
 .g-rb.sm span{font-size:clamp(11px,3.2cqh,12.5px)}
 .g-rb.on{background:var(--panel3)}
@@ -723,7 +723,7 @@ svg.clay{overflow:visible;filter:drop-shadow(0 1px 1.5px #0007)}
 .cm-ic svg{width:19px;height:19px}
 .cm-sep{height:1px;background:#48484a;margin:4px 6px}
 /* 알림창 */
-.al-bg{position:absolute;inset:0;z-index:420;background:#0007;display:grid;place-items:center;animation:fadeIn .18s both}
+.al-bg{position:absolute;inset:0;z-index:640;background:#0007;display:grid;place-items:center;animation:fadeIn .18s both}
 .al-bg.out{animation:fadeOut .15s both}
 .al{width:min(300px,86cqw);background:#2c2c2ef5;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:16px;padding:18px 16px 12px;display:flex;flex-direction:column;gap:8px;text-align:center;color:#fff;animation:popIn .4s var(--spring) both;box-sizing:border-box}
 .al-bg.out .al{animation:popOut .16s ease both}
@@ -825,6 +825,70 @@ textarea.cp-in{height:clamp(54px,18cqh,74px)}
 .tale-end .btn.or{background:var(--acc)}
 
 /* ---------- 세로 화면: 위 줄 · 가운데 · 아래 줄 ---------- */
+/* ---------- 온라인 상영관 (p7_theater.js) ---------- */
+.th-top{gap:12px;min-width:0}
+.th-seg{display:flex;gap:4px;background:var(--panel);border-radius:11px;padding:3px;min-width:0;overflow-x:auto;scrollbar-width:none}
+.th-seg::-webkit-scrollbar{display:none}
+.th-seg button{flex:none;border:0;border-radius:8px;background:none;color:#c7c7cc;font:inherit;font-size:clamp(12px,3.6cqh,14px);font-weight:800;padding:6px 10px;cursor:pointer;white-space:nowrap}
+.th-seg button.on{background:var(--panel3);color:#fff}
+.th-card .th{position:relative;overflow:hidden}
+.th-card.wait .th{filter:grayscale(.6) brightness(.7)}
+.th-rank{position:absolute;top:6px;left:6px;min-width:26px;height:26px;border-radius:13px;display:grid;place-items:center;font-style:normal;font-weight:900;font-size:14px;color:#fff;background:#000b;padding:0 6px;box-sizing:border-box}
+.th-rank.r1{background:#E9B23B;color:#3a2a00}.th-rank.r2{background:#C9CED6;color:#2a2f36}.th-rank.r3{background:#C98A5A;color:#2e1a0a}
+.thp-bg{position:absolute;inset:0;z-index:520;background:#000;display:grid;grid-template-rows:auto minmax(0,1fr) auto;animation:fadeIn .22s both;container-type:size}
+.thp-bg.out{animation:fadeOut .2s both}
+.thp-top{display:flex;align-items:center;gap:10px;padding:max(8px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) 6px max(16px,env(safe-area-inset-left))}
+.thp-tt{flex:1;min-width:0;display:flex;align-items:center;gap:10px}
+.thp-tt b{font-size:clamp(15px,4.6cqh,19px);font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.thp-tt small{color:#a1a1a6;font-size:clamp(11px,3.4cqh,13px);white-space:nowrap}
+.thp-x{flex:none;width:36px;height:36px;border:0;border-radius:50%;background:#ffffff22;color:#fff;display:grid;place-items:center;cursor:pointer;padding:0}
+.thp-x svg{width:18px;height:18px}
+.thp-mid{min-height:0;min-width:0;display:grid;grid-template:minmax(0,1fr)/minmax(0,1fr);padding:0 max(12px,env(safe-area-inset-right)) 0 max(12px,env(safe-area-inset-left))}
+.thp-v{width:100%;height:100%;min-width:0;min-height:0;object-fit:contain;background:#000 center/contain no-repeat;border-radius:10px;display:grid;place-items:end center}
+.thp-v.none span{color:#fffa;font-size:12px;padding:8px}
+.thp-bar{display:flex;align-items:center;justify-content:center;gap:12px;padding:8px 16px max(10px,env(safe-area-inset-bottom))}
+.thp-like{border:0;border-radius:999px;background:var(--panel2);color:#fff;font:inherit;display:flex;align-items:center;gap:8px;padding:8px 20px 8px 14px;cursor:pointer;transition:transform .2s var(--spring),background-color .2s}
+.thp-like span svg{width:clamp(24px,7cqh,30px);height:clamp(24px,7cqh,30px);display:block;color:#ff6b81}
+.thp-like b{font-size:clamp(15px,4.6cqh,19px);font-weight:900;min-width:1.5em;text-align:left}
+.thp-like.on{background:#ff3b5c}
+.thp-like.on span svg{color:#fff;fill:#fff}
+.thp-like.pop{animation:likePop .45s var(--spring)}
+@keyframes likePop{0%{transform:scale(1)}35%{transform:scale(1.22)}100%{transform:scale(1)}}
+.thp-like:disabled,.thp-rep:disabled{opacity:.4;cursor:default}
+.thp-rep{border:0;border-radius:999px;background:none;color:#a1a1a6;font:inherit;font-size:13px;font-weight:700;display:flex;align-items:center;gap:4px;padding:8px 12px;cursor:pointer}
+.thp-rep svg{width:16px;height:16px}
+.al-list{display:flex;flex-direction:column;gap:6px}
+.al-list button{border:0;border-radius:11px;background:#3a3a3c;color:#fff;font:inherit;font-size:14px;font-weight:700;padding:10px;cursor:pointer}
+.th-note{margin:0}
+.modal.th-sheet{gap:8px;padding:12px 16px}
+.modal.th-sheet h2{font-size:17px;margin:0}
+.th-sheet .acts{margin-top:0}
+.th-form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:8px 14px;align-items:start}
+.th-parent{grid-column:2;grid-row:1/4}
+.th-form>label{display:flex;align-items:center;gap:8px}
+.th-form>label>span{flex:none;width:3em;font-size:13px;font-weight:800;color:#c7c7cc}
+.th-form .input{flex:1;min-width:0;font-size:15px;padding:8px 10px;border-radius:10px}
+.th-chk{display:flex;align-items:flex-start;gap:8px;font-size:13px;line-height:1.4;color:#e5e5ea;cursor:pointer}
+.th-form>label.th-chk>span{width:auto;flex:1;font-weight:600;color:#e5e5ea}
+.th-chk input{width:20px;height:20px;flex:none;margin:0;accent-color:var(--acc)}
+.th-parent{background:#3a2a1e;border:1px solid #CF5D2A66;border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.th-parent b{font-size:13px;color:#ffb38a}
+.th-parent p{margin:0;font-size:12px;color:#c7c7cc}
+.th-qrow{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:800}
+.th-q.input{flex:none;width:5em;font-size:15px;padding:6px 8px;border-radius:9px}
+.th-err{margin:0;min-height:1.2em;color:#ff6961;font-size:13px;font-weight:700;text-align:center}
+.tha .tha-body{grid-row:2/4;overflow-y:auto;padding:4px 16px calc(16px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px}
+.tha-row{display:flex;align-items:center;gap:10px;background:var(--panel);border-radius:12px;padding:8px}
+.tha-row .th{flex:none;width:120px;aspect-ratio:16/9;border-radius:8px;background:#222 center/cover;cursor:pointer}
+.tha-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.tha-info b{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tha-info small{color:#a1a1a6;font-size:12px}
+.tha-acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.tha-acts .btn{background:var(--panel2);color:#fff;border-radius:10px}
+.tha-acts .btn.primary{background:var(--acc)}
+.tha-acts .btn.red{color:#ff6961}
+.tha-login{margin:auto;width:min(320px,100%);display:flex;flex-direction:column;gap:8px}
+.tha-login .input{font-size:15px;padding:10px;border-radius:10px}
 @media (orientation:portrait){
   .sh{grid-template-columns:minmax(0,1fr);grid-template-rows:clamp(64px,9cqh,80px) minmax(0,1fr) clamp(96px,15cqh,130px)}
   .sh-l,.sh-r{flex-direction:row;justify-content:space-around;padding:4px 6px}
@@ -852,6 +916,15 @@ textarea.cp-in{height:clamp(54px,18cqh,74px)}
   .share-two{display:grid;grid-template-columns:1.4fr 1fr;gap:6px;flex:none}
   .share-b{flex:none;grid-template-rows:auto;padding:9px 10px;column-gap:8px}
   .share-b small{display:none}
+  .share-two{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .share-two .share-b{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:4px;padding:6px 4px;text-align:left}
+  .share-two .share-b svg{width:22px;height:22px;flex:none}
+  .share-two .share-b b{font-size:13px;line-height:1.2;word-break:keep-all}
+  .th-top{flex-direction:column;align-items:flex-start;height:auto;gap:6px}
+  .th-form{grid-template-columns:minmax(0,1fr)}
+  .th-top .th-seg{width:100%;box-sizing:border-box}
+  .th-top .th-seg button{flex:1 1 auto;padding:6px 4px;font-size:13px}
+  .th-parent{grid-column:auto;grid-row:auto}
   .tale-top{padding-top:max(10px,env(safe-area-inset-top))}
   .cut{grid-template-columns:minmax(0,1fr)}
   .cut-acts{flex-direction:row;flex-wrap:wrap}
@@ -1704,6 +1777,7 @@ async function initApp() {
   await openGallery();
   await intro;
   $('#library').classList.add('enter');
+  if (/[?&]admin\b/.test(location.search)) theaterAdmin();
 }
 
 /* 지운 작품은 휴지통에 30일 동안 남아요 (d.trashed = 지운 시각) */
@@ -1930,10 +2004,11 @@ async function openGallery(o = {}) {
   closeScreen(); show('library');
   const root = $('#library'); root.className = 'screen gal-screen'; root.innerHTML = '';
   const up = h('input', { type: 'file', accept: '.json,application/json', hidden: true, onchange: async e => { const f = e.target.files[0]; if (!f) return; const d = await importProjectFile(f); if (d) { toast(`“${d.title}”을(를) 불러왔어요`); openGallery(); } } });
-  const tab = (ic, label, id, short = label) => h('button', { class: 'g-rb' + (galTab === id ? ' on' : ''), type: 'button', 'aria-label': label, html: icon(ic) + `<span>${short}</span>`, onclick: () => { galTab = id; openGallery(); } });
-  const rail = h('nav', { class: 'g-rail' }, tab('folder', '내 작품', 'movies'), tab('book', '전래동화', 'tales'), tab('trash', '휴지통', 'trash'), h('span', { class: 'g-sp' }),
+  const tab = (ic, label, id, short = label, cls = '') => h('button', { class: 'g-rb' + cls + (galTab === id ? ' on' : ''), type: 'button', 'aria-label': label, html: icon(ic) + `<span>${short}</span>`, onclick: () => { galTab = id; openGallery(); } });
+  const rail = h('nav', { class: 'g-rail' }, tab('folder', '내 작품', 'movies'), tab('theater', '상영관', 'theater'), tab('book', '전래동화', 'tales'), h('span', { class: 'g-sp' }), tab('trash', '휴지통', 'trash', '휴지통', ' sm'),
     h('button', { class: 'g-rb sm', type: 'button', 'aria-label': '도움말', html: icon('help') + '<span>도움말</span>', onclick: hintReset }),
     h('button', { class: 'g-rb sm', type: 'button', 'aria-label': '작품 파일 불러오기', html: icon('upload') + '<span>불러오기</span>', onclick: () => up.click() }), up);
+  if (galTab === 'theater') { root.append(rail, theaterMain()); return null; }
   const { list, trash } = await loadWorks();
   const isTrash = galTab === 'trash', isTales = galTab === 'tales';
   const grid = h('div', { class: 'g-grid list' });
@@ -1976,7 +2051,7 @@ async function toGallery() {
   const snapURL = (() => { try { return cv ? cv.toDataURL('image/jpeg', .6) : ''; } catch (e) { return ''; } })();
   closeScreen(); await saveProject(); P = null; TLc = null;
   const grid = await openGallery({ focus: id });
-  const card = id && $(`.g-card[data-id="${id}"]`, grid);
+  const card = id && grid && $(`.g-card[data-id="${id}"]`, grid);
   if (card) zoomInto(card, snapURL);
 }
 /* ---------- 확대 · 축소 전환 ---------- */
@@ -2363,6 +2438,7 @@ function paneShare(pane) {
       h('button', { class: 'cp-mini', type: 'button', onclick: () => openCard('credits'), html: icon('film') + `<span>크레딧<small>${hasCredits() ? designOf(P.credits.design).name + ' · ' + fontOf(P.credits.font).name : '없음'}</small></span>` })),
     h('div', { class: 'share-two' },   // 세로 화면에선 나란히, 가로에선 위아래로
       big('download', '영상 파일 만들기', '저장하거나 친구에게 보내요', () => { if (!TL().total) { toast('먼저 촬영에서 컷을 찍어요'); return; } Player.pause(); exportVideo(); }, 'or'),
+      big('theater', '상영관에 올리기', '모두에게 보여 줘요 · 어른이 확인해요', theaterUpload),
       big('save', '작품 파일', '다른 폰·태블릿으로 옮겨요', async () => { await saveProject(); const d = await DB.get(P.id).catch(() => null); d ? exportProjectFile(d) : toast('먼저 저장이 되어야 해요'); })));
 }
 IC.help = IC.help || '<circle cx="12" cy="12" r="9"/><path d="M9.6 9.6a2.4 2.4 0 1 1 3.4 2.2c-.7.4-1 .9-1 1.7"/><circle cx="12" cy="17" r=".7" fill="currentColor"/>';
@@ -2739,6 +2815,270 @@ function taleGrid(grid) {
 /* 다시 쓴 전래동화(기승전결·대사) 재생 데이터 — tools/tales-story.js가 만들어요. 고치지 말고 tools/tales-script.js·tales-images.js를 고친 뒤 다시 만드세요.
    장면: img(tales/<id>/<img>.jpg, 'card'면 tales/<id>.jpg), lines: w(말하는 이, 빈칸=내레이터) · t(자막) · a(tales/<id>/v/<a>.mp3) · d(초) */
 const STORY = {"byeoljubu":[{"img":"1","part":"기","lines":[{"w":"","t":"깊고 깊은 바닷속에는 용왕님이 사는 용궁이 있었어요. 그런데 어느 날, 용왕님이 큰 병에 걸리고 말았어요. 온몸이 쑤시고 열이 펄펄 났어요.","a":"01_0","d":11.89},{"w":"용왕","t":"아이고, 아이고… 온몸이 쑤시는구나. 누가 나를 좀 살려 다오.","a":"01_1","d":5.6}]},{"img":"2","part":"기","lines":[{"w":"","t":"용궁에서 제일 똑똑한 문어 의원이 용왕님을 진찰했어요. 문어 의원은 한참 고개를 갸웃거리더니 말했어요.","a":"02_0","d":8.65},{"w":"문어 의원","t":"용왕님, 이 병을 고칠 약은 딱 하나뿐입니다. 육지에 사는 토끼의 간을 드셔야 합니다.","a":"02_1","d":7.84},{"w":"용왕","t":"토끼의 간이라고? 육지에는 아무도 가 본 적이 없지 않느냐!","a":"02_2","d":4.33}]},{"img":"2","part":"기","lines":[{"w":"","t":"신하들은 모두 고개를 푹 숙였어요. 육지는 너무 멀고, 물 밖에서는 숨을 쉴 수 없으니까요. 그때 작은 자라 한 마리가 앞으로 나섰어요. 이름은 별주부였어요.","a":"03_0","d":13.33},{"w":"자라","t":"제가 다녀오겠습니다! 저는 물속에서도, 땅 위에서도 살 수 있으니까요. 토끼를 꼭 데려오겠습니다.","a":"03_1","d":6.8},{"w":"용왕","t":"오, 별주부야! 네 충성을 잊지 않으마.","a":"03_2","d":3.2}]},{"img":"3","part":"승","lines":[{"w":"","t":"자라는 토끼 그림을 품에 넣고 바다 위로 헤엄쳐 올라갔어요. 햇빛이 반짝이는 물 위로 나오자, 처음 보는 육지가 펼쳐졌어요. 하얀 모래, 푸른 소나무, 지저귀는 새들. 모든 게 신기했어요.","a":"04_0","d":15.29}]},{"img":"4","part":"승","lines":[{"w":"","t":"자라는 느릿느릿 숲속으로 들어갔어요. 그때 귀가 길쭉한 동물이 풀을 뜯고 있었어요. 그림이랑 똑같았어요!","a":"05_0","d":8.85},{"w":"자라","t":"저기, 귀가 길쭉한 분! 혹시 토끼님이신가요?","a":"05_1","d":4.26},{"w":"토끼","t":"그래, 내가 토끼다. 넌 처음 보는 녀석인데, 누구냐?","a":"05_2","d":4.51}]},{"img":"4","part":"승","lines":[{"w":"","t":"자라는 공손하게 인사를 하고 말했어요.","a":"06_0","d":2.75},{"w":"자라","t":"저는 바닷속 용궁에서 온 별주부라고 합니다. 용궁에는 맛있는 음식이 산더미처럼 쌓여 있고, 무서운 호랑이도 사냥꾼도 없답니다. 용왕님께서 토끼님께 높은 벼슬을 내리고 싶어 하세요.","a":"06_1","d":13.84},{"w":"토끼","t":"벼슬? 맛있는 음식? 그게 정말이야?","a":"06_2","d":3.18}]},{"img":"b","part":"승","lines":[{"w":"","t":"토끼는 귀를 쫑긋 세웠어요. 산에서는 날마다 호랑이와 사냥꾼에게 쫓겨 다니느라 마음 편할 날이 없었거든요. 토끼는 자라의 말을 덥석 믿어 버렸어요.","a":"07_0","d":11.68},{"w":"토끼","t":"좋아! 내가 용궁에 가 주지. 어서 안내해라!","a":"07_1","d":3.3}]},{"img":"5","part":"승","lines":[{"w":"","t":"토끼는 자라의 등에 올라탔어요. 자라는 토끼를 태우고 바닷속으로 쑤욱 들어갔어요. 알록달록한 물고기, 흔들흔들 춤추는 해초, 반짝이는 산호. 토끼는 입을 다물지 못했어요.","a":"08_0","d":14.61},{"w":"토끼","t":"우와! 바닷속이 이렇게 아름답다니! 역시 따라오길 잘했어.","a":"08_1","d":5.1}]},{"img":"c","part":"전","lines":[{"w":"","t":"드디어 용궁에 도착했어요. 그런데 이게 웬일이에요? 문 앞에 서 있던 병사들이 토끼를 꽁꽁 묶어 버렸어요. 용왕님이 무거운 목소리로 말했어요.","a":"09_0","d":11.13},{"w":"용왕","t":"토끼야, 미안하구나. 내 병을 고칠 약은 네 간뿐이란다. 어서 간을 내놓아라.","a":"09_1","d":6.03},{"w":"토끼","t":"네? 가, 간이라고요?","a":"09_2","d":2.05}]},{"img":"6","part":"전","lines":[{"w":"","t":"토끼는 그제야 자라에게 속았다는 걸 알았어요. 심장이 쿵쾅쿵쾅 뛰었어요. 하지만 토끼는 꾀가 많은 동물이었어요. 토끼는 숨을 한 번 크게 쉬고, 태연한 얼굴로 말했어요.","a":"10_0","d":13.55},{"w":"토끼","t":"아이고, 용왕님. 진작 말씀하시지요! 저희 토끼들은 간을 몸에 넣고 다니지 않는답니다. 간을 꺼내서 깨끗이 씻은 다음, 바위 위에 말려 두고 다니거든요. 오늘도 간을 두고 왔지 뭡니까!","a":"10_1","d":15.18},{"w":"용왕","t":"뭐라? 간을 빼놓고 다닌다고?","a":"10_2","d":2.48}]},{"img":"6","part":"전","lines":[{"w":"","t":"토끼는 배를 쑥 내밀어 보였어요.","a":"11_0","d":2.64},{"w":"토끼","t":"제 배를 보세요. 여기 간을 꺼냈다 넣었다 하는 구멍이 있지요? 저를 다시 육지에 데려다주시면, 바위 위에 말려 둔 간을 가져오겠습니다.","a":"11_1","d":10.13},{"w":"용왕","t":"음… 그 말이 맞는 것 같구나. 별주부야, 어서 토끼를 모시고 가서 간을 받아 오너라!","a":"11_2","d":6.1}]},{"img":"5","part":"전","lines":[{"w":"","t":"용왕님은 토끼의 말을 믿고 말았어요. 자라는 고개를 갸웃거렸지만, 용왕님의 명령이라 어쩔 수 없었어요. 자라는 다시 토끼를 등에 태우고 육지로 헤엄쳐 갔어요.","a":"12_0","d":12.82}]},{"img":"7","part":"결","lines":[{"w":"","t":"육지에 닿자마자 토끼는 자라 등에서 폴짝 뛰어내렸어요. 그러고는 깡충깡충 숲 쪽으로 달아나며 소리쳤어요.","a":"13_0","d":8.48},{"w":"토끼","t":"이 바보 자라야! 세상에 간을 빼놓고 다니는 동물이 어디 있니? 하마터면 큰일 날 뻔했네. 다시는 속지 않을 거야!","a":"13_1","d":9.4},{"w":"자라","t":"아이고… 내가 토끼에게 속았구나!","a":"13_2","d":3.38}]},{"img":"e","part":"결","lines":[{"w":"","t":"자라는 빈 등으로 바닷가에 주저앉아 엉엉 울었어요. 용왕님께 뭐라고 말씀드려야 할지 막막했어요. 그때, 하얀 수염을 길게 늘어뜨린 산신령이 나타났어요.","a":"14_0","d":12.6},{"w":"산신령","t":"별주부야, 울지 마라. 주인을 위해 먼 길을 다녀온 네 마음이 참으로 갸륵하구나. 이 약을 용왕에게 드리거라.","a":"14_1","d":9.29}]},{"img":"f","part":"결","lines":[{"w":"","t":"자라는 산신령이 준 약을 소중히 품고 용궁으로 돌아갔어요. 약을 먹은 용왕님은 금세 자리에서 벌떡 일어났어요. 용궁은 기쁨으로 가득 찼어요.","a":"15_0","d":11.28},{"w":"용왕","t":"별주부야, 네 덕분에 살았구나. 너야말로 용궁 최고의 충신이다!","a":"15_1","d":4.53}]},{"img":"f","part":"결","lines":[{"w":"","t":"그 뒤로 토끼는 달콤한 말에 넘어가지 않으려고 더욱 조심하며 살았어요. 그리고 자라는 오래오래 용왕님 곁을 지켰답니다. 끝.","a":"16_0","d":10.15}]}]};
+/* =========================================================
+   온라인 상영관 (2026-11-14) — 모두가 보는 공간. 좋아요 · 순위(새 작품 / 이번 주 / 전체) · 신고
+   서버: Supabase(docs/theater.sql). THEATER.url·key 가 비어 있으면 "준비 중"이에요.
+   주소에 ?theater=mock 을 붙이면 기기 안 가짜 서버로 돌아가요(점검·시연용, 새로 고치면 사라져요).
+   안전: 아이는 기기마다 익명 사용자, 실명 대신 별명, 올릴 때마다 보호자 확인, 관리자가 승인해야 공개,
+        신고 3번이면 저절로 숨김. 관리자 화면은 주소에 ?admin 을 붙여 열어요.
+   ========================================================= */
+const THEATER = { url: '', key: '' };   // Supabase › Project Settings › API 의 Project URL · anon public key
+const TH = { sort: 'new', liked: new Set(), likedLoaded: false };
+const TH_LONG = 854, TH_BPS = 1.2e6;     // 올리는 영상 크기(긴 변)·비트레이트: 30초 ≈ 5MB
+IC.heart = IC.heart || '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>';
+IC.flag = IC.flag || '<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>';
+IC.theater = IC.theater || '<rect x="3" y="5" width="18" height="12" rx="2"/><path d="M10 8.5v5l4-2.5z"/><path d="M8 21h8"/>';
+const thMock = () => /[?&]theater=mock/.test(location.search);
+const thReady = () => thMock() || !!(THEATER.url && THEATER.key);
+
+/* ---------- Supabase (REST만 써요, 라이브러리 없음) ---------- */
+function sbMake(store) {
+  const K = 'lb_th_' + store;
+  let s = null; try { s = JSON.parse(localStorage.getItem(K) || 'null'); } catch (e) { }
+  const keep = v => { s = v; try { v ? localStorage.setItem(K, JSON.stringify(v)) : localStorage.removeItem(K); } catch (e) { } };
+  const base = () => THEATER.url.replace(/\/+$/, '');
+  async function call(path, { method = 'GET', body, headers = {}, auth = 'opt' } = {}) {
+    const tok = auth ? await token(auth === 'need') : null;
+    const blob = body instanceof Blob;
+    const r = await fetch(base() + path, { method, headers: { apikey: THEATER.key, Authorization: 'Bearer ' + (tok || THEATER.key), ...(body && !blob ? { 'Content-Type': 'application/json' } : {}), ...headers }, body: blob ? body : body ? JSON.stringify(body) : undefined });
+    const txt = await r.text(); let j = null; try { j = txt ? JSON.parse(txt) : null; } catch (e) { }
+    if (!r.ok) { const e = new Error((j && (j.message || j.msg || j.error_description || j.error)) || ('HTTP ' + r.status)); e.status = r.status; throw e; }
+    return j;
+  }
+  async function authCall(path, body) {
+    const j = await call('/auth/v1/' + path, { method: 'POST', body, auth: false });
+    return { at: j.access_token, rt: j.refresh_token, exp: j.expires_at || Math.floor(Date.now() / 1000) + (j.expires_in || 3600), uid: j.user && j.user.id };
+  }
+  async function token(make) {
+    if (s && s.exp * 1000 > Date.now() + 60e3) return s.at;
+    if (s && s.rt) { try { keep(await authCall('token?grant_type=refresh_token', { refresh_token: s.rt })); return s.at; } catch (e) { keep(null); } }
+    if (!make || store === 'admin') return null;
+    keep(await authCall('signup', {}));   // 익명 사용자(이메일 없음)
+    return s.at;
+  }
+  const sign = async paths => {
+    if (!paths.length) return {};
+    const r = await call('/storage/v1/object/sign/films', { method: 'POST', body: { expiresIn: 3600, paths } });
+    const o = {}; for (const x of r || []) if (x.signedURL) o[x.path] = base() + '/storage/v1' + x.signedURL; return o;
+  };
+  const shape = (f, u) => ({ ...f, posterURL: u[f.poster] || '', created: Date.parse(f.created_at) || Date.now() });
+  const withPosters = async list => { const u = await sign(list.map(f => f.poster)).catch(() => ({})); return list.map(f => shape(f, u)); };
+  return {
+    signedIn: () => !!s,
+    async list(sort) { return withPosters(await call('/rest/v1/rpc/theater_list', { method: 'POST', body: { sort, lim: 60 } }) || []); },
+    async videoURL(f) { return (await sign([f.video]))[f.video] || ''; },
+    async myLikes() { if (!s) return new Set(); return new Set((await call('/rest/v1/likes?select=film') || []).map(x => x.film)); },
+    async like(id, on) {
+      if (on) { try { await call('/rest/v1/likes', { method: 'POST', body: { film: id }, auth: 'need', headers: { Prefer: 'return=minimal' } }); } catch (e) { if (e.status !== 409) throw e; } }
+      else await call(`/rest/v1/likes?film=eq.${id}&uid=eq.${s.uid}`, { method: 'DELETE', auth: 'need' });
+    },
+    async report(id, reason) { try { await call('/rest/v1/reports', { method: 'POST', body: { film: id, reason }, auth: 'need', headers: { Prefer: 'return=minimal' } }); } catch (e) { if (e.status !== 409) throw e; } },
+    async mine() { if (!s) return []; return withPosters(await call(`/rest/v1/films?select=*&owner=eq.${s.uid}&order=created_at.desc`) || []); },
+    async upload({ title, nick, secs, video, poster, ext }) {
+      await token(true);
+      const id = crypto.randomUUID(), vp = `${s.uid}/${id}.${ext}`, pp = `${s.uid}/${id}.jpg`;
+      await call('/storage/v1/object/films/' + vp, { method: 'POST', body: video, auth: 'need', headers: { 'Content-Type': video.type, 'x-upsert': 'false' } });
+      await call('/storage/v1/object/films/' + pp, { method: 'POST', body: poster, auth: 'need', headers: { 'Content-Type': 'image/jpeg', 'x-upsert': 'false' } });
+      try { await call('/rest/v1/films', { method: 'POST', auth: 'need', headers: { Prefer: 'return=minimal' }, body: { id, title, nick, secs, video: vp, poster: pp, parent_ok: true } }); }
+      catch (e) { await call('/storage/v1/object/films', { method: 'DELETE', body: { prefixes: [vp, pp] }, auth: 'need' }).catch(() => { }); throw e; }
+    },
+    async remove(f) {
+      await call(`/rest/v1/films?id=eq.${f.id}`, { method: 'DELETE', auth: 'need' });
+      await call('/storage/v1/object/films', { method: 'DELETE', body: { prefixes: [f.video, f.poster] }, auth: 'need' }).catch(() => { });
+    },
+    // 관리자
+    async login(email, password) { keep(await authCall('token?grant_type=password', { email, password })); if (!(await call('/rest/v1/admins?select=uid') || []).length) { keep(null); throw new Error('관리자로 등록되지 않은 계정이에요'); } },
+    logout() { keep(null); },
+    async queue(st) { return withPosters(await call(`/rest/v1/films?select=*&status=in.(${st})&order=created_at.asc&limit=100`) || []); },
+    async setStatus(id, status) { await call(`/rest/v1/films?id=eq.${id}`, { method: 'PATCH', body: { status }, headers: { Prefer: 'return=minimal' } }); },
+  };
+}
+
+/* ---------- 가짜 서버(?theater=mock) ---------- */
+function mockPoster(bg, emoji) {
+  const c = h('canvas', { width: 320, height: 180 }), g = c.getContext('2d');
+  g.fillStyle = bg; g.fillRect(0, 0, 320, 180); g.font = '90px serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(emoji, 160, 95);
+  return c.toDataURL('image/jpeg', .8);
+}
+function mockMake() {
+  const M = window.__thm || (window.__thm = { uid: 'me', likes: new Set(), films: [
+    ['토끼의 모험', '깡총이', '#E9A23B', '🐰', 12, 4], ['우주 고양이', '별빛', '#3B5BA9', '🐱', 8, 9], ['공룡 대소동', '쿵쿵', '#4E9A63', '🦖', 15, 2], ['눈사람 친구', '하얀눈', '#7FB3D5', '⛄', 6, 6], ['로봇 청소부', '삐삐', '#8E6FB0', '🤖', 10, 1],
+  ].map(([title, nick, bg, em, secs, likes], i) => ({ id: 'm' + i, owner: 'x', title, nick, secs, likes, week: Math.max(0, likes - (i % 3) * 2), status: 'approved', reports: 0, created: Date.now() - i * 36e5 * 7, posterURL: mockPoster(bg, em), video: null })) });
+  const pub = () => M.films.filter(f => f.status === 'approved');
+  const wait = v => new Promise(r => setTimeout(() => r(v), 120));
+  return {
+    signedIn: () => true,
+    list: sort => wait([...pub()].sort((a, b) => sort === 'week' ? b.week - a.week : sort === 'all' ? b.likes - a.likes : b.created - a.created)),
+    videoURL: async f => f.video || '',
+    myLikes: async () => new Set(M.likes),
+    async like(id, on) { const f = M.films.find(x => x.id === id); if (!f || on === M.likes.has(id)) return; on ? M.likes.add(id) : M.likes.delete(id); f.likes += on ? 1 : -1; f.week += on ? 1 : -1; },
+    async report(id) { const f = M.films.find(x => x.id === id); if (f && ++f.reports >= 3) f.status = 'hidden'; },
+    mine: async () => M.films.filter(f => f.owner === M.uid),
+    async upload({ title, nick, secs, video, poster }) { await wait(); M.films.unshift({ id: 'u' + Date.now(), owner: M.uid, title, nick, secs, likes: 0, week: 0, status: 'pending', reports: 0, created: Date.now(), posterURL: URL.createObjectURL(poster), video: URL.createObjectURL(video) }); },
+    async remove(f) { M.films = M.films.filter(x => x.id !== f.id); },
+    async login() { }, logout() { },
+    queue: async st => M.films.filter(f => st.split(',').includes(f.status)),
+    async setStatus(id, status) { const f = M.films.find(x => x.id === id); if (f) { f.status = status; if (status === 'approved') { f.created = Date.now(); f.reports = 0; } } },
+  };
+}
+let TH_API = null, TH_ADMIN = null;
+const thApi = () => TH_API || (TH_API = thMock() ? mockMake() : sbMake('kid'));
+const thAdminApi = () => TH_ADMIN || (TH_ADMIN = thMock() ? mockMake() : sbMake('admin'));
+const thErr = e => /daily_limit/.test(e && e.message) ? '오늘은 5편까지 올릴 수 있어요. 내일 또 올려요' : /anonymous/i.test(e && e.message) ? '상영관 서버 설정이 아직 안 끝났어요(익명 로그인)' : '인터넷 연결을 확인하고 다시 해 봐요';
+
+/* ---------- 상영관 화면 (내 작품 화면의 탭) ---------- */
+const TH_SORTS = [['new', '새 작품'], ['week', '이번 주 인기'], ['all', '전체 인기'], ['mine', '내가 올린']];
+function theaterMain() {
+  const grid = h('div', { class: 'g-grid list' });
+  const seg = h('div', { class: 'th-seg', role: 'tablist' }, ...TH_SORTS.map(([id, label]) => h('button', { class: TH.sort === id ? 'on' : '', type: 'button', role: 'tab', 'aria-selected': TH.sort === id, onclick: () => { TH.sort = id; $$('.th-seg button').forEach(b => b.classList.toggle('on', b.textContent === label)); theaterFill(grid); } }, label)));
+  const main = h('div', { class: 'g-main' }, h('div', { class: 'g-top th-top' }, h('b', { class: 'g-h' }, '상영관'), seg), grid);
+  theaterFill(grid);
+  return main;
+}
+async function theaterFill(grid) {
+  const my = ++TH.req; grid.innerHTML = '';
+  if (!thReady()) { grid.append(h('p', { class: 'g-none' }, '상영관은 준비 중이에요. 곧 친구들의 작품을 볼 수 있어요!')); return; }
+  grid.append(h('p', { class: 'g-none' }, '불러오는 중…'));
+  const api = thApi(), mine = TH.sort === 'mine';
+  let list;
+  try {
+    list = mine ? await api.mine() : await api.list(TH.sort);
+    if (!TH.likedLoaded) { TH.liked = await api.myLikes().catch(() => new Set()); TH.likedLoaded = true; }
+  } catch (e) { if (my === TH.req) { grid.innerHTML = ''; grid.append(h('p', { class: 'g-none' }, '상영관을 못 불러왔어요. 인터넷 연결을 확인해 봐요.')); } return; }
+  if (my !== TH.req) return;
+  grid.innerHTML = '';
+  if (!list.length) { grid.append(h('p', { class: 'g-none' }, mine ? '아직 올린 작품이 없어요. 꾸미기 › 내보내기에서 "상영관에 올리기"를 눌러요.' : '아직 상영 중인 작품이 없어요. 첫 번째로 올려 봐요!')); return; }
+  const ranked = TH.sort === 'week' || TH.sort === 'all';
+  list.forEach((f, i) => {
+    const th = h('span', { class: 'th' + (f.posterURL ? '' : ' empty'), html: f.posterURL ? '' : icon('film') });
+    if (f.posterURL) th.style.backgroundImage = `url("${f.posterURL}")`;
+    if (ranked && (TH.sort === 'week' ? f.week : f.likes) > 0) th.append(h('i', { class: 'th-rank r' + Math.min(i + 1, 4) }, String(i + 1)));
+    const st = { pending: '어른이 확인하고 있어요', hidden: '신고가 들어와 잠시 숨겼어요', rejected: '상영관에 올릴 수 없어요' }[f.status];
+    const sub = mine && st ? st : `${f.nick} · ♥ ${TH.sort === 'week' ? f.week : f.likes}`;
+    const card = h('div', { class: 'g-card th-card' + (mine && f.status !== 'approved' ? ' wait' : ''), role: 'button', tabindex: 0, 'data-id': f.id, 'aria-label': `${f.title} 보기` }, th, h('span', { class: 'tt' }, h('b', {}, f.title), h('small', {}, sub)),
+      mine ? h('button', { class: 'g-more', type: 'button', 'aria-label': '메뉴', html: icon('more'), onclick: e => { e.stopPropagation(); menu(); } }) : '');
+    const menu = () => ctxMenu(card, [{ label: '상영관에서 내리기', ic: 'trash', red: true, fn: async () => { if (!(await iosAlert('상영관에서 내릴까요?', '올린 영상이 지워져요. 내 작품에는 그대로 있어요.', '내리기', true))) return; try { await thApi().remove(f); toast('상영관에서 내렸어요'); theaterFill(grid); } catch (e) { toast(thErr(e)); } } }], { lift: true });
+    card.onclick = () => theaterPlay(f, list, grid);
+    card.onkeydown = e => { if (e.key === 'Enter') card.onclick(); };
+    if (mine) { card.oncontextmenu = e => { e.preventDefault(); menu(); }; longPress(card, menu); }
+    card.style.setProperty('--i', Math.min(i, 14));
+    grid.append(card);
+  });
+}
+TH.req = 0;
+
+/* ---------- 작품 보기: 영상 + 좋아요 + 신고 ---------- */
+async function theaterPlay(f, list, grid) {
+  const mine = f.status && f.status !== 'approved';
+  const vid = h('video', { class: 'thp-v', playsinline: true, controls: true, autoplay: true, poster: f.posterURL || '' });
+  vid.setAttribute('playsinline', ''); vid.setAttribute('webkit-playsinline', '');
+  const n = h('b', {}, String(f.likes));
+  const like = h('button', { class: 'thp-like' + (TH.liked.has(f.id) ? ' on' : ''), type: 'button', 'aria-label': '좋아요', disabled: mine }, h('span', { html: icon('heart') }), n);
+  like.onclick = async () => {
+    const on = !TH.liked.has(f.id);
+    on ? TH.liked.add(f.id) : TH.liked.delete(f.id); f.likes += on ? 1 : -1; if (f.week != null) f.week += on ? 1 : -1;
+    like.classList.toggle('on', on); n.textContent = f.likes;
+    if (on) { like.classList.remove('pop'); void like.offsetWidth; like.classList.add('pop'); try { navigator.vibrate && navigator.vibrate(12); } catch (e) { } }
+    try { await thApi().like(f.id, on); } catch (e) { on ? TH.liked.delete(f.id) : TH.liked.add(f.id); f.likes -= on ? 1 : -1; like.classList.toggle('on', !on); n.textContent = f.likes; toast(thErr(e)); }
+  };
+  const rep = h('button', { class: 'thp-rep', type: 'button', 'aria-label': '신고', html: icon('flag') + '<span>신고</span>', disabled: mine });
+  rep.onclick = async () => {
+    vid.pause();
+    const why = await pickAlert('어떤 점이 걱정돼요?', '어른이 확인하고, 문제가 있으면 내려요.', ['무섭거나 기분 나빠요', '나쁜 말이 나와요', '얼굴·이름·학교가 보여요', '다른 사람 작품을 베꼈어요']);
+    if (!why) return;
+    try { await thApi().report(f.id, why); toast('알려 줘서 고마워요. 어른이 확인할게요'); } catch (e) { toast(thErr(e)); }
+  };
+  const close = () => { vid.pause(); vid.removeAttribute('src'); vid.load(); fadeRemove(bg, 220); removeEventListener('keydown', onEsc); if (grid && TH.sort !== 'mine') theaterFill(grid); };
+  const onEsc = e => { if (e.key === 'Escape') close(); };
+  const bg = h('div', { class: 'thp-bg' },
+    h('div', { class: 'thp-top' }, h('div', { class: 'thp-tt' }, h('b', {}, f.title), h('small', {}, `${f.nick} · ${mmss(f.secs || 0)}`)), h('button', { class: 'thp-x', type: 'button', 'aria-label': '닫기', html: icon('x'), onclick: close })),
+    h('div', { class: 'thp-mid' }, vid),
+    h('div', { class: 'thp-bar' }, like, rep));
+  $('#app').append(bg); addEventListener('keydown', onEsc);
+  try { const u = await (mine ? thApi() : thApi()).videoURL(f); if (u) vid.src = u; else if (!f.video) vid.replaceWith(h('div', { class: 'thp-v none', style: { backgroundImage: f.posterURL ? `url("${f.posterURL}")` : '' } }, h('span', {}, '(시연용 작품이라 영상이 없어요)'))); }
+  catch (e) { toast(thErr(e)); }
+}
+/* 고르기 알림창: 버튼 여러 개 중 하나 */
+function pickAlert(title, text, opts) {
+  return new Promise(res => {
+    const done = v => { fadeRemove(bg, 160); res(v); };
+    const bg = h('div', { class: 'al-bg', onpointerdown: e => { if (e.target === bg) done(null); } },
+      h('div', { class: 'al', role: 'alertdialog', 'aria-modal': 'true' }, h('b', { class: 'al-t' }, title), text ? h('p', { class: 'al-p' }, text) : '',
+        h('div', { class: 'al-list' }, ...opts.map(o => h('button', { type: 'button', onclick: () => done(o) }, o))),
+        h('div', { class: 'al-acts' }, h('button', { type: 'button', onclick: () => done(null) }, '취소'))));
+    $('#app').append(bg);
+  });
+}
+
+/* ---------- 올리기: 영상 만들기 → 별명·보호자 확인 → 올리기 ---------- */
+function theaterUpload() {
+  if (!thReady()) { iosAlert('상영관은 준비 중이에요', '곧 친구들과 작품을 나눌 수 있어요. 지금은 "영상 파일 만들기"로 저장해요.'); return; }
+  if (!TL().total) { toast('먼저 촬영에서 컷을 찍어요'); return; }
+  Player.pause(); exportVideo({ upload: true });
+}
+function theaterUploadSheet(video, ext, poster, m, box) {
+  let nick = ''; try { nick = localStorage.getItem('lb_th_nick') || ''; } catch (e) { }
+  const a = 6 + Math.floor(Math.random() * 13), b = 6 + Math.floor(Math.random() * 7);
+  const ti = h('input', { class: 'input', maxlength: 40, value: isAutoTitle(P.title) ? '' : P.title, placeholder: '작품 제목', 'aria-label': '작품 제목' });
+  const ni = h('input', { class: 'input', maxlength: 12, value: nick, placeholder: '예: 별빛토끼', 'aria-label': '별명' });
+  const c1 = h('input', { type: 'checkbox' }), c2 = h('input', { type: 'checkbox' });
+  const qi = h('input', { class: 'input th-q', inputmode: 'numeric', maxlength: 4, 'aria-label': '보호자 확인 답' });
+  const err = h('p', { class: 'th-err', role: 'alert' });
+  const go = h('button', { class: 'btn primary', type: 'button', html: icon('upload') + '<span>올리기</span>' });
+  go.onclick = async () => {
+    const title = ti.value.trim(), nk = ni.value.trim();
+    const bad = !title ? '작품 제목을 써요' : !nk ? '별명을 써요(진짜 이름은 쓰지 않아요)' : !c1.checked ? '얼굴·이름·학교가 나오지 않는지 확인해요' : +qi.value !== a * b ? '보호자 확인 답이 맞지 않아요' : !c2.checked ? '보호자 동의에 표시해 주세요' : '';
+    if (bad) { err.textContent = bad; return; }
+    try { localStorage.setItem('lb_th_nick', nk); } catch (e) { }
+    go.disabled = true; go.querySelector('span').textContent = '올리는 중…'; err.textContent = '';
+    try {
+      await thApi().upload({ title, nick: nk, secs: Math.round(TL().total * 10) / 10, video, poster, ext });
+      m.close(); TH.sort = 'mine';
+      iosAlert('올렸어요!', '어른이 확인하면 상영관에 나와요. 내 작품 › 상영관 › 내가 올린 에서 볼 수 있어요.');
+    } catch (e) { go.disabled = false; go.querySelector('span').textContent = '다시 올리기'; err.textContent = thErr(e); }
+  };
+  box.innerHTML = ''; box.classList.add('th-sheet');
+  box.append(h('h2', {}, '상영관에 올리기'),
+    h('p', { class: 'hint th-note' }, '상영관은 모든 사람이 볼 수 있어요. 어른이 확인한 뒤에 공개돼요.'),
+    h('div', { class: 'th-form' },
+      h('label', {}, h('span', {}, '제목'), ti),
+      h('label', {}, h('span', {}, '별명'), ni),
+      h('label', { class: 'th-chk' }, c1, h('span', {}, '영상에 내 얼굴·진짜 이름·학교·집 주소가 나오지 않아요')),
+      h('div', { class: 'th-parent' }, h('b', {}, '보호자 확인'), h('p', {}, '보호자가 직접 풀고 표시해 주세요.'),
+        h('label', { class: 'th-qrow' }, h('span', {}, `${a} × ${b} =`), qi),
+        h('label', { class: 'th-chk' }, c2, h('span', {}, '보호자인 저는 이 영상(목소리 포함)이 모두에게 공개되는 것에 동의해요')))),
+    err, h('div', { class: 'acts' }, h('button', { class: 'btn', type: 'button', onclick: m.close }, '그만두기'), go));
+}
+
+/* ---------- 관리자 화면 (?admin) — 검토 중 · 숨겨진 작품을 승인 · 거절 · 지우기 ---------- */
+async function theaterAdmin() {
+  const api = thAdminApi();
+  const body = h('div', { class: 'tha-body list' }), state = { st: 'pending,hidden' };
+  const close = () => fadeRemove(bg, 220);
+  const tabs = h('div', { class: 'th-seg' }, ...[['pending,hidden', '확인할 작품'], ['approved', '상영 중'], ['rejected', '거절함']].map(([st, label]) => h('button', { type: 'button', class: st === state.st ? 'on' : '', onclick: e => { state.st = st; $$('button', tabs).forEach(b => b.classList.toggle('on', b === e.currentTarget)); fill(); } }, label)));
+  const bg = h('div', { class: 'thp-bg tha' }, h('div', { class: 'thp-top' }, h('div', { class: 'thp-tt' }, h('b', {}, '상영관 관리'), tabs), h('button', { class: 'thp-x', type: 'button', 'aria-label': '닫기', html: icon('x'), onclick: close })), body);
+  $('#app').append(bg);
+  async function fill() {
+    body.innerHTML = '';
+    let list; try { list = await api.queue(state.st); } catch (e) { body.append(h('p', { class: 'g-none' }, '목록을 못 불러왔어요: ' + e.message)); return; }
+    if (!list.length) { body.append(h('p', { class: 'g-none' }, '확인할 작품이 없어요')); return; }
+    for (const f of list) {
+      const th = h('span', { class: 'th', role: 'button', 'aria-label': '보기' }); if (f.posterURL) th.style.backgroundImage = `url("${f.posterURL}")`;
+      th.onclick = async () => { const u = await api.videoURL(f).catch(() => ''); if (u) open(u, '_blank'); else toast('영상이 없어요'); };
+      const act = (label, st, cls = '') => h('button', { class: 'btn sm ' + cls, type: 'button', onclick: async () => { try { await api.setStatus(f.id, st); toast(label + ' 했어요'); fill(); } catch (e) { toast(e.message); } } }, label);
+      body.append(h('div', { class: 'tha-row' }, th, h('div', { class: 'tha-info' }, h('b', {}, f.title), h('small', {}, `${f.nick} · ${mmss(f.secs || 0)} · ${({ pending: '검토 중', hidden: '신고로 숨김', approved: '상영 중', rejected: '거절함' })[f.status] || f.status}${f.reports ? ' · 신고 ' + f.reports : ''} · ♥ ${f.likes}`)),
+        h('div', { class: 'tha-acts' }, f.status !== 'approved' ? act('승인', 'approved', 'primary') : act('숨기기', 'hidden'), f.status !== 'rejected' ? act('거절', 'rejected') : '',
+          h('button', { class: 'btn sm red', type: 'button', onclick: async () => { if (!(await iosAlert('완전히 지울까요?', '영상 파일까지 지워져요.', '지우기', true))) return; try { await api.remove(f); fill(); } catch (e) { toast(e.message); } } }, '지우기'))));
+    }
+  }
+  if (!thMock() && !api.signedIn()) {
+    const em = h('input', { class: 'input', type: 'email', placeholder: '관리자 이메일', autocomplete: 'username' }), pw = h('input', { class: 'input', type: 'password', placeholder: '비밀번호', autocomplete: 'current-password' });
+    const msg = h('p', { class: 'th-err' });
+    const login = async () => { try { await api.login(em.value.trim(), pw.value); fill(); } catch (e) { msg.textContent = e.message; } };
+    pw.addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+    body.append(h('div', { class: 'tha-login' }, h('b', {}, '관리자 로그인'), em, pw, msg, h('button', { class: 'btn primary', type: 'button', onclick: login }, '들어가기')));
+  } else fill();
+}
 async function saveFile(blob, filename, what = '영상 파일') {
   try {
     if (window.claude && typeof window.claude.use === 'function') {
@@ -2749,7 +3089,7 @@ async function saveFile(blob, filename, what = '영상 파일') {
   try { const a = h('a', { href: URL.createObjectURL(blob), download: filename }); document.body.append(a); a.click(); a.remove(); toast(`${what}을 내려받았어요`); return true; }
   catch (e) { toast('이 화면에서는 파일로 저장할 수 없어요'); return false; }
 }
-async function exportVideo() {
+async function exportVideo(o = {}) {   // o.upload: 상영관에 올릴 작은 영상 + 포스터(p7_theater.js)
   if (!TL().total) return;
   if (!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream) { toast('이 브라우저는 영상 파일 만들기를 지원하지 않아요. 크롬에서 열어 주세요.'); return; }
   const types = ['video/mp4;codecs=avc1.42E01E,mp4a.40.2', 'video/mp4;codecs=avc1,mp4a.40.2', 'video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
@@ -2757,24 +3097,26 @@ async function exportVideo() {
   const ext = mime.includes('mp4') ? 'mp4' : 'webm';
   AE.init(); await Player.preload();
   const prev = { canvas: Player.canvas, opts: Player.opts, onTick: Player.onTick };
-  const long = ({ sd: 854, hd: 1280, fhd: 1920 })[(P.look || {}).q] || 1280, ev = v => Math.round(v / 2) * 2;   // 설정 › 품질 (긴 변)
+  const long = o.upload ? TH_LONG : ({ sd: 854, hd: 1280, fhd: 1920 })[(P.look || {}).q] || 1280, ev = v => Math.round(v / 2) * 2;   // 설정 › 품질 (긴 변)
   const [cw, ch] = W >= H ? [long, ev(long * H / W)] : [ev(long * W / H), long];
   const cv = h('canvas', { width: cw, height: ch });
   const stream = cv.captureStream(30); const dest = AE.ctx.createMediaStreamDestination(); AE.master.connect(dest);
   dest.stream.getAudioTracks().forEach(t => stream.addTrack(t));
-  const mr = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 5e6 }); const chunks = []; mr.ondataavailable = e => e.data.size && chunks.push(e.data);
-  let cancelled = false;
+  const mr = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: o.upload ? TH_BPS : 5e6 }); const chunks = []; mr.ondataavailable = e => e.data.size && chunks.push(e.data);
+  let cancelled = false, poster = null;
+  const tl = TL(), posterT = tl.lead + Math.max(0, tl.total - tl.lead - tl.tail) * .3;
   modal((b, m) => {
     const bar = h('div', { style: { height: '10px', borderRadius: '99px', background: 'var(--night)', overflow: 'hidden' } }, h('div', { id: 'expBar', style: { height: '100%', width: '0%', background: 'var(--jade)' } }));
     const prevBox = h('div', { class: 'stage-wrap', style: { maxWidth: '100%' } }, cv);
     cv.style.width = '100%'; cv.style.height = '100%'; cv.style.display = 'block';
     const txt = h('p', { class: 'hint', style: { margin: 0 } }, '영상 파일을 만드는 중이에요…');
     const acts = h('div', { class: 'acts' }, h('button', { class: 'btn', onclick: () => { cancelled = true; Player.pause(); try { mr.stop(); } catch (e) { } m.close(); } }, '그만두기'));
-    b.append(h('h2', {}, '영상 파일 만들기'), prevBox, bar, txt, acts);
+    b.append(h('h2', {}, o.upload ? '상영관에 올리기' : '영상 파일 만들기'), prevBox, bar, txt, acts);
     const restore = () => { try { AE.master.disconnect(dest); } catch (e) { } if (prev.canvas && document.body.contains(prev.canvas)) Player.attach(prev.canvas, { ...prev.opts, onTick: prev.onTick }); };
     mr.onstop = () => {
       restore(); if (cancelled) return;
       const blob = new Blob(chunks, { type: mime.split(';')[0] });
+      if (o.upload) { const go = pb => theaterUploadSheet(blob, ext, pb, m, b); poster ? go(poster) : cv.toBlob(go, 'image/jpeg', .8); return; }
       const fname = (P.title || '나의 영화').replace(/[\\/:*?"<>|]/g, '') + '.' + ext;
       prevBox.innerHTML = ''; const v = h('video', { src: URL.createObjectURL(blob), controls: true, playsinline: true, style: { width: '100%', height: '100%', display: 'block' } }); prevBox.append(v);
       bar.remove(); txt.textContent = `완성! ${fname} (${(blob.size / 1048576).toFixed(1)}MB)` + (ext === 'webm' ? ' · 이 브라우저는 webm으로만 만들 수 있어요. 아이폰에서는 안 열릴 수 있어요' : '');
@@ -2784,7 +3126,7 @@ async function exportVideo() {
         canShare ? ib('upload', '보내기 · 사진에 저장', 'btn', { onclick: () => navigator.share({ files: [file], title: P.title }).catch(() => { }) }) : '',
         ib('download', '파일로 저장', 'btn primary', { onclick: () => saveFile(blob, fname) }));
     };
-    Player.attach(cv, { onTick: t => { const el = $('#expBar'); if (el) el.style.width = (t / TL().total * 100) + '%'; } });
+    Player.attach(cv, { onTick: t => { const el = $('#expBar'); if (el) el.style.width = (t / TL().total * 100) + '%'; if (o.upload && !poster && t >= posterT) { poster = 1; cv.toBlob(pb => poster = pb, 'image/jpeg', .8); } } });
     Player.t = 0; Player.onEnd = () => setTimeout(() => { try { mr.stop(); } catch (e) { } }, 250);
     mr.start(200); Player.play();
   }, { close: false, wide: true });

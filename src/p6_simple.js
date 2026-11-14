@@ -57,10 +57,11 @@ async function openGallery(o = {}) {
   closeScreen(); show('library');
   const root = $('#library'); root.className = 'screen gal-screen'; root.innerHTML = '';
   const up = h('input', { type: 'file', accept: '.json,application/json', hidden: true, onchange: async e => { const f = e.target.files[0]; if (!f) return; const d = await importProjectFile(f); if (d) { toast(`“${d.title}”을(를) 불러왔어요`); openGallery(); } } });
-  const tab = (ic, label, id, short = label) => h('button', { class: 'g-rb' + (galTab === id ? ' on' : ''), type: 'button', 'aria-label': label, html: icon(ic) + `<span>${short}</span>`, onclick: () => { galTab = id; openGallery(); } });
-  const rail = h('nav', { class: 'g-rail' }, tab('folder', '내 작품', 'movies'), tab('book', '전래동화', 'tales'), tab('trash', '휴지통', 'trash'), h('span', { class: 'g-sp' }),
+  const tab = (ic, label, id, short = label, cls = '') => h('button', { class: 'g-rb' + cls + (galTab === id ? ' on' : ''), type: 'button', 'aria-label': label, html: icon(ic) + `<span>${short}</span>`, onclick: () => { galTab = id; openGallery(); } });
+  const rail = h('nav', { class: 'g-rail' }, tab('folder', '내 작품', 'movies'), tab('theater', '상영관', 'theater'), tab('book', '전래동화', 'tales'), h('span', { class: 'g-sp' }), tab('trash', '휴지통', 'trash', '휴지통', ' sm'),
     h('button', { class: 'g-rb sm', type: 'button', 'aria-label': '도움말', html: icon('help') + '<span>도움말</span>', onclick: hintReset }),
     h('button', { class: 'g-rb sm', type: 'button', 'aria-label': '작품 파일 불러오기', html: icon('upload') + '<span>불러오기</span>', onclick: () => up.click() }), up);
+  if (galTab === 'theater') { root.append(rail, theaterMain()); return null; }
   const { list, trash } = await loadWorks();
   const isTrash = galTab === 'trash', isTales = galTab === 'tales';
   const grid = h('div', { class: 'g-grid list' });
@@ -103,7 +104,7 @@ async function toGallery() {
   const snapURL = (() => { try { return cv ? cv.toDataURL('image/jpeg', .6) : ''; } catch (e) { return ''; } })();
   closeScreen(); await saveProject(); P = null; TLc = null;
   const grid = await openGallery({ focus: id });
-  const card = id && $(`.g-card[data-id="${id}"]`, grid);
+  const card = id && grid && $(`.g-card[data-id="${id}"]`, grid);
   if (card) zoomInto(card, snapURL);
 }
 /* ---------- 확대 · 축소 전환 ---------- */
@@ -490,6 +491,7 @@ function paneShare(pane) {
       h('button', { class: 'cp-mini', type: 'button', onclick: () => openCard('credits'), html: icon('film') + `<span>크레딧<small>${hasCredits() ? designOf(P.credits.design).name + ' · ' + fontOf(P.credits.font).name : '없음'}</small></span>` })),
     h('div', { class: 'share-two' },   // 세로 화면에선 나란히, 가로에선 위아래로
       big('download', '영상 파일 만들기', '저장하거나 친구에게 보내요', () => { if (!TL().total) { toast('먼저 촬영에서 컷을 찍어요'); return; } Player.pause(); exportVideo(); }, 'or'),
+      big('theater', '상영관에 올리기', '모두에게 보여 줘요 · 어른이 확인해요', theaterUpload),
       big('save', '작품 파일', '다른 폰·태블릿으로 옮겨요', async () => { await saveProject(); const d = await DB.get(P.id).catch(() => null); d ? exportProjectFile(d) : toast('먼저 저장이 되어야 해요'); })));
 }
 IC.help = IC.help || '<circle cx="12" cy="12" r="9"/><path d="M9.6 9.6a2.4 2.4 0 1 1 3.4 2.2c-.7.4-1 .9-1 1.7"/><circle cx="12" cy="17" r=".7" fill="currentColor"/>';

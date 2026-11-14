@@ -53,6 +53,7 @@ async function initApp() {
   await openGallery();
   await intro;
   $('#library').classList.add('enter');
+  if (/[?&]admin\b/.test(location.search)) theaterAdmin();
 }
 
 /* 지운 작품은 휴지통에 30일 동안 남아요 (d.trashed = 지운 시각) */
