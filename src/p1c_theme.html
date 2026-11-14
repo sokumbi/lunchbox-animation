@@ -269,10 +269,14 @@ body,#app,.screen{background:#000;color:#fff}
 .al-acts button.red{color:#ff453a}
 .al-acts button.ok{background:var(--acc)}
 /* 시작 로고 · 화면 전환 */
-.intro{position:absolute;inset:0;z-index:900;background:#000;display:grid;place-items:center;cursor:pointer}
-.intro svg{width:min(56cqw,130cqh,460px);height:auto;opacity:0;animation:logoIn 1.1s cubic-bezier(.25,.8,.3,1) .15s forwards}
+.intro{position:absolute;inset:0;z-index:900;background:linear-gradient(#bf6047,#cb664b);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:min(2.2cqh,14px);cursor:pointer;container-type:size}
+.intro-box{width:min(62cqh,72cqw,440px);aspect-ratio:1;display:block;margin:-3cqh 0 -5cqh;-webkit-mask-image:radial-gradient(closest-side,#000 86%,transparent 100%);mask-image:radial-gradient(closest-side,#000 86%,transparent 100%);opacity:0;animation:splashIn .9s cubic-bezier(.2,1.3,.4,1) .1s forwards}
+.intro-t{font-family:Jua,"Gothic A1",sans-serif;font-size:min(7.2cqh,7cqw,38px);color:#FFF4DC;letter-spacing:.02em;text-shadow:0 2px 0 #9c4a34,0 4px 12px #0003;opacity:0;animation:fadeUp .6s ease .55s forwards;white-space:nowrap}
+.intro-sym{width:min(9cqh,52px);aspect-ratio:1;border-radius:28%;background:#FFF4DC;display:grid;place-items:center;box-shadow:0 3px 0 #9c4a34;opacity:0;animation:fadeUp .6s ease .8s forwards}
+.intro-sym svg{width:64%;height:auto;display:block}
 .intro.out{animation:fadeOut .6s ease forwards}
-.intro.out svg{opacity:1;animation:logoOut .6s ease forwards}
+@keyframes splashIn{0%{opacity:0;transform:scale(.7) rotate(-4deg)}100%{opacity:1;transform:none}}
+@keyframes fadeUp{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:none}}
 @keyframes logoIn{from{opacity:0;transform:scale(.94);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
 @keyframes logoOut{from{opacity:1}to{opacity:0;transform:scale(1.04)}}
 .screen.enter{animation:screenIn .42s ease backwards}
@@ -371,7 +375,6 @@ textarea.cp-in{height:clamp(54px,18cqh,74px)}
   .share-b{flex:none;grid-template-rows:auto;padding:9px 10px;column-gap:8px}
   .share-b small{display:none}
   .tale-top{padding-top:max(10px,env(safe-area-inset-top))}
-  .intro{padding-bottom:22cqh;box-sizing:border-box}
   .cut{grid-template-columns:minmax(0,1fr)}
   .cut-acts{flex-direction:row;flex-wrap:wrap}
   .cut-t{width:100%}

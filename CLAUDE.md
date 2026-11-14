@@ -33,7 +33,7 @@ src/                   앱 소스 (빌드 순서대로)
   p2_core.js           BRAND, 무대 크기 W·H, h(), 아이콘 IC, toast/modal, DB(IndexedDB), 영상 효과 FX(지금은 UI 없음), 효과음 SFX, 배경음악 BGM, 오디오 엔진 AE
   p2b_ui.js            추가 아이콘(timer 등), 예전 LCD·key 헬퍼(거의 안 씀)
   p3a_core.js          작품 모델 P(newProject: fps 6 · hold 1), setFormat, 타임라인 TL(), 재생기 Player, 되돌리기 HIST, 저장, 작품 파일
-  p3c_screens.js       show() · 시작 initApp(로고 인트로 → 갤러리) · loadWorks(휴지통 30일)
+  p3c_screens.js       show() · 시작 initApp(런치박스 시작 화면 → 갤러리) · loadWorks(휴지통 30일)
   p4_shoot.js          카메라(Cam) · drawCam · 사진 불러오기(pickImages, fileToFrameBlob) · playAll
   p5c_rec.js           녹음 도우미(Mic, recordFlow), 소리 파일 불러오기(uploadAudio)
   p6_simple.js         세 화면 전부: 내 작품(openGallery) · 촬영(openShoot) · 꾸미기(openDeco) + 메뉴·알림창·확대 전환
@@ -71,7 +71,7 @@ tests/ui-test.js       Playwright 흐름 점검 (가짜 카메라로 촬영까�
 - **컨셉 (2026-10-31)**: **심플**. 화면 세 장, 아이가 할 일은 찍기·말하기·소리·내보내기뿐. 선택지를 늘리지 말고, 새 기능은 꼭 필요한지 먼저 물어요.
   **고치기가 쉬워야** 해요: 잘못 찍은 컷은 필름에서 눌러 두 번 안에 지우기/다시 찍기, 되돌리기는 항상 보여요.
 - 검은 바탕(`#000`, 판 `#1c1c1e`/`#2c2c2e`) + **크고 이름 붙은 아이콘**(`.ri`: 아이콘 밑에 글자). 강조 주황 `#CF5D2A`, 찰칵·녹음 빨강 `#FF3B30`. 소리 주황, 말(내레이션) 청록 `#2F9C9A`, 배경음악 초록 `#4E9A63`.
-- 시작: 검은 바탕에 아르떼노바 로고 페이드(`introLogo`, 누르면 넘어가요) → 내 작품. 배경음악 없음, 버튼 클릭음만.
+- 시작(2026-11-14): 코럴 바탕에 클레이 런치박스(앱 아이콘과 같은 그림, `SPLASH_IMG`로 파일 안에 심음) + "런치박스 애니메이션 스튜디오" + 작은 아르떼노바 심볼(회사 이름 글자 없음). `introLogo`, 누르면 넘어가요 → 내 작품. 배경음악 없음, 버튼 클릭음만.
 - **한 화면에 다 보이게**(꾸미기 도구 판만 스크롤). **가로·세로 둘 다** 돼요(`@media (orientation:portrait)`: 위 줄 · 가운데 · 아래 줄).
 - 창·메뉴·알림은 스프링 곡선으로 열리고 `fadeRemove`로 부드럽게 닫혀요. 카드 ↔ 화면은 확대·축소 전환(`zoomFrom`/`zoomInto`).
 - 문구: 아이 눈높이 존댓말("~해요"). "공정" 대신 "단계", "나레이션" 대신 "내레이션"(화면에선 "말하기").
