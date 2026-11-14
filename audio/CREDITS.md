@@ -6,15 +6,17 @@ CC0는 저작권을 포기한 것이라 출처 표기 의무가 없지만, 만�
 
 ## 배경음악 (`audio/bgm`)
 
-| 파일 | 앱에서 이름 | 원곡 · 만든 이 | 원본 |
-|---|---|---|---|
-| sea.mp3 | 평화로운 바닷속 | Underwater Theme · Cleyton Kauffman (CleytonRX) | `Cleyton RX - Underwater_0.mp3` (앞 64초) |
-| palace.mp3 | 용궁 궁중음악 | Asianoriental1 · Tozan | `asianoriental1_0.ogg` (전체) |
-| worry.mp3 | 걱정과 슬픔 | Emotional Piano · Centurion_of_war | `emotional_piano_2.ogg` (전체) |
-| journey.mp3 | 씩씩한 길 떠나기 | Children's March Theme · Cleyton Kauffman | `childrens_march_theme.zip` 안 ogg (64초 반복곡 전체) |
-| tension.mp3 | 두근두근 긴장 | It's time for adventure vol 2 – 12 Tension · Komiku | `Komiku - ... 12 Tension_0.mp3` (앞 64초) |
-| chase.mp3 | 신나는 도망 | It's time for adventure vol 2 – 13 Fight, run, breath deeply · Komiku | `Komiku - ... 13 Fight, run, breath deeply_0.mp3` (앞 64초) |
-| happy.mp3 | 행복한 마무리 | End Credits Theme (Farewell) · Cleyton Kauffman | `End_Credits_Theme_ogg.ogg` (전체) |
+2026-11-14에 실제 악기 느낌의 곡으로 모두 바꿨어요. 6곡은 **FreePD.com**(운영자 Kevin MacLeod, 2025년에 문 닫음. 사이트 전체가 "CC0 1.0 Universal Public Domain Dedication", 소프트웨어에 넣어도 된다고 명시)의 곡이고 archive.org 보관본(`https://archive.org/download/freepd/<경로>`)에서 받았어요. 1곡은 OpenGameArt의 CC0 곡이에요.
+
+| 파일 | 앱에서 이름 | 원곡 · 만든 이 | 원본 | 쓴 구간 |
+|---|---|---|---|---|
+| sea.mp3 | 평화로운 바닷속 | Aquarium (생상스 '동물의 사육제') · Kevin MacLeod | freepd `misc/Aquarium.mp3` | 앞 64초 |
+| palace.mp3 | 용궁 궁중음악 | Hot Springs Town · Kistol | opengameart.org `hot_spring_town.mp3` | 앞 64초 |
+| worry.mp3 | 걱정과 슬픔 | Piano Magic Motive · Kevin MacLeod | freepd `romantic/Piano Magic Motive.mp3` | 앞 66초 |
+| journey.mp3 | 씩씩한 길 떠나기 | Royal Coupling · Kevin MacLeod | freepd `misc/Royal Coupling.mp3` | 14~78초 |
+| tension.mp3 | 두근두근 긴장 | Managing Mischief · Bryan Teoh | freepd `comedy/Managing Mischief.mp3` | 앞 64초 |
+| chase.mp3 | 신나는 도망 | Rush · Rafael Krux | freepd `comedy/Rush.mp3` | 앞 54초 |
+| happy.mp3 | 행복한 마무리 | Motions · Rafael Krux | freepd `upbeat/Motions.mp3` | 앞 70초 |
 
 ## 효과음 (`audio/sfx`)
 
