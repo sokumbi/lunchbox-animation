@@ -277,7 +277,10 @@ function playTale(tale) {
   const loop = () => {
     if (!bg.isConnected) return; raf = requestAnimationFrame(loop);
     if (!ready) return;
-    if (playing) { const now = performance.now(); pos += (now - last) / 1000; last = now; if (pos >= total) { pos = total; playing = false; AE.stopPreview(); setPlayIcon(); end.hidden = false; pauseB.hidden = true; } }
+    // 지금 장면 그림이 아직 오는 중이면 시간을 멈추고 "불러오는 중"을 보여요(그림 없이 이야기가 흘러가지 않게)
+    const cur = imgs[sceneAt(pos)], loading = !okImg(cur) && !cur._bad; wait.hidden = !loading;
+    if (playing && loading) last = performance.now();
+    else if (playing) { const now = performance.now(); pos += (now - last) / 1000; last = now; if (pos >= total) { pos = total; playing = false; AE.stopPreview(); setPlayIcon(); end.hidden = false; pauseB.hidden = true; } }
     draw();
   };
   // 스토리를 보는 동안 뒤 화면(내 작품)은 숨겨요(가려진 버튼이 눌리지 않게)
@@ -295,9 +298,9 @@ function playTale(tale) {
   track.onpointermove = e => { if (track.classList.contains('drag')) seek(tAt(e)); };
   track.onpointerup = track.onpointercancel = () => { if (!track.classList.contains('drag')) return; track.classList.remove('drag'); if (wasPlaying) play(); };
   $('#app').append(bg); loop();
-  // 첫 장면 그림이 준비되면(또는 4초가 지나면) 시작해요
-  const go = () => { if (ready || !bg.isConnected) return; ready = true; wait.remove(); play(); };
-  const first = imgs[0]; if (okImg(first) || first._bad) go(); else { first.addEventListener('load', go); first.addEventListener('error', go); setTimeout(go, 4000); }
+  // 첫 장면 그림이 준비되면 시작해요(못 읽으면 이모지 장면으로)
+  const go = () => { if (ready || !bg.isConnected) return; ready = true; play(); };
+  const first = imgs[0]; if (okImg(first) || first._bad) go(); else { first.addEventListener('load', go); first.addEventListener('error', go); }
 }
 /* 전래동화 카드를 누르면: 스토리 보기 · 스토리 만들기(이야기 이름으로 새 작품 → 촬영, 장면 자막 안내) */
 const TALE_DESIGN = { byeoljubu: 'night', heungbu: 'meadow', haenim: 'night', geumdokki: 'paper', kongjwi: 'sunset' };

@@ -30,7 +30,18 @@ function introLogo() {
     setTimeout(end, 2600);
   });
 }
+/* 새 버전 확인: 폰(특히 홈 화면 앱)은 예전 index.html을 한동안 그대로 써요.
+   열 때 서버의 빌드 번호(<meta name="lb-build">, build.sh가 넣음)를 캐시 없이 읽어 보고, 다르면 주소 끝에 ?b=번호를 붙여 새로 열어요 */
+function checkUpdate() {
+  const mine = document.querySelector('meta[name="lb-build"]')?.content; if (!mine || !/^https?:/.test(location.protocol)) return;
+  fetch('./?t=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
+    const m = t.match(/<meta name="lb-build" content="(\d+)"/); if (!m || m[1] === mine) return;
+    if (new URLSearchParams(location.search).get('b') === m[1]) return;   // 이미 그 번호로 열었으면 다시 하지 않아요
+    location.replace(location.pathname + '?b=' + m[1]);
+  }).catch(() => { });
+}
 async function initApp() {
+  checkUpdate();
   layoutApp();
   // 처음 손댈 때 소리 엔진을 켜고, 버튼을 누를 때마다 짧은 클릭음
   document.addEventListener('pointerdown', e => {
