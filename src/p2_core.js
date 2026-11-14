@@ -359,6 +359,9 @@ const AE = {
   /* 터치 소리: 높은 "뾱" 대신 낮고 짧은 "톡"(부드러운 나무 두드림 느낌). 아주 짧은 잡음 + 낮은 음 */
   click(v = .25) {
     if (!this.ctx) return; const c = this.ctx, t = c.currentTime;
+    // 실제 녹음된 나무 두드림(audio/sfx/tap.mp3)을 먼저 써요. 아직 못 읽었거나 없으면 아래 합성 소리
+    if (this._tapF === undefined) { this._tapF = null; this.file('sfx', 'tap').then(b => { this._tapF = b; }).catch(() => { }); }
+    if (this._tapF) { const s = c.createBufferSource(), g = c.createGain(); s.buffer = this._tapF; g.gain.value = v * 2.2 * (this._tapF.__gain || 1); s.connect(g).connect(this.buses.ui); s.start(t); return; }
     if (!this._tap) { const n = Math.round(c.sampleRate * .03), b = c.createBuffer(1, n, c.sampleRate), d = b.getChannelData(0); for (let k = 0; k < n; k++) d[k] = (Math.random() * 2 - 1) * Math.pow(1 - k / n, 3); this._tap = b; }
     const s = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain(); s.buffer = this._tap; f.type = 'lowpass'; f.frequency.value = 1400; g.gain.value = v * .9; s.connect(f).connect(g).connect(this.buses.ui); s.start(t);
     const o = c.createOscillator(), g2 = c.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(260, t); o.frequency.exponentialRampToValueAtTime(150, t + .04); g2.gain.setValueAtTime(v * 1.2, t); g2.gain.exponentialRampToValueAtTime(.001, t + .06); o.connect(g2).connect(this.buses.ui); o.start(t); o.stop(t + .07);

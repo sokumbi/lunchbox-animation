@@ -33,6 +33,7 @@ CC0는 저작권을 포기한 것이라 출처 표기 의무가 없지만, 만�
 | ding.mp3 | 띠링 | `100-CC0-SFX_0.zip` 안 `bell_01.ogg` | 그대로 |
 | sparkle.mp3 | 반짝 | `100-CC0-SFX_0.zip` 안 `glass_05.ogg` + `bell_02.ogg`×2 | 종을 높여 겹침 |
 | gong.mp3 | 징 | `100-CC0-SFX_0.zip` 안 `gong_01.ogg` | 0.7배 느리게(여운) |
+| tap.mp3 | (버튼 터치 소리) | `100-CC0-SFX_0.zip` 안 `wooden_01.ogg` | 앞 0.14초 |
 | fail.mp3 | 띠로리 | `sad_theme_0.ogg` | 0.85~4.6초 구간, 페이드 아웃 |
 
 모든 원본 주소는 `https://opengameart.org/sites/default/files/<파일 이름>` 이에요.
