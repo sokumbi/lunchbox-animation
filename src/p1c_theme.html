@@ -322,7 +322,8 @@ textarea.cp-in{height:clamp(54px,18cqh,74px)}
 .hint-card small{text-align:center;color:#a1a1a6;font-size:12px;font-weight:700}
 /* ---------- 전래동화 ---------- */
 .g-card.tale .th{overflow:hidden;position:relative}
-.tale-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+.tale-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;opacity:0;transition:opacity .25s}
+.tale-img.in{opacity:1}
 .tale-big{font-size:clamp(44px,15cqh,72px);line-height:1;filter:drop-shadow(0 4px 10px #0008)}
 .tale-al{align-items:center;text-align:center}
 .tale-e{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;font-size:36px;margin-bottom:2px}
@@ -334,15 +335,25 @@ textarea.cp-in{height:clamp(54px,18cqh,74px)}
 .tale-b small{font-size:11px;font-weight:600;color:#d1d1d6}
 .tale-x{position:absolute;top:8px;right:8px;width:30px;height:30px;border:0;border-radius:50%;background:#48484a;color:#fff;display:grid;place-items:center;cursor:pointer;padding:0}
 .tale-x svg{width:16px;height:16px}
-.tale-bg{position:absolute;inset:0;z-index:520;background:#000;display:grid;grid-template-rows:auto minmax(0,1fr);animation:fadeIn .25s both;container-type:size}
+.tale-bg{position:absolute;inset:0;z-index:520;background:#000;display:grid;grid-template-rows:auto minmax(0,1fr) auto;animation:fadeIn .25s both;container-type:size}
 .tale-top{display:flex;align-items:center;justify-content:space-between;padding:10px 140px 6px max(16px,env(safe-area-inset-left));font-size:clamp(14px,4.4cqh,18px)}
 .tale-n{color:#8e8e93;font-size:13px;font-weight:700}
-.tale-mon{position:relative;min-height:0;display:grid;place-items:center;padding:0 10px 14px}
-.tale-cv{width:min(100%,calc((100cqh - 60px) * var(--ar,1.7778)));aspect-ratio:var(--ar,1.7778);height:auto;border-radius:12px;background:#000;cursor:pointer}
+.tale-mon{position:relative;min-height:0;display:grid;place-items:center;padding:0 10px 6px}
+.tale-cv{width:min(100%,calc((100cqh - 112px) * var(--ar,1.7778)));aspect-ratio:var(--ar,1.7778);height:auto;border-radius:12px;background:#000;cursor:pointer}
 .tale-skip{position:absolute;top:8px;right:max(10px,env(safe-area-inset-right));border:0;border-radius:999px;background:#ffffff22;color:#fff;font:inherit;font-size:13px;font-weight:800;display:flex;align-items:center;gap:4px;padding:6px 12px 6px 8px;cursor:pointer}
 .tale-skip svg{width:16px;height:16px}
 .tale-pause{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:76px;height:76px;border-radius:50%;background:#000000a6;color:#fff;display:grid;place-items:center;pointer-events:none;box-shadow:0 0 0 3px #ffffff66}
 .tale-pause svg{width:40px;height:40px;fill:currentColor;stroke:none}
+.tale-wait{position:absolute;inset:0;display:grid;place-items:center;color:#8e8e93;font-size:14px;font-weight:700;pointer-events:none}
+.tale-bar{display:flex;align-items:center;gap:6px;padding:0 max(14px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));height:52px;box-sizing:content-box}
+.tale-tb{flex:none;width:40px;height:40px;border:0;border-radius:50%;background:#2c2c2e;display:grid;place-items:center;padding:0;cursor:pointer;color:#fff}
+.tale-tb.big{width:46px;height:46px;background:#3a3a3c}
+.tale-tb svg{width:26px;height:26px}.tale-tb.big svg{width:30px;height:30px}
+.tale-track{position:relative;flex:1;min-width:0;height:40px;margin-left:8px;display:flex;align-items:center;gap:3px;cursor:pointer;touch-action:none}
+.tale-track span{height:8px;border-radius:4px;background:#3a3a3c}
+.tale-fill{position:absolute;left:0;top:50%;height:8px;margin-top:-4px;border-radius:4px;background:var(--acc);pointer-events:none;opacity:.85}
+.tale-knob{position:absolute;top:50%;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;background:#fff;box-shadow:0 2px 8px #000a;pointer-events:none;transition:transform .15s}
+.tale-track.drag .tale-knob{transform:scale(1.25)}
 .tale-end{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#000000a6;border-radius:12px;animation:fadeIn .3s both}
 .tale-end b{font-size:clamp(28px,10cqh,44px)}
 .tale-end div{display:flex;gap:10px}

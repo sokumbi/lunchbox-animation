@@ -239,30 +239,65 @@ function drawTaleScene(ctx, sc, t, img, k = 0) {
   ctx.fillStyle = 'rgba(0,0,0,.62)'; ctx.beginPath(); ctx.roundRect(W * .05, H - 18 - bh, W * .9, bh, 14); ctx.fill();
   ctx.fillStyle = '#fff'; lines.forEach((l, i) => ctx.fillText(l, W / 2, H - 18 - bh + 11 + lh / 2 + i * lh));
 }
-/* 스토리 보기: 전체 화면 · 건너뛰기 · 누르면 멈춤/계속 */
+/* 스토리 보기: 전체 화면 · 아래 타임라인(끌거나 눌러서 앞뒤로, ‹ › 장면 넘기기, 재생/멈춤) · 건너뛰기 · 화면 누르면 멈춤/계속
+   장면 그림(tales/<id>/<n>.jpg)이 준비될 때까지 기다렸다가 시작해요. 그림을 못 읽은 장면만 예전 이모지 장면으로 그려요 */
 function playTale(tale) {
   AE.init(); const cv = h('canvas', { class: 'tale-cv', width: W, height: H }), ctx = cv.getContext('2d');
-  const cap = h('div', { class: 'tale-top' }, h('b', {}, tale.e + ' ' + tale.title), h('span', { class: 'tale-n' }, ''));
-  const skip = h('button', { class: 'tale-skip', type: 'button', 'aria-label': '건너뛰기', html: icon('skip') + '<span>건너뛰기</span>' });
+  const N = tale.scenes.length, starts = [], total = tale.scenes.reduce((a, s) => (starts.push(a), a + s.d), 0);
+  const cap = h('div', { class: 'tale-top' }, h('b', {}, tale.title), h('span', { class: 'tale-n' }, ''));
+  const skip = h('button', { class: 'tale-skip', type: 'button', 'aria-label': '닫기', html: icon('x') + '<span>닫기</span>' });
   const pauseB = h('div', { class: 'tale-pause', hidden: true, html: icon('play') });
-  const end = h('div', { class: 'tale-end', hidden: true }, h('b', {}, '끝'), h('div', {}, h('button', { class: 'btn', type: 'button', onclick: () => start() }, '다시 보기'), h('button', { class: 'btn or', type: 'button', onclick: () => close() }, '닫기')));
-  const bg = h('div', { class: 'tale-bg' }, cap, h('div', { class: 'tale-mon' }, cv, pauseB, end), skip);
-  let i = 0, t0 = 0, paused = false, pausedAt = 0, raf = 0, done = false;
-  const total = tale.scenes.reduce((a, s) => a + s.d, 0);
-  const imgs = tale.scenes.map((_, n) => { const im = new Image(); im.src = `tales/${tale.id}/${n + 1}.jpg`; return im; });   // 못 읽으면 이모지 장면으로 대신해요
-  const music = async () => { try { const b = await AE.getBgm(tale.bgm); if (!bg.isConnected) return; AE.stopPreview(); const s = AE.ctx.createBufferSource(); s.buffer = b; s.loop = true; s.loopStart = b.__loopStart || 0; s.loopEnd = b.__loopEnd || b.duration; const g = AE.ctx.createGain(); g.gain.value = .5 * (b.__gain || 1); s.connect(g).connect(AE.buses.ui); s.start(0, s.loopStart); AE.preview = s; } catch (e) { } };
-  const start = () => { end.hidden = true; done = false; paused = false; i = 0; t0 = performance.now(); music(); cancelAnimationFrame(raf); loop(); };
+  const wait = h('div', { class: 'tale-wait' }, '그림을 불러오는 중…');
+  const end = h('div', { class: 'tale-end', hidden: true }, h('b', {}, '끝'), h('div', {}, h('button', { class: 'btn', type: 'button', onclick: () => { seek(0); play(); } }, '다시 보기'), h('button', { class: 'btn or', type: 'button', onclick: () => close() }, '닫기')));
+  // 타임라인: 장면마다 칸, 흰 손잡이. 누르거나 끌면 그 자리로 가요
+  const fill = h('i', { class: 'tale-fill' }), knob = h('i', { class: 'tale-knob' });
+  const track = h('div', { class: 'tale-track' }, ...tale.scenes.map(s => h('span', { style: { flex: s.d } })), fill, knob);
+  const prevB = h('button', { class: 'tale-tb', type: 'button', 'aria-label': '앞 장면', html: icon('back') });
+  const playB = h('button', { class: 'tale-tb big', type: 'button', 'aria-label': '재생', html: icon('pause') });
+  const nextB = h('button', { class: 'tale-tb', type: 'button', 'aria-label': '다음 장면', html: icon('next') });
+  const bar = h('div', { class: 'tale-bar' }, prevB, playB, nextB, track);
+  const bg = h('div', { class: 'tale-bg' }, cap, h('div', { class: 'tale-mon' }, cv, wait, pauseB, end), bar, skip);
+  let pos = 0, playing = false, last = 0, raf = 0, ready = false;
+  const imgs = tale.scenes.map((_, n) => { const im = new Image(); im.onerror = () => { im._bad = true; }; im.src = `tales/${tale.id}/${n + 1}.jpg`; return im; });
+  const okImg = im => im.complete && im.naturalWidth > 0;
+  const music = async () => { try { const b = await AE.getBgm(tale.bgm); if (!bg.isConnected || !playing) return; AE.stopPreview(); const s = AE.ctx.createBufferSource(); s.buffer = b; s.loop = true; s.loopStart = b.__loopStart || 0; s.loopEnd = b.__loopEnd || b.duration; const g = AE.ctx.createGain(); g.gain.value = .5 * (b.__gain || 1); s.connect(g).connect(AE.buses.ui); s.start(0, s.loopStart); AE.preview = s; } catch (e) { } };
+  const sceneAt = t => { let k = 0; while (k < N - 1 && t >= starts[k + 1]) k++; return k; };
+  const draw = () => {
+    const k = sceneAt(pos), t = pos - starts[k], im = imgs[k]; ctx.setTransform(1, 0, 0, 1, 0, 0);
+    if (okImg(im)) drawTaleScene(ctx, tale.scenes[k], t, im, k);
+    else if (im._bad) drawTaleScene(ctx, tale.scenes[k], t, null, k);
+    else { ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H); }   // 아직 오는 중이면 검은 화면(이모지 장면이 잠깐 비치지 않게)
+    cap.lastChild.textContent = `${k + 1} / ${N}`;
+    const f = pos / total * 100; fill.style.width = f + '%'; knob.style.left = f + '%';
+  };
+  const setPlayIcon = () => { playB.innerHTML = icon(playing ? 'pause' : 'play'); pauseB.hidden = playing || pos >= total; };
+  const play = () => { if (!ready) return; if (pos >= total) pos = 0; end.hidden = true; playing = true; last = performance.now(); setPlayIcon(); music(); };
+  const pause = () => { playing = false; AE.stopPreview(); setPlayIcon(); };
+  const seek = t => { pos = Math.max(0, Math.min(total - .001, t)); end.hidden = true; draw(); };
   const loop = () => {
     if (!bg.isConnected) return; raf = requestAnimationFrame(loop);
-    if (paused || done) return;
-    let t = (performance.now() - t0) / 1000, k = 0; while (k < tale.scenes.length && t >= tale.scenes[k].d) { t -= tale.scenes[k].d; k++; }
-    if (k >= tale.scenes.length) { done = true; end.hidden = false; AE.stopPreview(); return; }
-    i = k; ctx.setTransform(1, 0, 0, 1, 0, 0); drawTaleScene(ctx, tale.scenes[k], t, imgs[k], k); cap.lastChild.textContent = `${k + 1} / ${tale.scenes.length}`;
+    if (!ready) return;
+    if (playing) { const now = performance.now(); pos += (now - last) / 1000; last = now; if (pos >= total) { pos = total; playing = false; AE.stopPreview(); setPlayIcon(); end.hidden = false; pauseB.hidden = true; } }
+    draw();
   };
-  const close = () => { cancelAnimationFrame(raf); AE.stopPreview(); fadeRemove(bg); };
+  // 스토리를 보는 동안 뒤 화면(내 작품)은 숨겨요(가려진 버튼이 눌리지 않게)
+  const under = [...document.querySelectorAll('#library,#studio')].filter(e => e.style.visibility !== 'hidden'); under.forEach(e => e.style.visibility = 'hidden');
+  const close = () => { cancelAnimationFrame(raf); AE.stopPreview(); under.forEach(e => e.style.visibility = ''); fadeRemove(bg); };
   skip.onclick = close;
-  cv.onclick = () => { if (done) return; paused = !paused; pauseB.hidden = !paused; if (paused) pausedAt = performance.now(); else t0 += performance.now() - pausedAt; if (paused) AE.stopPreview(); else music(); };
-  $('#app').append(bg); start();
+  cv.onclick = () => { if (!ready || !end.hidden) return; playing ? pause() : play(); };
+  playB.onclick = () => { if (!end.hidden) { seek(0); play(); return; } playing ? pause() : play(); };
+  prevB.onclick = () => { const k = sceneAt(pos); seek(pos - starts[k] > 1 || k === 0 ? starts[k] : starts[k - 1]); };   // 장면 시작에서 1초 안이면 앞 장면으로
+  nextB.onclick = () => { const k = sceneAt(pos); if (k < N - 1) seek(starts[k + 1]); };
+  // 타임라인 끌기: 끄는 동안 멈췄다가 놓으면 원래대로
+  let wasPlaying = false;
+  const tAt = e => { const r = track.getBoundingClientRect(); return Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * total; };
+  track.onpointerdown = e => { if (!ready) return; track.setPointerCapture(e.pointerId); wasPlaying = playing; if (playing) pause(); seek(tAt(e)); track.classList.add('drag'); };
+  track.onpointermove = e => { if (track.classList.contains('drag')) seek(tAt(e)); };
+  track.onpointerup = track.onpointercancel = () => { if (!track.classList.contains('drag')) return; track.classList.remove('drag'); if (wasPlaying) play(); };
+  $('#app').append(bg); loop();
+  // 첫 장면 그림이 준비되면(또는 4초가 지나면) 시작해요
+  const go = () => { if (ready || !bg.isConnected) return; ready = true; wait.remove(); play(); };
+  const first = imgs[0]; if (okImg(first) || first._bad) go(); else { first.addEventListener('load', go); first.addEventListener('error', go); setTimeout(go, 4000); }
 }
 /* 전래동화 카드를 누르면: 스토리 보기 · 스토리 만들기(이야기 이름으로 새 작품 → 촬영, 장면 자막 안내) */
 const TALE_DESIGN = { byeoljubu: 'night', heungbu: 'meadow', haenim: 'night', geumdokki: 'paper', kongjwi: 'sunset' };
@@ -285,7 +320,7 @@ function taleGuide(tale) {
 function taleSheet(tale) {
   const done = () => { bg.classList.add('out'); setTimeout(() => bg.remove(), 160); };
   const bg = h('div', { class: 'al-bg', onpointerdown: e => { if (e.target === bg) done(); } },
-    h('div', { class: 'al tale-al', role: 'dialog', 'aria-modal': 'true' }, h('span', { class: 'tale-e', style: { background: tale.c } }, tale.e), h('b', { class: 'al-t' }, tale.title), h('p', { class: 'al-p' }, tale.sub),
+    h('div', { class: 'al tale-al', role: 'dialog', 'aria-modal': 'true' }, h('b', { class: 'al-t' }, tale.title), h('p', { class: 'al-p' }, tale.sub),
       h('button', { class: 'tale-b or', type: 'button', html: icon('play') + '<span>스토리 보기</span>', onclick: () => { done(); playTale(tale); } }),
       h('button', { class: 'tale-b', type: 'button', html: icon('cam') + '<span>스토리 만들기<small>이야기를 따라 찍어요</small></span>', onclick: () => { done(); makeTale(tale); } }),
       h('button', { class: 'tale-x', type: 'button', 'aria-label': '닫기', html: icon('x'), onclick: done })));
@@ -293,10 +328,11 @@ function taleSheet(tale) {
 }
 function taleGrid(grid) {
   for (const t of TALES) {
-    const card = h('button', { class: 'g-card tale', type: 'button', 'aria-label': t.title, onclick: () => taleSheet(t) },
-      h('span', { class: 'th', style: { background: `linear-gradient(135deg, ${t.c}, #000000aa)` } }, h('span', { class: 'tale-big' }, t.e),
-        // 카드 그림(tales/<id>.jpg). 못 읽으면(오프라인·file://) 지워져서 아래 이모지가 보여요
-        h('img', { class: 'tale-img', src: `tales/${t.id}.jpg`, alt: '', loading: 'lazy', draggable: false, onerror: e => e.target.remove() })), h('span', { class: 'tt' }, h('b', {}, t.title), h('small', {}, t.sub)));
+    // 카드 그림(tales/<id>.jpg)이 뜰 때까지 어두운 바탕만 보여요. 못 읽을 때(오프라인·file://)만 예전 색 바탕+이모지
+    const emo = h('span', { class: 'tale-big', hidden: true }, t.e);
+    const th = h('span', { class: 'th', style: { background: '#1c1c1e' } }, emo,
+      h('img', { class: 'tale-img', src: `tales/${t.id}.jpg`, alt: '', draggable: false, onload: e => e.target.classList.add('in'), onerror: e => { e.target.remove(); emo.hidden = false; th.style.background = `linear-gradient(135deg, ${t.c}, #000000aa)`; } }));
+    const card = h('button', { class: 'g-card tale', type: 'button', 'aria-label': t.title, onclick: () => taleSheet(t) }, th, h('span', { class: 'tt' }, h('b', {}, t.title), h('small', {}, t.sub)));
     card.style.setProperty('--i', grid.children.length); grid.append(card);
   }
 }
