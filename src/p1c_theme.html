@@ -67,6 +67,15 @@ svg.clay{overflow:visible;filter:drop-shadow(0 1px 1.5px #0007)}
 .sh-mon canvas{width:100%;height:100%;display:block}
 .sh-banner{position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:3;display:flex;align-items:center;gap:8px;background:var(--acc);color:#fff;border-radius:999px;padding:5px 8px 5px 14px;font-size:clamp(12px,4cqh,15px);font-weight:800;white-space:nowrap;box-shadow:0 4px 14px #0008}
 .sh-banner button{border:0;border-radius:999px;background:#fff;color:var(--acc);font:inherit;font-size:clamp(11px,3.6cqh,13px);font-weight:800;padding:3px 10px;cursor:pointer}
+/* 초점: 누른 자리에 노란 네모가 잠깐, 직접 조절이 되는 기기는 오른쪽에 세로 막대 */
+.fc-ring{position:absolute;z-index:4;width:64px;height:64px;margin:-32px 0 0 -32px;border:2px solid #FFD54A;border-radius:10px;pointer-events:none;opacity:0}
+.fc-ring.go{animation:fcRing 1.1s ease forwards}
+@keyframes fcRing{0%{opacity:1;transform:scale(1.5)}25%{opacity:1;transform:scale(1)}80%{opacity:1}100%{opacity:0;transform:scale(1)}}
+.fc-box{position:absolute;z-index:3;right:8px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 6px;border-radius:14px;background:#000a;color:#fff;font-size:11px;font-weight:800}
+.fc-box[hidden]{display:none}
+.fc-range{writing-mode:vertical-lr;direction:rtl;width:28px;height:min(46cqh,160px);margin:0;accent-color:#FFD54A}
+.fc-auto{border:0;border-radius:999px;background:#ffffff26;color:#fff;font:inherit;font-size:11px;font-weight:800;padding:3px 8px;cursor:pointer}
+.fc-auto.on{background:#FFD54A;color:#222}
 /* 아래 필름: 찍은 컷이 쌓여요. 카메라 화면 밖(아래)에 있어서 화면을 가리지 않아요 */
 .sh-film{position:relative;flex:none;height:clamp(48px,17cqh,80px);display:flex;align-items:center;gap:8px;padding:0 6px;box-sizing:border-box}
 .sh-cnt{flex:none;display:flex;flex-direction:column;align-items:center;line-height:1;font-size:clamp(11px,3.4cqh,12.5px);font-weight:700;color:#fff;min-width:34px;text-shadow:0 1px 4px #000c}

@@ -18,6 +18,27 @@ const Cam = {
     } catch (e) { this.failed = true; this.reason = e && e.name; this.stream = null; return false; }
   },
   stop() { if (this.stream) this.stream.getTracks().forEach(t => t.stop()); this.stream = null; },
+  /* 초점: 기기가 알려 주는 기능만 써요(안드로이드 크롬은 대부분 됨, 아이폰 사파리는 대개 안 됨)
+     focusInfo() → { tap: 눌러서 맞추기 되나, dist: {min,max,step} 직접 조절 되나, now: 지금 거리 } */
+  track() { return this.stream && this.stream.getVideoTracks()[0]; },
+  focusInfo() {
+    const t = this.track(); if (!t || !t.getCapabilities) return { tap: false, dist: null };
+    let c = {}; try { c = t.getCapabilities() || {}; } catch (e) { }
+    const modes = c.focusMode || [], dist = c.focusDistance && c.focusDistance.max > c.focusDistance.min && modes.includes('manual') ? c.focusDistance : null;
+    let now = null; try { now = t.getSettings().focusDistance ?? null; } catch (e) { }
+    return { tap: modes.includes('single-shot') || modes.includes('continuous') || !!dist, dist, now, modes };
+  },
+  /* 화면의 (x, y)(0~1)에 초점을 한 번 맞춘 뒤 그 거리로 고정해요(컷마다 초점이 흔들리지 않게) */
+  async focusAt(x, y) {
+    const t = this.track(), f = this.focusInfo(); if (!t || !f.tap) return false;
+    const mode = f.modes.includes('single-shot') ? 'single-shot' : f.modes.includes('continuous') ? 'continuous' : 'manual';
+    try { await t.applyConstraints({ advanced: [{ pointsOfInterest: [{ x, y }], focusMode: mode }] }); }
+    catch (e) { try { await t.applyConstraints({ advanced: [{ focusMode: mode }] }); } catch (e2) { return false; } }
+    if (f.dist) setTimeout(() => { try { const d = t.getSettings().focusDistance; if (d != null) t.applyConstraints({ advanced: [{ focusMode: 'manual', focusDistance: d }] }).catch(() => { }); } catch (e) { } }, 1200);
+    return true;
+  },
+  async focusDist(d) { const t = this.track(); if (!t) return; try { await t.applyConstraints({ advanced: [{ focusMode: 'manual', focusDistance: d }] }); } catch (e) { } },
+  async focusAuto() { const t = this.track(); if (!t) return; try { await t.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }); } catch (e) { } },
   async next() { if (this.devices.length < 2) return false; this.stop(); this.di = (this.di + 1) % this.devices.length; return this.start(); }
 };
 

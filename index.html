@@ -1,4 +1,4 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="lb-build" content="20261114162818"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"></head><body><title>런치박스애니메이션</title>
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="lb-build" content="20261114163751"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"></head><body><title>런치박스애니메이션</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="theme-color" content="#F4EFE5">
 <meta name="mobile-web-app-capable" content="yes">
@@ -520,6 +520,15 @@ svg.clay{overflow:visible;filter:drop-shadow(0 1px 1.5px #0007)}
 .sh-mon canvas{width:100%;height:100%;display:block}
 .sh-banner{position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:3;display:flex;align-items:center;gap:8px;background:var(--acc);color:#fff;border-radius:999px;padding:5px 8px 5px 14px;font-size:clamp(12px,4cqh,15px);font-weight:800;white-space:nowrap;box-shadow:0 4px 14px #0008}
 .sh-banner button{border:0;border-radius:999px;background:#fff;color:var(--acc);font:inherit;font-size:clamp(11px,3.6cqh,13px);font-weight:800;padding:3px 10px;cursor:pointer}
+/* 초점: 누른 자리에 노란 네모가 잠깐, 직접 조절이 되는 기기는 오른쪽에 세로 막대 */
+.fc-ring{position:absolute;z-index:4;width:64px;height:64px;margin:-32px 0 0 -32px;border:2px solid #FFD54A;border-radius:10px;pointer-events:none;opacity:0}
+.fc-ring.go{animation:fcRing 1.1s ease forwards}
+@keyframes fcRing{0%{opacity:1;transform:scale(1.5)}25%{opacity:1;transform:scale(1)}80%{opacity:1}100%{opacity:0;transform:scale(1)}}
+.fc-box{position:absolute;z-index:3;right:8px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 6px;border-radius:14px;background:#000a;color:#fff;font-size:11px;font-weight:800}
+.fc-box[hidden]{display:none}
+.fc-range{writing-mode:vertical-lr;direction:rtl;width:28px;height:min(46cqh,160px);margin:0;accent-color:#FFD54A}
+.fc-auto{border:0;border-radius:999px;background:#ffffff26;color:#fff;font:inherit;font-size:11px;font-weight:800;padding:3px 8px;cursor:pointer}
+.fc-auto.on{background:#FFD54A;color:#222}
 /* 아래 필름: 찍은 컷이 쌓여요. 카메라 화면 밖(아래)에 있어서 화면을 가리지 않아요 */
 .sh-film{position:relative;flex:none;height:clamp(48px,17cqh,80px);display:flex;align-items:center;gap:8px;padding:0 6px;box-sizing:border-box}
 .sh-cnt{flex:none;display:flex;flex-direction:column;align-items:center;line-height:1;font-size:clamp(11px,3.4cqh,12.5px);font-weight:700;color:#fff;min-width:34px;text-shadow:0 1px 4px #000c}
@@ -1730,6 +1739,27 @@ const Cam = {
     } catch (e) { this.failed = true; this.reason = e && e.name; this.stream = null; return false; }
   },
   stop() { if (this.stream) this.stream.getTracks().forEach(t => t.stop()); this.stream = null; },
+  /* 초점: 기기가 알려 주는 기능만 써요(안드로이드 크롬은 대부분 됨, 아이폰 사파리는 대개 안 됨)
+     focusInfo() → { tap: 눌러서 맞추기 되나, dist: {min,max,step} 직접 조절 되나, now: 지금 거리 } */
+  track() { return this.stream && this.stream.getVideoTracks()[0]; },
+  focusInfo() {
+    const t = this.track(); if (!t || !t.getCapabilities) return { tap: false, dist: null };
+    let c = {}; try { c = t.getCapabilities() || {}; } catch (e) { }
+    const modes = c.focusMode || [], dist = c.focusDistance && c.focusDistance.max > c.focusDistance.min && modes.includes('manual') ? c.focusDistance : null;
+    let now = null; try { now = t.getSettings().focusDistance ?? null; } catch (e) { }
+    return { tap: modes.includes('single-shot') || modes.includes('continuous') || !!dist, dist, now, modes };
+  },
+  /* 화면의 (x, y)(0~1)에 초점을 한 번 맞춘 뒤 그 거리로 고정해요(컷마다 초점이 흔들리지 않게) */
+  async focusAt(x, y) {
+    const t = this.track(), f = this.focusInfo(); if (!t || !f.tap) return false;
+    const mode = f.modes.includes('single-shot') ? 'single-shot' : f.modes.includes('continuous') ? 'continuous' : 'manual';
+    try { await t.applyConstraints({ advanced: [{ pointsOfInterest: [{ x, y }], focusMode: mode }] }); }
+    catch (e) { try { await t.applyConstraints({ advanced: [{ focusMode: mode }] }); } catch (e2) { return false; } }
+    if (f.dist) setTimeout(() => { try { const d = t.getSettings().focusDistance; if (d != null) t.applyConstraints({ advanced: [{ focusMode: 'manual', focusDistance: d }] }).catch(() => { }); } catch (e) { } }, 1200);
+    return true;
+  },
+  async focusDist(d) { const t = this.track(); if (!t) return; try { await t.applyConstraints({ advanced: [{ focusMode: 'manual', focusDistance: d }] }); } catch (e) { } },
+  async focusAuto() { const t = this.track(); if (!t) return; try { await t.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }); } catch (e) { } },
   async next() { if (this.devices.length < 2) return false; this.stop(); this.di = (this.di + 1) % this.devices.length; return this.start(); }
 };
 
@@ -2035,9 +2065,11 @@ function openShoot() {
   const banner = h('div', { class: 'sh-banner', hidden: true });
   const film = h('div', { class: 'sh-film' });
   const tale = P.tale && TALES.find(t => t.id === P.tale), guide = tale ? taleGuide(tale) : '';   // 전래동화 따라 찍기면 위에 장면 자막
-  const mon = h('div', { class: 'sh-mon' + (tale ? ' tale' : '') }, cv, flash, cd, nocam, guide, banner);
+  const ring = h('i', { class: 'fc-ring', hidden: true });
+  const focusBox = h('div', { class: 'fc-box', hidden: true });   // 기기가 직접 초점 조절을 지원할 때만 보여요
+  const mon = h('div', { class: 'sh-mon' + (tale ? ' tale' : ''), onpointerup: e => tapFocus(e) }, cv, flash, cd, nocam, ring, focusBox, guide, banner);
   // 카메라(.sh-stage) 아래에 필름이 따로 있어요. 컷이 아닌 곳을 누르면 컷 메뉴가 닫혀요
-  const sc_ = h('div', { class: 'sh-c', onpointerdown: e => { if (EL.pop && !e.target.closest('.sh-fr')) cutPopClose(); } }, h('div', { class: 'sh-stage' }, mon), film);
+  const sc_ = h('div', { class: 'sh-c', onpointerdown: e => { V.popTap = !!EL.pop; if (EL.pop && !e.target.closest('.sh-fr')) cutPopClose(); } }, h('div', { class: 'sh-stage' }, mon), film);
   const onionB = rb('onion', '겹쳐보기', () => { V.onion = !V.onion; onionB.classList.toggle('on', V.onion); }, V.onion ? 'on' : '');
   const gridB = rb('grid', '격자', () => { V.grid = !V.grid; gridB.classList.toggle('on', V.grid); }, V.grid ? 'on' : '');
   const playB = rb('play', '재생', shootPv);
@@ -2045,9 +2077,9 @@ function openShoot() {
   const timerB = rb('timer', '타이머', () => { V.timer = ({ 0: 3, 3: 5, 5: 0 })[V.timer]; stopTimer(); timerPaint(); });
   const shutterB = h('button', { class: 'shutter', type: 'button', 'aria-label': '찰칵', onclick: shutter }, h('span', { class: 'in' }));
   const doneB = h('button', { class: 'sh-done', type: 'button', 'aria-label': '다 찍었어요', onclick: () => { if (!nFrames()) { toast('먼저 찰칵을 눌러 한 컷이라도 찍어 보세요', 2200); return; } openDeco(); }, html: icon('sparkle') + '<span>다 찍었어요<b>꾸미기 ›</b></span>' });
-  const right = h('div', { class: 'sh-r rail' }, rb('switchCam', '카메라', async () => { if (Cam.failed) { camStart(); return; } if (!(await Cam.next())) toast('바꿀 수 있는 다른 카메라가 없어요'); }), timerB, shutterB, doneB);
+  const right = h('div', { class: 'sh-r rail' }, rb('switchCam', '카메라', async () => { if (Cam.failed) { camStart(); return; } if (!(await Cam.next())) toast('바꿀 수 있는 다른 카메라가 없어요'); else focusUI(); }), timerB, shutterB, doneB);
   body.append(h('div', { class: 'sh' }, left, sc_, right));
-  EL = { cv, ctx: cv.getContext('2d'), flash, cd, nocam, banner, film, timerB, shutterB, playB, mon, sc: sc_, pop: null };
+  EL = { cv, ctx: cv.getContext('2d'), flash, cd, nocam, banner, film, timerB, shutterB, playB, mon, sc: sc_, pop: null, ring, focusBox };
   addEventListener('keydown', onKey);
   timerPaint(); shootPaint(); camStart();
   cancelAnimationFrame(V.raf); shootLoop();
@@ -2089,7 +2121,33 @@ function shootPaint() {
   else b.hidden = true;
 }
 function timerPaint() { const b = EL.timerB; if (!b) return; b.classList.toggle('on', !!V.timer); b.innerHTML = icon('timer') + `<span>${V.timer ? V.timer + '초' : '타이머'}</span>`; }
-async function camStart() { EL.nocam.hidden = true; const ok = await Cam.start(); if (!ok && V.screen === 'shoot') noCam(); }
+async function camStart() { EL.nocam.hidden = true; const ok = await Cam.start(); if (!ok && V.screen === 'shoot') noCam(); else focusUI(); }
+/* 초점: 카메라 화면을 누르면 그 자리에 맞추고 고정해요. 직접 조절이 되는 기기는 오른쪽에 가까이 ↔ 멀리 막대가 나와요 */
+function focusUI() {
+  const b = EL.focusBox; if (!b || V.screen !== 'shoot') return; const f = Cam.focusInfo(); b.innerHTML = '';
+  b.hidden = !f.dist; if (!f.dist) return;
+  const { min, max, step } = f.dist, cur = f.now ?? (min + max) / 2;
+  const auto = h('button', { type: 'button', class: 'fc-auto on' }, '자동');
+  const r = h('input', { type: 'range', class: 'fc-range', min, max, step: step || (max - min) / 100, value: cur, 'aria-label': '초점 거리',
+    oninput: e => { Cam.focusDist(+e.target.value); auto.classList.remove('on'); } });
+  auto.onclick = () => { Cam.focusAuto(); auto.classList.add('on'); toast('초점을 카메라가 스스로 맞춰요', 1400); };
+  // 위가 멀리, 아래가 가까이
+  b.append(h('span', {}, '멀리'), r, h('span', {}, '가까이'), auto);
+  b.onpointerup = e => e.stopPropagation(); b.onpointerdown = e => e.stopPropagation();
+}
+let focusTipShown = false;
+async function tapFocus(e) {
+  if (V.popTap) { V.popTap = false; return; }   // 컷 메뉴를 닫으려고 누른 건 초점이 아니에요
+  if (V.pv || EL.pop || !Cam.stream || e.target.closest('.fc-box,.sh-banner,.sh-guide,.nocam')) return;
+  const r = EL.mon.getBoundingClientRect(); let x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+  const v = Cam.video; if (ROT.on && v && v.videoHeight > v.videoWidth) [x, y] = [1 - y, x];   // 돌려 보여 줄 때는 영상 좌표로 바꿔요
+  const f = Cam.focusInfo();
+  if (!f.tap) { if (!focusTipShown) { focusTipShown = true; toast('이 폰은 카메라가 스스로 초점을 맞춰요', 1800); } return; }
+  const ring = EL.ring; ring.hidden = false; ring.style.left = (e.clientX - r.left) + 'px'; ring.style.top = (e.clientY - r.top) + 'px';
+  ring.classList.remove('go'); void ring.offsetWidth; ring.classList.add('go');
+  const ok = await Cam.focusAt(Math.min(1, Math.max(0, x)), Math.min(1, Math.max(0, y)));
+  if (ok) { toast('여기에 초점을 맞추고 고정했어요', 1100); const a = EL.focusBox.querySelector('.fc-auto'); if (a) a.classList.remove('on'); setTimeout(() => { const n = Cam.focusInfo().now, rg = EL.focusBox.querySelector('.fc-range'); if (rg && n != null) rg.value = n; }, 1400); }
+}
 function noCam() {
   const n = EL.nocam; n.hidden = false; n.innerHTML = '';
   const denied = Cam.reason === 'NotAllowedError';

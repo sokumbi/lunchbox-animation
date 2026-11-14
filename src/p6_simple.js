@@ -193,9 +193,11 @@ function openShoot() {
   const banner = h('div', { class: 'sh-banner', hidden: true });
   const film = h('div', { class: 'sh-film' });
   const tale = P.tale && TALES.find(t => t.id === P.tale), guide = tale ? taleGuide(tale) : '';   // 전래동화 따라 찍기면 위에 장면 자막
-  const mon = h('div', { class: 'sh-mon' + (tale ? ' tale' : '') }, cv, flash, cd, nocam, guide, banner);
+  const ring = h('i', { class: 'fc-ring', hidden: true });
+  const focusBox = h('div', { class: 'fc-box', hidden: true });   // 기기가 직접 초점 조절을 지원할 때만 보여요
+  const mon = h('div', { class: 'sh-mon' + (tale ? ' tale' : ''), onpointerup: e => tapFocus(e) }, cv, flash, cd, nocam, ring, focusBox, guide, banner);
   // 카메라(.sh-stage) 아래에 필름이 따로 있어요. 컷이 아닌 곳을 누르면 컷 메뉴가 닫혀요
-  const sc_ = h('div', { class: 'sh-c', onpointerdown: e => { if (EL.pop && !e.target.closest('.sh-fr')) cutPopClose(); } }, h('div', { class: 'sh-stage' }, mon), film);
+  const sc_ = h('div', { class: 'sh-c', onpointerdown: e => { V.popTap = !!EL.pop; if (EL.pop && !e.target.closest('.sh-fr')) cutPopClose(); } }, h('div', { class: 'sh-stage' }, mon), film);
   const onionB = rb('onion', '겹쳐보기', () => { V.onion = !V.onion; onionB.classList.toggle('on', V.onion); }, V.onion ? 'on' : '');
   const gridB = rb('grid', '격자', () => { V.grid = !V.grid; gridB.classList.toggle('on', V.grid); }, V.grid ? 'on' : '');
   const playB = rb('play', '재생', shootPv);
@@ -203,9 +205,9 @@ function openShoot() {
   const timerB = rb('timer', '타이머', () => { V.timer = ({ 0: 3, 3: 5, 5: 0 })[V.timer]; stopTimer(); timerPaint(); });
   const shutterB = h('button', { class: 'shutter', type: 'button', 'aria-label': '찰칵', onclick: shutter }, h('span', { class: 'in' }));
   const doneB = h('button', { class: 'sh-done', type: 'button', 'aria-label': '다 찍었어요', onclick: () => { if (!nFrames()) { toast('먼저 찰칵을 눌러 한 컷이라도 찍어 보세요', 2200); return; } openDeco(); }, html: icon('sparkle') + '<span>다 찍었어요<b>꾸미기 ›</b></span>' });
-  const right = h('div', { class: 'sh-r rail' }, rb('switchCam', '카메라', async () => { if (Cam.failed) { camStart(); return; } if (!(await Cam.next())) toast('바꿀 수 있는 다른 카메라가 없어요'); }), timerB, shutterB, doneB);
+  const right = h('div', { class: 'sh-r rail' }, rb('switchCam', '카메라', async () => { if (Cam.failed) { camStart(); return; } if (!(await Cam.next())) toast('바꿀 수 있는 다른 카메라가 없어요'); else focusUI(); }), timerB, shutterB, doneB);
   body.append(h('div', { class: 'sh' }, left, sc_, right));
-  EL = { cv, ctx: cv.getContext('2d'), flash, cd, nocam, banner, film, timerB, shutterB, playB, mon, sc: sc_, pop: null };
+  EL = { cv, ctx: cv.getContext('2d'), flash, cd, nocam, banner, film, timerB, shutterB, playB, mon, sc: sc_, pop: null, ring, focusBox };
   addEventListener('keydown', onKey);
   timerPaint(); shootPaint(); camStart();
   cancelAnimationFrame(V.raf); shootLoop();
@@ -247,7 +249,33 @@ function shootPaint() {
   else b.hidden = true;
 }
 function timerPaint() { const b = EL.timerB; if (!b) return; b.classList.toggle('on', !!V.timer); b.innerHTML = icon('timer') + `<span>${V.timer ? V.timer + '초' : '타이머'}</span>`; }
-async function camStart() { EL.nocam.hidden = true; const ok = await Cam.start(); if (!ok && V.screen === 'shoot') noCam(); }
+async function camStart() { EL.nocam.hidden = true; const ok = await Cam.start(); if (!ok && V.screen === 'shoot') noCam(); else focusUI(); }
+/* 초점: 카메라 화면을 누르면 그 자리에 맞추고 고정해요. 직접 조절이 되는 기기는 오른쪽에 가까이 ↔ 멀리 막대가 나와요 */
+function focusUI() {
+  const b = EL.focusBox; if (!b || V.screen !== 'shoot') return; const f = Cam.focusInfo(); b.innerHTML = '';
+  b.hidden = !f.dist; if (!f.dist) return;
+  const { min, max, step } = f.dist, cur = f.now ?? (min + max) / 2;
+  const auto = h('button', { type: 'button', class: 'fc-auto on' }, '자동');
+  const r = h('input', { type: 'range', class: 'fc-range', min, max, step: step || (max - min) / 100, value: cur, 'aria-label': '초점 거리',
+    oninput: e => { Cam.focusDist(+e.target.value); auto.classList.remove('on'); } });
+  auto.onclick = () => { Cam.focusAuto(); auto.classList.add('on'); toast('초점을 카메라가 스스로 맞춰요', 1400); };
+  // 위가 멀리, 아래가 가까이
+  b.append(h('span', {}, '멀리'), r, h('span', {}, '가까이'), auto);
+  b.onpointerup = e => e.stopPropagation(); b.onpointerdown = e => e.stopPropagation();
+}
+let focusTipShown = false;
+async function tapFocus(e) {
+  if (V.popTap) { V.popTap = false; return; }   // 컷 메뉴를 닫으려고 누른 건 초점이 아니에요
+  if (V.pv || EL.pop || !Cam.stream || e.target.closest('.fc-box,.sh-banner,.sh-guide,.nocam')) return;
+  const r = EL.mon.getBoundingClientRect(); let x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+  const v = Cam.video; if (ROT.on && v && v.videoHeight > v.videoWidth) [x, y] = [1 - y, x];   // 돌려 보여 줄 때는 영상 좌표로 바꿔요
+  const f = Cam.focusInfo();
+  if (!f.tap) { if (!focusTipShown) { focusTipShown = true; toast('이 폰은 카메라가 스스로 초점을 맞춰요', 1800); } return; }
+  const ring = EL.ring; ring.hidden = false; ring.style.left = (e.clientX - r.left) + 'px'; ring.style.top = (e.clientY - r.top) + 'px';
+  ring.classList.remove('go'); void ring.offsetWidth; ring.classList.add('go');
+  const ok = await Cam.focusAt(Math.min(1, Math.max(0, x)), Math.min(1, Math.max(0, y)));
+  if (ok) { toast('여기에 초점을 맞추고 고정했어요', 1100); const a = EL.focusBox.querySelector('.fc-auto'); if (a) a.classList.remove('on'); setTimeout(() => { const n = Cam.focusInfo().now, rg = EL.focusBox.querySelector('.fc-range'); if (rg && n != null) rg.value = n; }, 1400); }
+}
 function noCam() {
   const n = EL.nocam; n.hidden = false; n.innerHTML = '';
   const denied = Cam.reason === 'NotAllowedError';
