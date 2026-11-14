@@ -6,7 +6,7 @@
 
 ## 한눈에
 
-- 결과물은 **`index.html` 한 장**이에요. 외부 파일 없이 열려요. 예외는 **홈 화면 아이콘**뿐이에요(`icon.svg` · `icon-180/192/512.png` · `manifest.webmanifest`, 아이폰이 HTML 안에 심은 아이콘을 못 읽어서 파일로 둬요). 아이콘이 없어도 앱은 열려요. **효과음·배경음악**도 `audio/sfx/<id>.mp3`·`audio/bgm/<id>.mp3` 파일을 먼저 읽고, 없으면(오프라인·file://) 코드로 합성한 소리로 대신해요(`AE.file`/`AE.trim`, p2_core.js).
+- 결과물은 **`index.html` 한 장**이에요. 외부 파일 없이 열려요. 예외는 **홈 화면 아이콘**뿐이에요(`icon-180/192/512.png` · `icon-maskable-512.png` · `manifest.webmanifest`, 아이폰이 HTML 안에 심은 아이콘을 못 읽어서 파일로 둬요). 아이콘이 없어도 앱은 열려요. **효과음·배경음악**도 `audio/sfx/<id>.mp3`·`audio/bgm/<id>.mp3` 파일을 먼저 읽고, 없으면(오프라인·file://) 코드로 합성한 소리로 대신해요(`AE.file`/`AE.trim`, p2_core.js).
 - 소스는 `src/`의 조각 파일이에요. **`index.html`을 직접 고치지 말고** `src/`를 고친 뒤 `./build.sh`를 실행하세요.
 - 프레임워크 없는 순수 JS예요. 화면은 `h()` 헬퍼로 DOM을 만들고, 무대는 canvas에 그려요. 크기 `W`·`H`는 `setFormat`이 정해요(기본 16:9, 960×540). CSS는 `--ar`(가로÷세로)로 비율을 맞춰요.
 - 실시간 카메라는 **https나 localhost에서만** 켜져요. 폰 테스트는 GitHub Pages에 올려서 해요(아래 "배포" 참고).
@@ -40,9 +40,8 @@ src/                   앱 소스 (빌드 순서대로)
   p6d_extra.js         제목 카드·엔딩 크레딧 페이지(openCard, DESIGNS·FONTS, drawTitleCard/drawCredits) · 전래동화 5편(TALES, playTale 이모지 애니메이션) · 처음 한 번 설명 레이어(hintOnce)
   p5d_export.js        영상 파일 만들기(MediaRecorder, mp4→webm), 시작 호출
 brand/, design/        예전 아르떼노바 CI·런치박스 시안 (앱에서는 로고 인트로만 써요)
-icon.svg, icon-*.png     홈 화면 아이콘(검정 바탕에 아르떼노바 심볼 + 영문명). icon.svg를 고치면 `node tools/make-icon.js`로 PNG를 다시 만들어요
+icon-*.png             홈 화면 아이콘(2026-11-14): 클레이로 빚은 런치박스 기계 + 이름판에 아르떼노바 로고, 코럴 배경. 원본(1024)·만든 과정·다른 시안은 `design/icon2/`(clay3_coral.png). 안드로이드 마스크용은 여백을 둔 `icon-maskable-512.png`
 manifest.webmanifest   안드로이드 설치용(이름·아이콘·standalone)
-tools/make-icon.js     icon.svg → PNG 3장(playwright)
 tales/                 전래동화 그림: 카드 `tales/<id>.jpg` 5장 + 스토리 보기 장면 `tales/<id>/<n>.jpg` 33장(n은 1부터, 960×540). .gitignore 예외
 audio/sfx, audio/bgm   효과음 14개·배경음악 7곡 mp3(파일 이름 = SFX/BGM의 id). 불러올 때 `AE.trim`이 앞뒤 무음을 자르고 음량을 맞춰요
 tests/ui-test.js       Playwright 흐름 점검 (가짜 카메라로 촬영까지 눌러 봐요)
