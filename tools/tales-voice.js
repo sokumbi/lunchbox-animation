@@ -20,7 +20,7 @@ function plan(id) {
   for (const [who, list] of Object.entries(by)) { let cur = [], len = 0;
     for (const it of list) { const L = it.text.length; if (cur.length && len + L > 420) { groups.push({ who, items: cur }); cur = []; len = 0; } cur.push(it); len += L; }
     if (cur.length) groups.push({ who, items: cur }); }
-  for (const g of groups) { const [vid, tag] = VOICE[g.who]; g.voice = vid; g.prompt = g.items.map(it => (tag ? tag + ' ' : '') + clean(it.text)).join('\n[long pause]\n'); g.chars = g.prompt.length; }
+  for (const g of groups) { const [vid, tag] = VOICE[g.who] || []; g.voice = vid; g.prompt = g.items.map(it => (tag ? tag + ' ' : '') + clean(it.text)).join('\n[long pause]\n'); g.chars = g.prompt.length; }
   return { items, groups };
 }
 module.exports = { plan, VOICE };

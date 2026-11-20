@@ -251,6 +251,7 @@ function playTale(tale) {
   AE.init(); const cv = h('canvas', { class: 'tale-cv', width: W, height: H }), ctx = cv.getContext('2d');
   // 녹음된 이야기(STORY, p6e_story.js)는 장면마다 내레이션·대사 목소리가 차례로 나오고, 장면 길이 = 목소리 길이 + 쉼
   const story = typeof STORY !== 'undefined' && STORY[tale.id], GAP = .35, PRE = .5, POST = .8;
+  const voiced = story && story.some(sc => sc.lines.some(l => l.a));   // 목소리가 있으면 배경음악을 작게
   const SC = story ? story.map(sc => { let t = PRE; const lines = sc.lines.map(l => { const o = { ...l, s: t }; t += l.d + GAP; return o; }); return { d: t - GAP + POST, lines, img: sc.img, cap: '' }; }) : tale.scenes;
   const N = SC.length, starts = [], total = SC.reduce((a, s) => (starts.push(a), a + s.d), 0);
   const cap = h('div', { class: 'tale-top' }, h('b', {}, tale.title), h('span', { class: 'tale-n' }, ''));
@@ -270,12 +271,13 @@ function playTale(tale) {
   const imgs = SC.map((s, n) => { const im = new Image(); im.onerror = () => { im._bad = true; }; im.src = !story ? `tales/${tale.id}/${n + 1}.jpg` : s.img === 'card' ? `tales/${tale.id}.jpg` : `tales/${tale.id}/${s.img}.jpg`; return im; });
   // 목소리: 줄마다 mp3를 미리 받아 두고, 재생 위치에 맞춰 그 줄을 틀어요(앞뒤로 옮기면 그 자리부터)
   const vbuf = {}, vtry = {}; let vsrc = null, vkey = null;
-  const loadVoice = l => { if (vtry[l.a]) return vtry[l.a]; return vtry[l.a] = fetch(`tales/${tale.id}/v/${l.a}.mp3`).then(r => r.ok ? r.arrayBuffer() : Promise.reject()).then(ab => new Promise((res, rej) => AE.ctx.decodeAudioData(ab, res, rej))).then(b => { vbuf[l.a] = b; }).catch(() => { vbuf[l.a] = null; }); };
+  const loadVoice = l => { if (!l.a) { vbuf[l.a] = null; return Promise.resolve(); }   // 아직 녹음 없는 이야기: 자막만
+    if (vtry[l.a]) return vtry[l.a]; return vtry[l.a] = fetch(`tales/${tale.id}/v/${l.a}.mp3`).then(r => r.ok ? r.arrayBuffer() : Promise.reject()).then(ab => new Promise((res, rej) => AE.ctx.decodeAudioData(ab, res, rej))).then(b => { vbuf[l.a] = b; }).catch(() => { vbuf[l.a] = null; }); };
   if (story) SC.forEach(s => s.lines.forEach(loadVoice));
   const voiceStop = () => { try { vsrc && vsrc.stop(); } catch (e) { } vsrc = null; vkey = null; };
   const lineAt = (k, t) => { const L = SC[k].lines; let i = 0; while (i < L.length - 1 && t >= L[i + 1].s) i++; return L[i]; };
   const okImg = im => im.complete && im.naturalWidth > 0;
-  const music = async () => { try { const b = await AE.getBgm(tale.bgm); if (!bg.isConnected || !playing) return; AE.stopPreview(); const s = AE.ctx.createBufferSource(); s.buffer = b; s.loop = true; s.loopStart = b.__loopStart || 0; s.loopEnd = b.__loopEnd || b.duration; const g = AE.ctx.createGain(); g.gain.value = (story ? .2 : .5) * (b.__gain || 1); s.connect(g).connect(AE.buses.ui); s.start(0, s.loopStart); AE.preview = s; } catch (e) { } };
+  const music = async () => { try { const b = await AE.getBgm(tale.bgm); if (!bg.isConnected || !playing) return; AE.stopPreview(); const s = AE.ctx.createBufferSource(); s.buffer = b; s.loop = true; s.loopStart = b.__loopStart || 0; s.loopEnd = b.__loopEnd || b.duration; const g = AE.ctx.createGain(); g.gain.value = (voiced ? .2 : .5) * (b.__gain || 1); s.connect(g).connect(AE.buses.ui); s.start(0, s.loopStart); AE.preview = s; } catch (e) { } };
   const sceneAt = t => { let k = 0; while (k < N - 1 && t >= starts[k + 1]) k++; return k; };
   const draw = () => {
     const k = sceneAt(pos), t = pos - starts[k], im = imgs[k]; ctx.setTransform(1, 0, 0, 1, 0, 0);

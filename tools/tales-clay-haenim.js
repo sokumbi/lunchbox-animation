@@ -24,10 +24,10 @@ const SCENES = {
   7: `Night inside ${C.hut}, a big hairy orange striped tiger paw pokes through a gap in the paper door, ${kids} lean back in surprise pointing at the hairy paw.`,
   8: `Night in the small kitchen of ${C.hut}, ${C.dtiger} dips his paws into a sack of white flour, a cloud of flour dust puffs up, his paws turn white, comical.`,
   9: `Night inside ${C.hut}, ${C.dtiger} sits on the floor pretending to be mother, ${C.sister} notices the striped tail under the skirt and whispers into the ear of ${C.brother}, candle light.`,
-  10: `Moonlit night in the hut yard, ${kids} hide high up on a branch of ${C.tree}, ${C.tiger} bends over the well and stares at the children's reflection in the water, puzzled.`,
+  10: `Moonlit night in the hut yard, wide shot: high up in the branches of ${C.tree}, ${kids} hide together clearly up in the tree, below on the ground ${C.tiger} bends over the round stone well and looks down into the water at the children's reflection, puzzled. Only one tiger and only two children.`,
   11: `Moonlit night, ${C.tiger} looks up at ${C.tree} with a curious face, ${C.sister} sits on a high branch hugging ${C.brother} and answers him with a clever smile.`,
   12: `Moonlit night, ${C.tiger} with paws shiny with sesame oil slides down the trunk of ${C.tree} with a silly face, an oil bottle on the ground, ${C.brother} laughs out loud on the branch while ${C.sister} covers his mouth.`,
-  13: `Moonlit night, ${C.tiger} climbs ${C.tree} chopping notches into the trunk with a small axe, at the very top ${kids} kneel on the highest branch and pray to the starry sky with folded hands.`,
+  13: `Moonlit night, wide shot of ${C.tree}: ${C.tiger} hugs the lower trunk and chops a notch into the bark with a small wooden-handled axe as he climbs, far above on the very top branch ${kids} kneel and pray to the starry sky with folded hands. Only one tiger and only two children.`,
   14: `Night sky, a strong new golden rope glowing with light comes down from the clouds, ${kids} hold on tight and rise up into the starry sky, the tree and hut far below.`,
   15: `Night sky over a field of tall red sorghum stalks, ${C.tiger} hangs from an old frayed rotten rope that snaps, he falls toward the soft sorghum field with a silly shocked face, comical, no blood.`,
   16: `High in the night sky among soft cotton clouds, ${C.sister} holds a glowing silver moon and looks a little scared of the dark, ${C.brother} holds a bright golden sun and comforts her.`,
@@ -38,5 +38,7 @@ const SCENES = {
 // 만드는 순서: 9번(엄마로 변장한 호랑이와 오누이)을 먼저 보고 나머지를 만들어요
 const KEYS = ['9', ...Array.from({ length: 18 }, (_, i) => String(i + 1)).filter(k => k !== '9'), 'card'];
 const prompt = k => STYLE + SCENES[k] + END;
-if (typeof module !== 'undefined') module.exports = { C, SCENES, KEYS, prompt };
-if (require.main === module) { const fs = require('fs'); const done = KEYS.filter(k => fs.existsSync(`design/clay-haenim/${k}.png`)); console.log('done', done.join(','), '| todo', KEYS.filter(k => !done.includes(k)).join(',')); }
+// 미드저니(2026-11-20부터): 같은 글 + 비율·글자 빼기 옵션. 그림은 design/clay-haenim-mj/<key>.png
+const mj = k => STYLE + SCENES[k] + ' --ar 16:9 --no text, letters, watermark';
+if (typeof module !== 'undefined') module.exports = { C, SCENES, KEYS, prompt, mj };
+if (require.main === module) { const fs = require('fs'); const done = KEYS.filter(k => fs.existsSync(`design/clay-haenim-mj/${k}.png`)); console.log('done', done.join(','), '| todo', KEYS.filter(k => !done.includes(k)).join(',')); }
