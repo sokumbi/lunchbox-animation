@@ -4,8 +4,8 @@ const MAP = {
   byeoljubu: ['clay/1', 'clay/2', 'clay/3', 'clay/4', 'clay/5', 'clay/6', 'clay/7', 'clay/8', 'clay/9', 'clay/10', 'clay/11', 'clay/12', 'clay/13', 'clay/14', 'clay/15', 'clay/16'],
   heungbu: Array.from({ length: 17 }, (_, i) => 'clay/' + (i + 1)),   // 2026-11-20 클레이(드리미나)
   haenim: Array.from({ length: 18 }, (_, i) => 'clay/' + (i + 1)),   // 2026-11-20 클레이(미드저니)
-  geumdokki: ['a', 1, 1, 2, 2, 3, 4, 'b', 'c', 5, 'd', 6, 6, 'b'],
-  kongjwi: [1, 1, 'a', 'b', 4, 'c', 2, 3, 4, 'd', 5, 5, 'e', 'f', 'f', 6, 6, 'g', 6],
+  geumdokki: Array.from({ length: 14 }, (_, i) => 'clay/' + (i + 1)),   // 2026-11-20 클레이(미드저니)
+  kongjwi: Array.from({ length: 19 }, (_, i) => 'clay/' + (i + 1)),   // 2026-11-20 클레이(미드저니)
 };
 const PRE = 'Japanese anime film style illustration, clean cel shading, hand-painted detailed background, vibrant colors, cute characters with big expressive eyes. Korean folk tale ';
 const POST = ' Wide 16:9, characters in the upper two thirds of the frame, no text, no letters, no watermark.';
